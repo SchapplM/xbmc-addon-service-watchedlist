@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+    <category label="52001">
+        <setting id="debug" type="bool" label="52010" default="false"/>
+		<setting id="w_movies" type="bool" label="52011" default="true"/>
+		<setting id="w_episodes" type="bool" label="52012" default="true"/>
+		
+		<setting id="autostart" type="bool" label="52021" default="true"/>
+		<setting id="periodic" type="bool" label="52013" default="false" enable="eq(-1,true)" />
+		<setting id="interval" type="slider" label="52014" default="24" range="0,3,96" option="int" enable="eq(-1,true)+eq(-2,true)" />
+		<setting id="delay" type="slider" label="52015" default="0" range="0,5,60" option="int" enable="eq(-2,true)+eq(-3,true)" />
+		<setting id="progressdialog" type="bool" label="52016" default="false"/>
+		
+
+		<!-- Option für externe Datenbank-Datei, um die gesehen-Liste im Netzwerk zu verwalten -->
+    </category>
+	
+    <category label="52002">
+		<setting id="extdb" type="bool" label="52017" default="false"/>
+		<setting id="dbpath" type="folder" label="52018" default="" enable="eq(-1,true)"/>
+		<setting id="dbfilename" type="text" label="52019" default="watchedlist.db" enable="eq(-2,true)"/>
+		<setting id="dbbackup" type="bool" label="52020" default="false"/>
+    </category>
+</settings>
