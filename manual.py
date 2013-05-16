@@ -3,6 +3,8 @@ import resources.lib.utils as utils
 from service import WatchedList
 
 __remotedebug__ = False
+
+
 # append pydev remote debugger
 if __remotedebug__:
     # Make pydev debugger works for auto reload.
@@ -19,8 +21,8 @@ if __remotedebug__:
 
 WL = WatchedList()
 
-#check if we should run updates
-if True or ( xbmcgui.Dialog().yesno( utils.getString(32101),utils.getString(31001) ) ):
+#check if we should run updates (only ask if autostart is on
+if (not utils.getSetting("autostart") == 'true') or xbmcgui.Dialog().yesno( utils.getString(32101),utils.getString(31001) ):
     #run the program
     utils.log("Update Library Manual Run...")
     WL.runUpdate()

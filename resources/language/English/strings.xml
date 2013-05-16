@@ -1,13 +1,26 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <strings>
-	<string id="30001">Error</string>
-	<string id="30002">db path does not exist: %s</string>
+	<!-- Notification headers -->
+	<string id="32101">WatchedList</string>
+	<string id="32102">Watchedlist: Error</string>
+	
+	<string id="32202">WL: Addon movie database</string>
+	<string id="32203">WL: Addon episode database</string>
+	<string id="32204">WL: xbmc-movie database</string>
+	<string id="32205">WL: xbmc-episode database</string>
+	
+	<string id="32401">WL: Set as watched</string>
+	<string id="32402">WL: Remember as newly watched</string>
+	<string id="32403">WL: Remember as watched (updated)</string>
+
+	<!-- Notification text -->
+	
 	<string id="30003">next update in %d hours</string>
 	<string id="30004">begin update %d minutes</string>
 	
 	<string id="31001">manually run the database update again?</string>
 	
-	<string id="32101">WatchedList</string>
+
 	<string id="32102">Load tables from user database file...</string>
 	<string id="32103">Load watched states from addon-database...</string>
 	<string id="32104">load watched states xbmc-database ...</string>
@@ -15,35 +28,41 @@
 	<string id="32106">update the xbmc-database ...</string>
 	<string id="32107">update complete.</string>
 	
-	<string id="32201">database</string>
-	<string id="32202">movie database</string>
-	<string id="32203">episode database</string>
 	
 	<string id="32298">%d movies and %d episodes read from WL.</string>
-	<string id="32299">%d movies and %d episodes read from XBMC-DB.</string>
+	<string id="32299">%d movies and %d episodes read from xbmc-db.</string>
 	<string id="32301">%d watched new. %d updated</string>
 	<string id="32302">%d movies marked as watched</string>
 	<string id="32303">%d episodes marked as watched</string>
 	
-	<string id="32401">Set as watched</string>
-	<string id="32402">Remember as watched</string>
-	
+		<!-- Error Messages-->
+		<string id="30002">db path does not exist: %s</string>
+		<string id="32601">Error opening WL-database</string>
+		<string id="32602">Error loading WL-database</string>
+		<string id="32603">Error loading xbmc-database</string>
+		<string id="32604">Error updating WL database</string>
+		<string id="32605">Error updating xbmc-database</string>
+		
+		<!-- Progress Dialog -->
+		<string id="32610">%d/%d: %s</string>
+		<string id="32611">%d/%d: %s S%02dE%02d</string>
+		
 	<!-- Settings Language Strings-->
     <string id="52001">Basic Settings</string>
-	<string id="52010">debug mode</string>
-	<string id="52011">update movies watched state</string>
-	<string id="52012">update episodes watched state</string>
-	<string id="52013">periodic database update</string>
-	<string id="52014">update interval [hours]</string>
-	<string id="52015">startup delay befor action [minutes]</string>
-	<string id="52016">show annoying progress dialog</string>
+	<string id="52010">Debug mode</string>
+	<string id="52011">Update movies watched state</string>
+	<string id="52012">Update episodes watched state</string>
+	<string id="52013">Periodic database update</string>
+	<string id="52014">Uupdate interval [hours]</string>
+	<string id="52015">Startup delay befor action [minutes]</string>
 	
-	<string id="52021">start with XBMC (autorun)</string>
+	<string id="52021">Start with XBMC (autorun)</string>
+	<string id="52016">Progress Dialog</string>
 	
 	<string id="52002">Database</string>
-	<string id="52017">use non-default database file</string>
-	<string id="52018">path to database file</string>
-	<string id="52019">database filename (SQLite Database, *.db)</string>
+	<string id="52017">Use non-default database file</string>
+	<string id="52018">Path to database file</string>
+	<string id="52019">Database filename (SQLite Database, *.db)</string>
 	<string id="52020">Backup copy before accessing database file</string>
 </strings>
 

@@ -1,25 +1,33 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <strings>
-	<string id="30001">Fehler</string>
-	<string id="30002">DB-Pfad existiert nicht: %s</string>
+	<!-- Notification headers -->
+	<string id="32101">WatchedList</string>
+	<string id="32102">WatchedList: Fehler</string>
+	
+	<string id="32202">WL: Gesehen-Datenbank (Filme)</string>
+	<string id="32203">WL: Gesehen-Datenbank (Episoden)</string>
+	<string id="32204">WL: XBMC-Filmdatenbank</string>
+	<string id="32205">WL: XBMC-Episodendatenbank</string>
+	
+	<string id="32401">WL: Als gesehen markiert</string>
+	<string id="32402">WL: Merke als neu gesehen</string>
+	<string id="32403">WL: Merke als gesehen (aktualisiert)</string>
+	
+	<!-- Notification text -->
+
 	<string id="30003">Nächste Aktualisierung in %d Stunden</string>
 	<string id="30004">Starte Aktualisierung in %d Minuten</string>
 	
 	<string id="31001">Datenbank-Aktualisierung nochmal starten?</string>
 	
-	<string id="32101">WatchedList</string>
+
 	<string id="32102">Lade Tabellen aus Benutzer-Datenbank...</string>
 	<string id="32103">Lade Gesehen-Status aus Gesehen-Datenbank...</string>
-	<string id="32104">Lade Gesehene-Status aus xbmc-Datenbank ...</string>
+	<string id="32104">Lade Gesehene-Status aus XBMC-Datenbank ...</string>
 	<string id="32105">Aktualisiere die Gesehen-Datenbank: ...</string>
-	<string id="32106">Aktualisiere die xbmc-Datenbank ...</string>
+	<string id="32106">Aktualisiere die XBMC-Datenbank ...</string>
 	<string id="32107">Aktualisierung abgeschlossen.</string>
-	
-	
-	
-	<string id="32201">Datenbank</string>
-	<string id="32202">Filmdatenbank</string>
-	<string id="32203">Episodendatenbank</string>
+
 	
 	<string id="32298">%d Filme, %d Episoden in WL.</string>
 	<string id="32299">%d Filme, %d Episoden in XBMC-DB.</string>
@@ -27,9 +35,19 @@
 	<string id="32302">%d Filme als gesehen markiert.</string>
 	<string id="32303">%d Episoden als gesehen markiert.</string>
 	
-	<string id="32401">als gesehen markiert</string>
-	<string id="32402">merke als gesehen</string>
-	
+		<!-- Error Messages-->
+		<string id="30002">DB-Pfad existiert nicht: %s</string>
+		<string id="32601">Öffnen der Gesehen-Datenbank</string>
+		<string id="32602">Laden der Gesehen-Datenbank</string>
+		<string id="32603">Laden der XBMC-Datenbank</string>
+		<string id="32604">Aktualisieren der Gesehen-Datenbank</string>
+		<string id="32605">Aktualisieren der XBMC-Datenbank</string>
+		
+		<!-- Progress Dialog -->
+		<string id="32610">%d/%d: %s</string>
+		<string id="32611">%d/%d: %s S%02dE%02d</string>
+
+		
 	<!-- Einstellungen-->
     <string id="52001">Grundeinstellungen</string>
 	<string id="52010">Debug-Modus</string>
@@ -38,13 +56,12 @@
 	<string id="52013">Periodische Datenbank-Aktualisierung</string>
 	<string id="52014">Aktualisierungs-Intervall [Stunden]</string>
 	<string id="52015">Start-Verzögerung [Minuten]</string>
-	<string id="52016">Zeige Fortschritt an</string>
 	<string id="52021">Automatisch mit XBMC starten</string>
+	<string id="52016">Fortschrittsanzeige</string>
 	
 	<string id="52002">Datenbank</string>
 	<string id="52017">Eigene Datenbank-Datei</string>
 	<string id="52018">Pfad zur Datenbank-Datei</string>
 	<string id="52019">Dateiname (*.db)</string>
 	<string id="52020">Sicherungskopie vor Datenbankzugriff</string>
-	
 </strings>

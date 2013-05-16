@@ -6,11 +6,11 @@
 		<setting id="w_episodes" type="bool" label="52012" default="true"/>
 		
 		<setting id="autostart" type="bool" label="52021" default="true"/>
-		<setting id="periodic" type="bool" label="52013" default="false" enable="eq(-1,true)" />
-		<setting id="interval" type="slider" label="52014" default="24" range="0,3,96" option="int" enable="eq(-1,true)+eq(-2,true)" />
-		<setting id="delay" type="slider" label="52015" default="0" range="0,5,60" option="int" enable="eq(-2,true)+eq(-3,true)" />
-		<setting id="progressdialog" type="bool" label="52016" default="false"/>
+		<setting id="delay" type="slider" label="52015" default="5" range="0,5,60" option="int" enable="eq(-1,true)" />
+		<setting id="periodic" type="bool" label="52013" default="true" enable="eq(-2,true)" />
+		<setting id="interval" type="slider" label="52014" default="24" range="3,3,96" option="int" enable="eq(-1,true)+eq(-3,true)" />
 		
+		<setting id="progressdialog" type="bool" label="52016" default="true"/>
 
 		<!-- Option für externe Datenbank-Datei, um die gesehen-Liste im Netzwerk zu verwalten -->
     </category>

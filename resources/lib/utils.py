@@ -2,6 +2,7 @@ import xbmc
 import xbmcvfs
 import xbmcaddon
 import os
+import time
     
 __addon_id__= 'service.watchedlist'
 __Addon = xbmcaddon.Addon(__addon_id__)
@@ -22,10 +23,11 @@ def log(message,loglevel=xbmc.LOGNOTICE):
 
 def showNotification(title,message, time=4000):
     __addoniconpath__ = os.path.join(addon_dir(),"icon.png")
+    log('Notification. %s: %s' % (title, message) )
     xbmc.executebuiltin('Notification("' + encode(title) + '","' + encode(message) + '",'+str(time)+',"' + __addoniconpath__ + '")')
     if getSetting('debug') == 'true':
         xbmc.sleep(250) # time to read the message
-        log('%s: %s' % (title, message) )
+        
 
 def setSetting(name,value):
     __Addon.setSetting(name,value)
@@ -54,3 +56,17 @@ def footprint():
     log('dbpath = %s' % getSetting('dbpath'), xbmc.LOGDEBUG)
     log('dbfilename = %s' % getSetting('dbfilename'), xbmc.LOGDEBUG)
     log('dbbackup = %s' % getSetting('dbbackup'), xbmc.LOGDEBUG)
+    
+# "2013-05-10 21:23:24"  --->  1368213804
+def sqlDateTimeToTimeStamp(sqlDateTime):
+    if sqlDateTime == '':
+        return 0 # NULL timestamp
+    else:
+        return int(time.mktime(time.strptime(sqlDateTime,"%Y-%m-%d %H:%M:%S")))
+
+#  1368213804  --->  "2013-05-10 21:23:24"
+def TimeStamptosqlDateTime(TimeStamp):
+    if TimeStamp == 0:
+        return ""
+    else:
+        return time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(TimeStamp))    

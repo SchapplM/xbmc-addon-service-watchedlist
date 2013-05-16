@@ -1,2 +1,6 @@
-[B]0.7.0[/B]
-- Initial Release
+version 0.8.0
+ * Fixed: lastplayed-information is now also stored in the database (although it is sometimes missing in XBMC)
+ * Added: Exceptions are catched with buggalo and bug reports are sent
+ 
+ version 0.7.0
+ * initial release

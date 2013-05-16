@@ -1,13 +1,13 @@
 # XBMC Media Center language file
 # Addon Name: WatchedList
 # Addon id: service.watchedlist
-# Addon version: 0.7.0
+# Addon version: 0.8.0
 # Addon Provider: schapplm
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC-Addons\n"
 "Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
-"POT-Creation-Date: 2013-05-11 06:59+0000\n"
+"POT-Creation-Date: 2013-05-16 07:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE\n"
@@ -22,16 +22,12 @@ msgid "Save watched Movies and TV Episodes independent from filenames"
 msgstr "Gesehen-Status von Filmen und Serien-Episoden unabhängig von Dateinamen speichern"
 
 msgctxt "Addon Description"
-msgid "\n		Export:\n		Searches the XBMC-Database for watched files. Determine imdb-id and thetvdb-id to identify movies and TV-episodes. Then save the list to a new independen table.\n		Import:\n		Set the watched state for each video file in xbmc."
-msgstr "\n		Export:\n		Durchsucht die XBMC-Datenbank nach gesehenen Filmen und ordne den Dateien die eindeutigen Kennnummern von imdb und TheTVDB zu. Gesehene Filme und Episoden werden jeweils in einer eigenen Datenbank gespeichert.\n		Import:\n		Der Gesehen-Status von Medien in XBMC wird aus der Gesehenen-Tabelle geholt."
+msgid "\n		Export: Searches the XBMC-Database for watched files. Determine imdb-id and thetvdb-id to identify movies and TV-episodes. Then save the list to a new independen table.\n		Import: Set the watched state for each video file in xbmc.\n		Automatic background process without user interaction."
+msgstr "\n		Export: Durchsucht die XBMC-Datenbank nach gesehenen Filmen und ordne den Dateien die eindeutigen Kennnummern von imdb und TheTVDB zu. Gesehene Filme und Episoden werden jeweils in einer eigenen Datenbank gespeichert.\n		Import: Der Gesehen-Status von Medien in XBMC wird aus der Gesehenen-Tabelle geholt.\n		Die Synchronisierung geschieht automatisch im Hintergrund ohne Benutzereingriff."
 
 msgctxt "Addon Disclaimer"
 msgid "This script does not regard the file format. A Movie watched in DVD quality will also set	the 1080p version as watched."
 msgstr "Dieses Script ignoriert das Dateiformat. Ein gesehener Film in DVD-Qualität wird auch in der BlueRay-Version als gesehen gekennzeichnet."
-
-msgctxt "#30001"
-msgid "Error"
-msgstr "Fehler"
 
 msgctxt "#30002"
 msgid "db path does not exist: %s"
@@ -54,8 +50,8 @@ msgid "WatchedList"
 msgstr "WatchedList"
 
 msgctxt "#32102"
-msgid "Load tables from user database file..."
-msgstr "Lade Tabellen aus Benutzer-Datenbank..."
+msgid "Watchedlist: Error"
+msgstr "WatchedList: Fehler"
 
 msgctxt "#32103"
 msgid "Load watched states from addon-database..."
@@ -63,7 +59,7 @@ msgstr "Lade Gesehen-Status aus Gesehen-Datenbank..."
 
 msgctxt "#32104"
 msgid "load watched states xbmc-database ..."
-msgstr "Lade Gesehene-Status aus xbmc-Datenbank ..."
+msgstr "Lade Gesehene-Status aus XBMC-Datenbank ..."
 
 msgctxt "#32105"
 msgid "update the addon watched-database ..."
@@ -71,30 +67,34 @@ msgstr "Aktualisiere die Gesehen-Datenbank: ..."
 
 msgctxt "#32106"
 msgid "update the xbmc-database ..."
-msgstr "Aktualisiere die xbmc-Datenbank ..."
+msgstr "Aktualisiere die XBMC-Datenbank ..."
 
 msgctxt "#32107"
 msgid "update complete."
 msgstr "Aktualisierung abgeschlossen."
 
-msgctxt "#32201"
-msgid "database"
-msgstr "Datenbank"
-
 msgctxt "#32202"
-msgid "movie database"
-msgstr "Filmdatenbank"
+msgid "WL: Addon movie database"
+msgstr "WL: Gesehen-Datenbank (Filme)"
 
 msgctxt "#32203"
-msgid "episode database"
-msgstr "Episodendatenbank"
+msgid "WL: Addon episode database"
+msgstr "WL: Gesehen-Datenbank (Episoden)"
+
+msgctxt "#32204"
+msgid "WL: xbmc-movie database"
+msgstr "WL: XBMC-Filmdatenbank"
+
+msgctxt "#32205"
+msgid "WL: xbmc-episode database"
+msgstr "WL: XBMC-Episodendatenbank"
 
 msgctxt "#32298"
 msgid "%d movies and %d episodes read from WL."
 msgstr "%d Filme, %d Episoden in WL."
 
 msgctxt "#32299"
-msgid "%d movies and %d episodes read from XBMC-DB."
+msgid "%d movies and %d episodes read from xbmc-db."
 msgstr "%d Filme, %d Episoden in XBMC-DB."
 
 msgctxt "#32301"
@@ -110,12 +110,44 @@ msgid "%d episodes marked as watched"
 msgstr "%d Episoden als gesehen markiert."
 
 msgctxt "#32401"
-msgid "Set as watched"
-msgstr "als gesehen markiert"
+msgid "WL: Set as watched"
+msgstr "WL: Als gesehen markiert"
 
 msgctxt "#32402"
-msgid "Remember as watched"
-msgstr "merke als gesehen"
+msgid "WL: Remember as newly watched"
+msgstr "WL: Merke als neu gesehen"
+
+msgctxt "#32403"
+msgid "WL: Remember as watched (updated)"
+msgstr "WL: Merke als gesehen (aktualisiert)"
+
+msgctxt "#32601"
+msgid "Error opening WL-database"
+msgstr "Öffnen der Gesehen-Datenbank"
+
+msgctxt "#32602"
+msgid "Error loading WL-database"
+msgstr "Laden der Gesehen-Datenbank"
+
+msgctxt "#32603"
+msgid "Error loading xbmc-database"
+msgstr "Laden der XBMC-Datenbank"
+
+msgctxt "#32604"
+msgid "Error updating WL database"
+msgstr "Aktualisieren der Gesehen-Datenbank"
+
+msgctxt "#32605"
+msgid "Error updating xbmc-database"
+msgstr "Aktualisieren der XBMC-Datenbank"
+
+msgctxt "#32610"
+msgid "%d/%d: %s"
+msgstr "%d/%d: %s"
+
+msgctxt "#32611"
+msgid "%d/%d: %s S%02dE%02d"
+msgstr "%d/%d: %s S%02dE%02d"
 
 msgctxt "#52001"
 msgid "Basic Settings"
@@ -126,43 +158,43 @@ msgid "Database"
 msgstr "Datenbank"
 
 msgctxt "#52010"
-msgid "debug mode"
+msgid "Debug mode"
 msgstr "Debug-Modus"
 
 msgctxt "#52011"
-msgid "update movies watched state"
+msgid "Update movies watched state"
 msgstr "Aktualisiere Gesehen-Status von Filmen"
 
 msgctxt "#52012"
-msgid "update episodes watched state"
+msgid "Update episodes watched state"
 msgstr "Aktualisiere Gesehen-Status von Episoden"
 
 msgctxt "#52013"
-msgid "periodic database update"
+msgid "Periodic database update"
 msgstr "Periodische Datenbank-Aktualisierung"
 
 msgctxt "#52014"
-msgid "update interval [hours]"
+msgid "Uupdate interval [hours]"
 msgstr "Aktualisierungs-Intervall [Stunden]"
 
 msgctxt "#52015"
-msgid "startup delay befor action [minutes]"
+msgid "Startup delay befor action [minutes]"
 msgstr "Start-Verzögerung [Minuten]"
 
 msgctxt "#52016"
-msgid "show annoying progress dialog"
-msgstr "Zeige Fortschritt an"
+msgid "Progress Dialog"
+msgstr "Fortschrittsanzeige"
 
 msgctxt "#52017"
-msgid "use non-default database file"
+msgid "Use non-default database file"
 msgstr "Eigene Datenbank-Datei"
 
 msgctxt "#52018"
-msgid "path to database file"
+msgid "Path to database file"
 msgstr "Pfad zur Datenbank-Datei"
 
 msgctxt "#52019"
-msgid "database filename (SQLite Database, *.db)"
+msgid "Database filename (SQLite Database, *.db)"
 msgstr "Dateiname (*.db)"
 
 msgctxt "#52020"
@@ -170,5 +202,5 @@ msgid "Backup copy before accessing database file"
 msgstr "Sicherungskopie vor Datenbankzugriff"
 
 msgctxt "#52021"
-msgid "start with XBMC (autorun)"
+msgid "Start with XBMC (autorun)"
 msgstr "Automatisch mit XBMC starten"
