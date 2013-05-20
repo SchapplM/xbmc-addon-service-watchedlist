@@ -21,8 +21,6 @@ if sys.version_info < (2, 7):
 else:
     import json as simplejson
 
-
-
         
 # Main class of the add-on
 class WatchedList:
@@ -95,6 +93,10 @@ class WatchedList:
                if xbmc.abortRequested:
                    return 1
                xbmc.sleep(60)
+               if xbmc.Player().isPlaying() == False:
+                   xbmc.sleep(180) # do not start directly after ending playback
+
+               
             # flag to remember copying the databasefile if requested
             self.dbcopydone = False   
     
@@ -123,8 +125,7 @@ class WatchedList:
                 utils.showNotification(utils.getString(32102), utils.getString(32602))
                 return 4
             
-            # add the watched state from imdb ratings csv file, if existing
-            
+
             # get watched state from xbmc
             self.watchedmovielist_xbmc_index = list([]) # imdbnumber
             self.watchedmovielist_xbmc_data = list([]) # lastPlayed, playCount
@@ -138,6 +139,7 @@ class WatchedList:
             if self.sync_tvshows():
                 utils.showNotification(utils.getString(32102), utils.getString(32604))
                 return 5
+
     
             # import from xbmc into addon database
             res = self.write_wl_wdata()
@@ -371,7 +373,7 @@ class WatchedList:
             return 1   
         return 0 
         
-        
+
         
     def write_wl_wdata(self):
         # Go through all watched movies from xbmc and check whether they are up to date in the addon database
@@ -570,7 +572,7 @@ class WatchedList:
                 imdbId = self.watchedmovielist_wl_index[j]
                 row_wl = self.watchedmovielist_wl_data[j]
                 if utils.getSetting("progressdialog") == 'true':
-                    DIALOG_PROGRESS.update(100*j/(len(self.watchedmovielist_wl_index)-1), utils.getString(32106), utils.getString(32610) % (j+1, len(self.watchedepisodelist_xbmc), row_wl[2]) )
+                    DIALOG_PROGRESS.update(100*j/(len(self.watchedmovielist_wl_index)-1), utils.getString(32106), utils.getString(32610) % (j+1, len(self.watchedmovielist_wl_index), row_wl[2]) )
                 try:
                     rpccmd = {} # empty variable that is eventually sent by buggalo
                     # search the imdb id in the xbmc-list
@@ -580,7 +582,6 @@ class WatchedList:
                         lastplayed_wl = row_wl[0]
                         playcount_wl = row_wl[1]
                         for i in indices:
-                            i = self.watchedmovielist_xbmc_index.index(imdbId)
                             row_xbmc = self.watchedmovielist_xbmc_data[i]
                             playcount_xbmc = row_xbmc[1]
                             lastplayed_xbmc = row_xbmc[0]
