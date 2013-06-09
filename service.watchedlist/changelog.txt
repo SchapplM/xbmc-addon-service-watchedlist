@@ -1,3 +1,6 @@
+version 0.9.0
+ * Added: Check watched-states permanently and enable to set media as unwatched
+ 
 version 0.8.1
  * Fixed: Duplicate movies and tv episodes get marked as watched
 

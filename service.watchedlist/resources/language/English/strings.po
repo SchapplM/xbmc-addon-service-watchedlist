@@ -1,13 +1,13 @@
 # XBMC Media Center language file
 # Addon Name: WatchedList
 # Addon id: service.watchedlist
-# Addon version: 0.8.0
+# Addon version: 0.8.1
 # Addon Provider: schapplm
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC-Addons\n"
 "Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
-"POT-Creation-Date: 2013-05-16 07:51+0000\n"
+"POT-Creation-Date: 2013-06-04 18:26+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE\n"
@@ -22,7 +22,7 @@ msgid "Save watched Movies and TV Episodes independent from filenames"
 msgstr ""
 
 msgctxt "Addon Description"
-msgid "\n		Export: Searches the XBMC-Database for watched files. Determine imdb-id and thetvdb-id to identify movies and TV-episodes. Then save the list to a new independen table.\n		Import: Set the watched state for each video file in xbmc.\n		Automatic background process without user interaction."
+msgid "\n		Export: Searches the XBMC-Database for watched files. Determine imdb-id and thetvdb-id to identify movies and TV-episodes. Then save the list to a new independent table.\n		Import: Set the watched state for each video file in xbmc.\n		Automatic background process without user interaction."
 msgstr ""
 
 msgctxt "Addon Disclaimer"
@@ -43,7 +43,11 @@ msgctxt "#30004"
 msgid "begin update %d minutes"
 msgstr ""
 
-#empty strings from id 30005 to 31000
+msgctxt "#30005"
+msgid "running observation of changes of watched states"
+msgstr ""
+
+#empty strings from id 30006 to 31000
 
 msgctxt "#31001"
 msgid "manually run the database update again?"
@@ -82,19 +86,19 @@ msgstr ""
 #empty strings from id 32108 to 32201
 
 msgctxt "#32202"
-msgid "WL: Addon movie database"
+msgid "Addon movie database"
 msgstr ""
 
 msgctxt "#32203"
-msgid "WL: Addon episode database"
+msgid "Addon episode database"
 msgstr ""
 
 msgctxt "#32204"
-msgid "WL: xbmc-movie database"
+msgid "xbmc-movie database"
 msgstr ""
 
 msgctxt "#32205"
-msgid "WL: xbmc-episode database"
+msgid "xbmc-episode database"
 msgstr ""
 
 #empty strings from id 32206 to 32297
@@ -125,19 +129,27 @@ msgstr ""
 #empty strings from id 32304 to 32400
 
 msgctxt "#32401"
-msgid "WL: Set as watched"
+msgid "Set as watched (XBMC-DB)"
 msgstr ""
 
 msgctxt "#32402"
-msgid "WL: Remember as newly watched"
+msgid "Remember as newly watched (WL-DB)"
 msgstr ""
 
 msgctxt "#32403"
-msgid "WL: Remember as watched (updated)"
+msgid "Remember as watched (updated) (WL-B)"
+msgstr ""
+
+msgctxt "#32404"
+msgid "Set as not watched (XBMC-DB)"
+msgstr ""
+
+msgctxt "#32405"
+msgid "Remember as not watched (WL-DB)"
 msgstr ""
 
 #Notification text
-#empty strings from id 32404 to 32600
+#empty strings from id 32406 to 32600
 
 msgctxt "#32601"
 msgid "Error opening WL-database"
@@ -196,7 +208,7 @@ msgid "Update episodes watched state"
 msgstr ""
 
 msgctxt "#52013"
-msgid "Periodic database update"
+msgid "autostart mode"
 msgstr ""
 
 msgctxt "#52014"
@@ -229,4 +241,22 @@ msgstr ""
 
 msgctxt "#52021"
 msgid "Start with XBMC (autorun)"
+msgstr ""
+
+msgctxt "#52022"
+msgid "follow user setting watched/unwatched"
+msgstr ""
+
+#empty strings from id 52023 to 52029
+
+msgctxt "#52030"
+msgid "no update"
+msgstr ""
+
+msgctxt "#52031"
+msgid "one update"
+msgstr ""
+
+msgctxt "#52032"
+msgid "periodic"
 msgstr ""

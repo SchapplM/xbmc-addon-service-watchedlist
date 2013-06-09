@@ -4,19 +4,22 @@
 	<string id="32101">WatchedList</string>
 	<string id="32102">WatchedList: Fehler</string>
 	
-	<string id="32202">WL: Gesehen-Datenbank (Filme)</string>
-	<string id="32203">WL: Gesehen-Datenbank (Episoden)</string>
-	<string id="32204">WL: XBMC-Filmdatenbank</string>
-	<string id="32205">WL: XBMC-Episodendatenbank</string>
+	<string id="32202">Gesehen-Datenbank (Filme)</string>
+	<string id="32203">Gesehen-Datenbank (Episoden)</string>
+	<string id="32204">XBMC-Filmdatenbank</string>
+	<string id="32205">XBMC-Episodendatenbank</string>
 	
-	<string id="32401">WL: Als gesehen markiert</string>
-	<string id="32402">WL: Merke als neu gesehen</string>
-	<string id="32403">WL: Merke als gesehen (aktualisiert)</string>
+	<string id="32401">Als gesehen markiert (XBMC-DB)</string>
+	<string id="32402">Merke als neu gesehen (WL-DB)</string>
+	<string id="32403">Merke als gesehen (aktualisiert) (WL-DB)</string>
+	<string id="32404">Als ungesehen markiert (XBMC-DB)</string>
+	<string id="32405">Merke als ungesehen (WL-DB)</string>
 	
 	<!-- Notification text -->
 
 	<string id="30003">Nächste Aktualisierung in %d Stunden</string>
 	<string id="30004">Starte Aktualisierung in %d Minuten</string>
+	<string id="30005">laufende Überwachung von Änderungen des Gesehen-Status</string>
 	
 	<string id="31001">Datenbank-Aktualisierung nochmal starten?</string>
 	
@@ -53,11 +56,16 @@
 	<string id="52010">Debug-Modus</string>
 	<string id="52011">Aktualisiere Gesehen-Status von Filmen</string>
 	<string id="52012">Aktualisiere Gesehen-Status von Episoden</string>
-	<string id="52013">Periodische Datenbank-Aktualisierung</string>
+	<string id="52013">Starttyp</string>
+	<string id="52030">Keine Aktualisierung</string>
+	<string id="52031">Einmalig</string>
+	<string id="52032">Periodisch</string>
+	
 	<string id="52014">Aktualisierungs-Intervall [Stunden]</string>
 	<string id="52015">Start-Verzögerung [Minuten]</string>
 	<string id="52021">Automatisch mit XBMC starten</string>
 	<string id="52016">Fortschrittsanzeige</string>
+	<string id="52022">Gesehen-Änderungen laufend überwachen</string>
 	
 	<string id="52002">Datenbank</string>
 	<string id="52017">Eigene Datenbank-Datei</string>

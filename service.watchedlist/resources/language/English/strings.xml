@@ -4,19 +4,21 @@
 	<string id="32101">WatchedList</string>
 	<string id="32102">Watchedlist: Error</string>
 	
-	<string id="32202">WL: Addon movie database</string>
-	<string id="32203">WL: Addon episode database</string>
-	<string id="32204">WL: xbmc-movie database</string>
-	<string id="32205">WL: xbmc-episode database</string>
+	<string id="32202">Addon movie database</string>
+	<string id="32203">Addon episode database</string>
+	<string id="32204">xbmc-movie database</string>
+	<string id="32205">xbmc-episode database</string>
 	
-	<string id="32401">WL: Set as watched</string>
-	<string id="32402">WL: Remember as newly watched</string>
-	<string id="32403">WL: Remember as watched (updated)</string>
-
+	<string id="32401">Set as watched (XBMC-DB)</string>
+	<string id="32402">Remember as newly watched (WL-DB)</string>
+	<string id="32403">Remember as watched (updated) (WL-B)</string>
+	<string id="32404">Set as not watched (XBMC-DB)</string>
+	<string id="32405">Remember as not watched (WL-DB)</string>
 	<!-- Notification text -->
 	
 	<string id="30003">next update in %d hours</string>
 	<string id="30004">begin update %d minutes</string>
+	<string id="30005">running observation of changes of watched states</string>
 	
 	<string id="31001">manually run the database update again?</string>
 	
@@ -52,12 +54,17 @@
 	<string id="52010">Debug mode</string>
 	<string id="52011">Update movies watched state</string>
 	<string id="52012">Update episodes watched state</string>
-	<string id="52013">Periodic database update</string>
+	<string id="52013">autostart mode</string>
+	<string id="52030">no update</string>
+	<string id="52031">one update</string>
+	<string id="52032">periodic</string>
+	
 	<string id="52014">Uupdate interval [hours]</string>
 	<string id="52015">Startup delay befor action [minutes]</string>
 	
 	<string id="52021">Start with XBMC (autorun)</string>
 	<string id="52016">Progress Dialog</string>
+	<string id="52022">follow user setting watched/unwatched</string>
 	
 	<string id="52002">Database</string>
 	<string id="52017">Use non-default database file</string>

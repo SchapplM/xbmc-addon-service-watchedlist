@@ -3,9 +3,19 @@ import xbmcvfs
 import xbmcaddon
 import os
 import time
+import sys
+import buggalo
+import re
     
 __addon_id__= 'service.watchedlist'
 __Addon = xbmcaddon.Addon(__addon_id__)
+
+# XBMC-JSON
+if sys.version_info < (2, 7):
+    import simplejson
+else:
+    import json as simplejson
+
 
 def data_dir():
     __datapath__ = xbmc.translatePath( __Addon.getAddonInfo('profile') ).decode('utf-8')
@@ -70,3 +80,42 @@ def TimeStamptosqlDateTime(TimeStamp):
         return ""
     else:
         return time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(TimeStamp))    
+    
+def executeJSON(request):
+    rpccmd = simplejson.dumps(request) # create string from dict
+    json_query = xbmc.executeJSONRPC(rpccmd)
+    json_query = unicode(json_query, 'utf-8', errors='ignore')
+    json_response = simplejson.loads(json_query)  
+    # in case of exception this will be sent
+    buggalo.addExtraData('json_query',json_query);
+    buggalo.addExtraData('len(json_response)', len(str(json_response)));
+    return json_response
+
+def buggalo_extradata_settings():
+    # add extradata to buggalo
+    buggalo.addExtraData('setting_debug', getSetting("debug"));
+    buggalo.addExtraData('setting_w_movies', getSetting("w_movies"));
+    buggalo.addExtraData('setting_w_episodes', getSetting("w_episodes"));
+    buggalo.addExtraData('setting_autostart', getSetting("autostart"));
+    buggalo.addExtraData('setting_delay', getSetting("delay"));
+    buggalo.addExtraData('setting_starttype', getSetting("starttype"));
+    buggalo.addExtraData('setting_interval', getSetting("interval"));
+    buggalo.addExtraData('setting_progressdialog', getSetting("progressdialog"));
+    buggalo.addExtraData('setting_watch_user', getSetting("watch_user"));
+    buggalo.addExtraData('setting_extdb', getSetting("extdb"));
+    buggalo.addExtraData('setting_dbpath', getSetting("dbpath"));
+    buggalo.addExtraData('setting_dbfilename', getSetting("dbfilename"));
+    buggalo.addExtraData('setting_dbbackup', getSetting("dbbackup"));
+
+def translateSMB(path):
+    # translate "smb://..." to "\\..." in windows. Don't change other paths
+    if os.sep == '\\': # windows os
+        res = re.compile('smb://(\w+)/(.+)').findall(path)
+        if len(res) == 0:
+            # path is not smb://...
+            return path
+        else:
+            return '\\\\'+res[0][0]+'\\'+res[0][1].replace('/', '\\')
+    else:
+        return path
+   

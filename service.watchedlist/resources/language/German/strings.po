@@ -1,13 +1,13 @@
 # XBMC Media Center language file
 # Addon Name: WatchedList
 # Addon id: service.watchedlist
-# Addon version: 0.8.0
+# Addon version: 0.8.1
 # Addon Provider: schapplm
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC-Addons\n"
 "Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
-"POT-Creation-Date: 2013-05-16 07:51+0000\n"
+"POT-Creation-Date: 2013-06-04 18:26+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE\n"
@@ -22,7 +22,7 @@ msgid "Save watched Movies and TV Episodes independent from filenames"
 msgstr "Gesehen-Status von Filmen und Serien-Episoden unabhängig von Dateinamen speichern"
 
 msgctxt "Addon Description"
-msgid "\n		Export: Searches the XBMC-Database for watched files. Determine imdb-id and thetvdb-id to identify movies and TV-episodes. Then save the list to a new independen table.\n		Import: Set the watched state for each video file in xbmc.\n		Automatic background process without user interaction."
+msgid "\n		Export: Searches the XBMC-Database for watched files. Determine imdb-id and thetvdb-id to identify movies and TV-episodes. Then save the list to a new independent table.\n		Import: Set the watched state for each video file in xbmc.\n		Automatic background process without user interaction."
 msgstr "\n		Export: Durchsucht die XBMC-Datenbank nach gesehenen Filmen und ordne den Dateien die eindeutigen Kennnummern von imdb und TheTVDB zu. Gesehene Filme und Episoden werden jeweils in einer eigenen Datenbank gespeichert.\n		Import: Der Gesehen-Status von Medien in XBMC wird aus der Gesehenen-Tabelle geholt.\n		Die Synchronisierung geschieht automatisch im Hintergrund ohne Benutzereingriff."
 
 msgctxt "Addon Disclaimer"
@@ -40,6 +40,10 @@ msgstr "Nächste Aktualisierung in %d Stunden"
 msgctxt "#30004"
 msgid "begin update %d minutes"
 msgstr "Starte Aktualisierung in %d Minuten"
+
+msgctxt "#30005"
+msgid "running observation of changes of watched states"
+msgstr "laufende Überwachung von Änderungen des Gesehen-Status"
 
 msgctxt "#31001"
 msgid "manually run the database update again?"
@@ -74,20 +78,20 @@ msgid "update complete."
 msgstr "Aktualisierung abgeschlossen."
 
 msgctxt "#32202"
-msgid "WL: Addon movie database"
-msgstr "WL: Gesehen-Datenbank (Filme)"
+msgid "Addon movie database"
+msgstr "Gesehen-Datenbank (Filme)"
 
 msgctxt "#32203"
-msgid "WL: Addon episode database"
-msgstr "WL: Gesehen-Datenbank (Episoden)"
+msgid "Addon episode database"
+msgstr "Gesehen-Datenbank (Episoden)"
 
 msgctxt "#32204"
-msgid "WL: xbmc-movie database"
-msgstr "WL: XBMC-Filmdatenbank"
+msgid "xbmc-movie database"
+msgstr "XBMC-Filmdatenbank"
 
 msgctxt "#32205"
-msgid "WL: xbmc-episode database"
-msgstr "WL: XBMC-Episodendatenbank"
+msgid "xbmc-episode database"
+msgstr "XBMC-Episodendatenbank"
 
 msgctxt "#32298"
 msgid "%d movies and %d episodes read from WL."
@@ -110,16 +114,24 @@ msgid "%d episodes marked as watched"
 msgstr "%d Episoden als gesehen markiert."
 
 msgctxt "#32401"
-msgid "WL: Set as watched"
-msgstr "WL: Als gesehen markiert"
+msgid "Set as watched (XBMC-DB)"
+msgstr "Als gesehen markiert (XBMC-DB)"
 
 msgctxt "#32402"
-msgid "WL: Remember as newly watched"
-msgstr "WL: Merke als neu gesehen"
+msgid "Remember as newly watched (WL-DB)"
+msgstr "Merke als neu gesehen (WL-DB)"
 
 msgctxt "#32403"
-msgid "WL: Remember as watched (updated)"
-msgstr "WL: Merke als gesehen (aktualisiert)"
+msgid "Remember as watched (updated) (WL-B)"
+msgstr "Merke als gesehen (aktualisiert) (WL-DB)"
+
+msgctxt "#32404"
+msgid "Set as not watched (XBMC-DB)"
+msgstr "Als ungesehen markiert (XBMC-DB)"
+
+msgctxt "#32405"
+msgid "Remember as not watched (WL-DB)"
+msgstr "Merke als ungesehen (WL-DB)"
 
 msgctxt "#32601"
 msgid "Error opening WL-database"
@@ -170,8 +182,8 @@ msgid "Update episodes watched state"
 msgstr "Aktualisiere Gesehen-Status von Episoden"
 
 msgctxt "#52013"
-msgid "Periodic database update"
-msgstr "Periodische Datenbank-Aktualisierung"
+msgid "autostart mode"
+msgstr "Starttyp"
 
 msgctxt "#52014"
 msgid "Uupdate interval [hours]"
@@ -204,3 +216,19 @@ msgstr "Sicherungskopie vor Datenbankzugriff"
 msgctxt "#52021"
 msgid "Start with XBMC (autorun)"
 msgstr "Automatisch mit XBMC starten"
+
+msgctxt "#52022"
+msgid "follow user setting watched/unwatched"
+msgstr "Gesehen-Änderungen laufend überwachen"
+
+msgctxt "#52030"
+msgid "no update"
+msgstr "Keine Aktualisierung"
+
+msgctxt "#52031"
+msgid "one update"
+msgstr "Einmalig"
+
+msgctxt "#52032"
+msgid "periodic"
+msgstr "Periodisch"

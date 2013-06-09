@@ -7,11 +7,12 @@
 		
 		<setting id="autostart" type="bool" label="52021" default="true"/>
 		<setting id="delay" type="slider" label="52015" default="5" range="0,5,60" option="int" enable="eq(-1,true)" />
-		<setting id="periodic" type="bool" label="52013" default="true" enable="eq(-2,true)" />
-		<setting id="interval" type="slider" label="52014" default="24" range="3,3,96" option="int" enable="eq(-1,true)+eq(-3,true)" />
-		
+		<!-- starttype: no, one, periodic update -->
+		<setting id="starttype" label="52013" type="enum" lvalues="52030|52031|52032" enable="eq(-2,true)" default="2"/>
+		<setting id="interval" type="slider" label="52014" default="24" range="3,3,96" option="int" enable="eq(-1,2)+eq(-3,true)" />
+		<setting id="watch_user" type="bool" label="52022" default="true" enable="eq(-4,true)" />
 		<setting id="progressdialog" type="bool" label="52016" default="true"/>
-
+		
 		<!-- Option für externe Datenbank-Datei, um die gesehen-Liste im Netzwerk zu verwalten -->
     </category>
 	
