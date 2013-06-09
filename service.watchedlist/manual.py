@@ -2,7 +2,7 @@ import xbmcgui
 import resources.lib.utils as utils
 from service import WatchedList
 
-__remotedebug__ = True
+__remotedebug__ = False
 
 
 # append pydev remote debugger
