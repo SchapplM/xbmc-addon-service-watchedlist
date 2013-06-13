@@ -93,6 +93,8 @@ def executeJSON(request):
 
 def buggalo_extradata_settings():
     # add extradata to buggalo
+    buggalo.addExtraData('data_dir', data_dir());
+    buggalo.addExtraData('addon_dir', addon_dir());
     buggalo.addExtraData('setting_debug', getSetting("debug"));
     buggalo.addExtraData('setting_w_movies', getSetting("w_movies"));
     buggalo.addExtraData('setting_w_episodes', getSetting("w_episodes"));

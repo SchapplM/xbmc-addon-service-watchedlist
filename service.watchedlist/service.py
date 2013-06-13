@@ -170,11 +170,13 @@ class WatchedList:
             if utils.getSetting("extdb") == 'false':
                 # use the default file 
                 self.dbdirectory = xbmc.translatePath( utils.data_dir() ).decode('utf-8')
-                self.dbpath = os.path.join( utils.data_dir() , "watchedlist.db" )
+                buggalo.addExtraData('dbdirectory', self.dbdirectory);
+                self.dbpath = os.path.join( self.dbdirectory , "watchedlist.db" )
             else:
                 # use a user specified file, for example to synchronize multiple clients
                 self.dbdirectory = xbmc.translatePath( utils.getSetting("dbpath") ).decode('utf-8')
                 self.dbdirectory = utils.translateSMB(self.dbdirectory)
+                buggalo.addExtraData('dbdirectory', self.dbdirectory);
                 self.dbpath = os.path.join( self.dbdirectory , utils.getSetting("dbfilename").decode('utf-8') )
                 # xbmc.validatePath(self.dbdirectory) # does not work for smb
                 if not xbmcvfs.exists(self.dbdirectory): # do not use os.path.exists to access smb:// paths
@@ -587,6 +589,7 @@ class WatchedList:
             now = datetime.datetime.now()
             timestr = '%04d%02d%02d_%02d%02d%02d' % (now.year, now.month, now.day, now.hour, now.minute, now.second)
             zipfilename = os.path.join(self.dbdirectory, timestr + ' - watchedlist.db.zip')
+            zf = False
             try:
                 zf = zipfile.ZipFile(zipfilename, 'w')
                 zf.write(self.dbpath, compress_type=zipfile.ZIP_DEFLATED, arcname='watchedlist.db')
