@@ -53,7 +53,7 @@ class WatchedList:
             if len(self.watchedmovielist_xbmc) == 0: self.get_watched_xbmc(1)
             executioncount = 0
             idletime = 0
-            if utils.getSetting("watch_user") == 'true': utils.showNotification(utils.getString(32101), utils.getString(30005))
+            if utils.getSetting("watch_user") == 'true': utils.showNotification(utils.getString(32101), utils.getString(32005))
             # handle the periodic execution
             while int(utils.getSetting("starttype")) > 0 or utils.getSetting("watch_user") == 'true':
                 starttime = time.time()
@@ -62,12 +62,12 @@ class WatchedList:
                     if executioncount == 0:
                         sleeptime = int(utils.getSetting("delay")) * 60
                         utils.log('Delay time before execution: %d seconds' % sleeptime, xbmc.LOGDEBUG)
-                        utils.showNotification(utils.getString(32101), utils.getString(30004)%int(utils.getSetting("delay")))
+                        utils.showNotification(utils.getString(32101), utils.getString(32004)%int(utils.getSetting("delay")))
                     elif utils.getSetting("starttype") == '2':
                         sleeptime = int(utils.getSetting("interval")) * 3600 # wait interval until next startup in [seconds]
                         # wait and then update again
                         utils.log('wait %d seconds until next update' % sleeptime)
-                        utils.showNotification(utils.getString(32101), utils.getString(30003)%(sleeptime/3600))
+                        utils.showNotification(utils.getString(32101), utils.getString(32003)%(sleeptime/3600))
                     else:
                         sleeptime = 3600 # arbitrary time for infinite loop
                 else:
@@ -180,7 +180,7 @@ class WatchedList:
                 self.dbpath = os.path.join( self.dbdirectory , utils.getSetting("dbfilename").decode('utf-8') )
                 # xbmc.validatePath(self.dbdirectory) # does not work for smb
                 if not xbmcvfs.exists(self.dbdirectory): # do not use os.path.exists to access smb:// paths
-                    utils.showNotification(utils.getString(32102), utils.getString(30002)%(self.dbpath))
+                    utils.showNotification(utils.getString(32102), utils.getString(32002)%(self.dbpath))
                     utils.log('db path does not exist: %s' % self.dbpath)
                     return 2     
             

@@ -1,13 +1,13 @@
 # XBMC Media Center language file
 # Addon Name: WatchedList
 # Addon id: service.watchedlist
-# Addon version: 0.8.1
+# Addon version: 0.9.0
 # Addon Provider: schapplm
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC-Addons\n"
 "Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
-"POT-Creation-Date: 2013-06-04 18:26+0000\n"
+"POT-Creation-Date: 2013-06-20 17:28+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE\n"
@@ -31,29 +31,105 @@ msgstr ""
 
 #Notification headers
 
+msgctxt "#30001"
+msgid "Basic Settings"
+msgstr ""
+
 msgctxt "#30002"
-msgid "db path does not exist: %s"
+msgid "Database"
 msgstr ""
 
-msgctxt "#30003"
-msgid "next update in %d hours"
+#empty strings from id 30003 to 30009
+
+msgctxt "#30010"
+msgid "Debug mode"
 msgstr ""
 
-msgctxt "#30004"
-msgid "begin update %d minutes"
+msgctxt "#30011"
+msgid "Update movies watched state"
 msgstr ""
 
-msgctxt "#30005"
-msgid "running observation of changes of watched states"
+msgctxt "#30012"
+msgid "Update episodes watched state"
 msgstr ""
 
-#empty strings from id 30006 to 31000
+msgctxt "#30013"
+msgid "autostart mode"
+msgstr ""
 
-msgctxt "#31001"
+msgctxt "#30014"
+msgid "Uupdate interval [hours]"
+msgstr ""
+
+msgctxt "#30015"
+msgid "Startup delay befor action [minutes]"
+msgstr ""
+
+msgctxt "#30016"
+msgid "Progress Dialog"
+msgstr ""
+
+msgctxt "#30017"
+msgid "Use non-default database file"
+msgstr ""
+
+msgctxt "#30018"
+msgid "Path to database file"
+msgstr ""
+
+msgctxt "#30019"
+msgid "Database filename (SQLite Database, *.db)"
+msgstr ""
+
+msgctxt "#30020"
+msgid "Backup copy before accessing database file"
+msgstr ""
+
+msgctxt "#30021"
+msgid "Start with XBMC (autorun)"
+msgstr ""
+
+msgctxt "#30022"
+msgid "follow user setting watched/unwatched"
+msgstr ""
+
+#empty strings from id 30023 to 30029
+
+msgctxt "#30030"
+msgid "no update"
+msgstr ""
+
+msgctxt "#30031"
+msgid "one update"
+msgstr ""
+
+msgctxt "#30032"
+msgid "periodic"
+msgstr ""
+
+#empty strings from id 30033 to 32000
+
+msgctxt "#32001"
 msgid "manually run the database update again?"
 msgstr ""
 
-#empty strings from id 31002 to 32100
+msgctxt "#32002"
+msgid "db path does not exist: %s"
+msgstr ""
+
+msgctxt "#32003"
+msgid "next update in %d hours"
+msgstr ""
+
+msgctxt "#32004"
+msgid "begin update %d minutes"
+msgstr ""
+
+msgctxt "#32005"
+msgid "running observation of changes of watched states"
+msgstr ""
+
+#empty strings from id 32006 to 32100
 
 msgctxt "#32101"
 msgid "WatchedList"
@@ -180,83 +256,4 @@ msgstr ""
 
 msgctxt "#32611"
 msgid "%d/%d: %s S%02dE%02d"
-msgstr ""
-
-#Settings Language Strings
-#empty strings from id 32612 to 52000
-
-msgctxt "#52001"
-msgid "Basic Settings"
-msgstr ""
-
-msgctxt "#52002"
-msgid "Database"
-msgstr ""
-
-#empty strings from id 52003 to 52009
-
-msgctxt "#52010"
-msgid "Debug mode"
-msgstr ""
-
-msgctxt "#52011"
-msgid "Update movies watched state"
-msgstr ""
-
-msgctxt "#52012"
-msgid "Update episodes watched state"
-msgstr ""
-
-msgctxt "#52013"
-msgid "autostart mode"
-msgstr ""
-
-msgctxt "#52014"
-msgid "Uupdate interval [hours]"
-msgstr ""
-
-msgctxt "#52015"
-msgid "Startup delay befor action [minutes]"
-msgstr ""
-
-msgctxt "#52016"
-msgid "Progress Dialog"
-msgstr ""
-
-msgctxt "#52017"
-msgid "Use non-default database file"
-msgstr ""
-
-msgctxt "#52018"
-msgid "Path to database file"
-msgstr ""
-
-msgctxt "#52019"
-msgid "Database filename (SQLite Database, *.db)"
-msgstr ""
-
-msgctxt "#52020"
-msgid "Backup copy before accessing database file"
-msgstr ""
-
-msgctxt "#52021"
-msgid "Start with XBMC (autorun)"
-msgstr ""
-
-msgctxt "#52022"
-msgid "follow user setting watched/unwatched"
-msgstr ""
-
-#empty strings from id 52023 to 52029
-
-msgctxt "#52030"
-msgid "no update"
-msgstr ""
-
-msgctxt "#52031"
-msgid "one update"
-msgstr ""
-
-msgctxt "#52032"
-msgid "periodic"
 msgstr ""

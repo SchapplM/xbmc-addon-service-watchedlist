@@ -17,14 +17,12 @@
 	
 	<!-- Notification text -->
 
-	<string id="30003">Nächste Aktualisierung in %d Stunden</string>
-	<string id="30004">Starte Aktualisierung in %d Minuten</string>
-	<string id="30005">laufende Überwachung von Änderungen des Gesehen-Status</string>
+	<string id="32003">Nächste Aktualisierung in %d Stunden</string>
+	<string id="32004">Starte Aktualisierung in %d Minuten</string>
+	<string id="32005">laufende Überwachung von Änderungen des Gesehen-Status</string>
 	
-	<string id="31001">Datenbank-Aktualisierung nochmal starten?</string>
+	<string id="32001">Datenbank-Aktualisierung nochmal starten?</string>
 	
-
-	<string id="32102">Lade Tabellen aus Benutzer-Datenbank...</string>
 	<string id="32103">Lade Gesehen-Status aus Gesehen-Datenbank...</string>
 	<string id="32104">Lade Gesehene-Status aus XBMC-Datenbank ...</string>
 	<string id="32105">Aktualisiere die Gesehen-Datenbank: ...</string>
@@ -39,7 +37,7 @@
 	<string id="32303">%d Episoden als gesehen markiert.</string>
 	
 		<!-- Error Messages-->
-		<string id="30002">DB-Pfad existiert nicht: %s</string>
+		<string id="32002">DB-Pfad existiert nicht: %s</string>
 		<string id="32601">Öffnen der Gesehen-Datenbank</string>
 		<string id="32602">Laden der Gesehen-Datenbank</string>
 		<string id="32603">Laden der XBMC-Datenbank</string>
@@ -52,24 +50,24 @@
 
 		
 	<!-- Einstellungen-->
-    <string id="52001">Grundeinstellungen</string>
-	<string id="52010">Debug-Modus</string>
-	<string id="52011">Aktualisiere Gesehen-Status von Filmen</string>
-	<string id="52012">Aktualisiere Gesehen-Status von Episoden</string>
-	<string id="52013">Starttyp</string>
-	<string id="52030">Keine Aktualisierung</string>
-	<string id="52031">Einmalig</string>
-	<string id="52032">Periodisch</string>
+    <string id="30001">Grundeinstellungen</string>
+	<string id="30010">Debug-Modus</string>
+	<string id="30011">Aktualisiere Gesehen-Status von Filmen</string>
+	<string id="30012">Aktualisiere Gesehen-Status von Episoden</string>
+	<string id="30013">Starttyp</string>
+	<string id="30030">Keine Aktualisierung</string>
+	<string id="30031">Einmalig</string>
+	<string id="30032">Periodisch</string>
 	
-	<string id="52014">Aktualisierungs-Intervall [Stunden]</string>
-	<string id="52015">Start-Verzögerung [Minuten]</string>
-	<string id="52021">Automatisch mit XBMC starten</string>
-	<string id="52016">Fortschrittsanzeige</string>
-	<string id="52022">Gesehen-Änderungen laufend überwachen</string>
+	<string id="30014">Aktualisierungs-Intervall [Stunden]</string>
+	<string id="30015">Start-Verzögerung [Minuten]</string>
+	<string id="30021">Automatisch mit XBMC starten</string>
+	<string id="30016">Fortschrittsanzeige</string>
+	<string id="30022">Gesehen-Änderungen laufend überwachen</string>
 	
-	<string id="52002">Datenbank</string>
-	<string id="52017">Eigene Datenbank-Datei</string>
-	<string id="52018">Pfad zur Datenbank-Datei</string>
-	<string id="52019">Dateiname (*.db)</string>
-	<string id="52020">Sicherungskopie vor Datenbankzugriff</string>
+	<string id="30002">Datenbank</string>
+	<string id="30017">Eigene Datenbank-Datei</string>
+	<string id="30018">Pfad zur Datenbank-Datei</string>
+	<string id="30019">Dateiname (*.db)</string>
+	<string id="30020">Sicherungskopie vor Datenbankzugriff</string>
 </strings>

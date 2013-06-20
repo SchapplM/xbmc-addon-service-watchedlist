@@ -1,13 +1,13 @@
 # XBMC Media Center language file
 # Addon Name: WatchedList
 # Addon id: service.watchedlist
-# Addon version: 0.8.1
+# Addon version: 0.9.0
 # Addon Provider: schapplm
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC-Addons\n"
 "Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
-"POT-Creation-Date: 2013-06-04 18:26+0000\n"
+"POT-Creation-Date: 2013-06-20 17:28+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE\n"
@@ -29,25 +29,97 @@ msgctxt "Addon Disclaimer"
 msgid "This script does not regard the file format. A Movie watched in DVD quality will also set	the 1080p version as watched."
 msgstr "Dieses Script ignoriert das Dateiformat. Ein gesehener Film in DVD-Qualität wird auch in der BlueRay-Version als gesehen gekennzeichnet."
 
+msgctxt "#30001"
+msgid "Basic Settings"
+msgstr "Grundeinstellungen"
+
 msgctxt "#30002"
+msgid "Database"
+msgstr "Datenbank"
+
+msgctxt "#30010"
+msgid "Debug mode"
+msgstr "Debug-Modus"
+
+msgctxt "#30011"
+msgid "Update movies watched state"
+msgstr "Aktualisiere Gesehen-Status von Filmen"
+
+msgctxt "#30012"
+msgid "Update episodes watched state"
+msgstr "Aktualisiere Gesehen-Status von Episoden"
+
+msgctxt "#30013"
+msgid "autostart mode"
+msgstr "Starttyp"
+
+msgctxt "#30014"
+msgid "Uupdate interval [hours]"
+msgstr "Aktualisierungs-Intervall [Stunden]"
+
+msgctxt "#30015"
+msgid "Startup delay befor action [minutes]"
+msgstr "Start-Verzögerung [Minuten]"
+
+msgctxt "#30016"
+msgid "Progress Dialog"
+msgstr "Fortschrittsanzeige"
+
+msgctxt "#30017"
+msgid "Use non-default database file"
+msgstr "Eigene Datenbank-Datei"
+
+msgctxt "#30018"
+msgid "Path to database file"
+msgstr "Pfad zur Datenbank-Datei"
+
+msgctxt "#30019"
+msgid "Database filename (SQLite Database, *.db)"
+msgstr "Dateiname (*.db)"
+
+msgctxt "#30020"
+msgid "Backup copy before accessing database file"
+msgstr "Sicherungskopie vor Datenbankzugriff"
+
+msgctxt "#30021"
+msgid "Start with XBMC (autorun)"
+msgstr "Automatisch mit XBMC starten"
+
+msgctxt "#30022"
+msgid "follow user setting watched/unwatched"
+msgstr "Gesehen-Änderungen laufend überwachen"
+
+msgctxt "#30030"
+msgid "no update"
+msgstr "Keine Aktualisierung"
+
+msgctxt "#30031"
+msgid "one update"
+msgstr "Einmalig"
+
+msgctxt "#30032"
+msgid "periodic"
+msgstr "Periodisch"
+
+msgctxt "#32001"
+msgid "manually run the database update again?"
+msgstr "Datenbank-Aktualisierung nochmal starten?"
+
+msgctxt "#32002"
 msgid "db path does not exist: %s"
 msgstr "DB-Pfad existiert nicht: %s"
 
-msgctxt "#30003"
+msgctxt "#32003"
 msgid "next update in %d hours"
 msgstr "Nächste Aktualisierung in %d Stunden"
 
-msgctxt "#30004"
+msgctxt "#32004"
 msgid "begin update %d minutes"
 msgstr "Starte Aktualisierung in %d Minuten"
 
-msgctxt "#30005"
+msgctxt "#32005"
 msgid "running observation of changes of watched states"
 msgstr "laufende Überwachung von Änderungen des Gesehen-Status"
-
-msgctxt "#31001"
-msgid "manually run the database update again?"
-msgstr "Datenbank-Aktualisierung nochmal starten?"
 
 msgctxt "#32101"
 msgid "WatchedList"
@@ -160,75 +232,3 @@ msgstr "%d/%d: %s"
 msgctxt "#32611"
 msgid "%d/%d: %s S%02dE%02d"
 msgstr "%d/%d: %s S%02dE%02d"
-
-msgctxt "#52001"
-msgid "Basic Settings"
-msgstr "Grundeinstellungen"
-
-msgctxt "#52002"
-msgid "Database"
-msgstr "Datenbank"
-
-msgctxt "#52010"
-msgid "Debug mode"
-msgstr "Debug-Modus"
-
-msgctxt "#52011"
-msgid "Update movies watched state"
-msgstr "Aktualisiere Gesehen-Status von Filmen"
-
-msgctxt "#52012"
-msgid "Update episodes watched state"
-msgstr "Aktualisiere Gesehen-Status von Episoden"
-
-msgctxt "#52013"
-msgid "autostart mode"
-msgstr "Starttyp"
-
-msgctxt "#52014"
-msgid "Uupdate interval [hours]"
-msgstr "Aktualisierungs-Intervall [Stunden]"
-
-msgctxt "#52015"
-msgid "Startup delay befor action [minutes]"
-msgstr "Start-Verzögerung [Minuten]"
-
-msgctxt "#52016"
-msgid "Progress Dialog"
-msgstr "Fortschrittsanzeige"
-
-msgctxt "#52017"
-msgid "Use non-default database file"
-msgstr "Eigene Datenbank-Datei"
-
-msgctxt "#52018"
-msgid "Path to database file"
-msgstr "Pfad zur Datenbank-Datei"
-
-msgctxt "#52019"
-msgid "Database filename (SQLite Database, *.db)"
-msgstr "Dateiname (*.db)"
-
-msgctxt "#52020"
-msgid "Backup copy before accessing database file"
-msgstr "Sicherungskopie vor Datenbankzugriff"
-
-msgctxt "#52021"
-msgid "Start with XBMC (autorun)"
-msgstr "Automatisch mit XBMC starten"
-
-msgctxt "#52022"
-msgid "follow user setting watched/unwatched"
-msgstr "Gesehen-Änderungen laufend überwachen"
-
-msgctxt "#52030"
-msgid "no update"
-msgstr "Keine Aktualisierung"
-
-msgctxt "#52031"
-msgid "one update"
-msgstr "Einmalig"
-
-msgctxt "#52032"
-msgid "periodic"
-msgstr "Periodisch"
