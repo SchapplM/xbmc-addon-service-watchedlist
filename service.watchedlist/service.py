@@ -639,6 +639,9 @@ class WatchedList:
             else:
                 list_new = self.watchedepisodelist_xbmc
                 list_old = old_watchedepisodelist_xbmc
+            if len(list_old) == 0 or len(list_new) == 0:
+                # one of the lists is empty: nothing to compare. No user changes noticable
+                continue
             for i_n, row_xbmc in enumerate(list_new):
                 if xbmc.abortRequested: return
                 imdbId = row_xbmc[0]
