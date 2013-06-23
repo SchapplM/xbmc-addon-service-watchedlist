@@ -197,14 +197,18 @@ class WatchedList:
             
             sql = "CREATE TABLE IF NOT EXISTS tvshows (idShow INTEGER, title TEXT, PRIMARY KEY (idShow))"
             self.sqlcursor.execute(sql)
+            
+            buggalo.addExtraData('db_connstatus', 'connected')
         except sqlite3.Error:
             utils.log("Database error while opening %s" % self.dbpath)
             self.close_db()
+            buggalo.addExtraData('db_connstatus', 'sqlite3 error, closed')
             return 1
         except:
             utils.log("Error while opening %s: %s" % (self.dbpath, sys.exc_info()[2]))
             self.close_db()
             buggalo.addExtraData('dbpath', self.dbpath)
+            buggalo.addExtraData('db_connstatus', 'error, closed')
             buggalo.onExceptionRaised()
             return 1     
         # only commit the changes if no error occured to ensure database persistence
@@ -217,6 +221,7 @@ class WatchedList:
         if self.sqlcon:
             self.sqlcon.close()
         self.sqlcon = 0
+        buggalo.addExtraData('db_connstatus', 'closed')
         # cursor is not changed -> error
         
 
