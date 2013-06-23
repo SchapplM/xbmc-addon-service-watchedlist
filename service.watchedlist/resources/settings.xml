@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
-    <category label="52001">
-        <setting id="debug" type="bool" label="52010" default="false"/>
-		<setting id="w_movies" type="bool" label="52011" default="true"/>
-		<setting id="w_episodes" type="bool" label="52012" default="true"/>
+    <category label="30001">
+        <setting id="debug" type="bool" label="30010" default="false"/>
+		<setting id="w_movies" type="bool" label="30011" default="true"/>
+		<setting id="w_episodes" type="bool" label="30012" default="true"/>
 		
-		<setting id="autostart" type="bool" label="52021" default="true"/>
-		<setting id="delay" type="slider" label="52015" default="5" range="0,5,60" option="int" enable="eq(-1,true)" />
+		<setting id="autostart" type="bool" label="30021" default="true"/>
+		<setting id="delay" type="slider" label="30015" default="5" range="0,5,60" option="int" enable="eq(-1,true)" />
 		<!-- starttype: no, one, periodic update -->
-		<setting id="starttype" label="52013" type="enum" lvalues="52030|52031|52032" enable="eq(-2,true)" default="2"/>
-		<setting id="interval" type="slider" label="52014" default="24" range="3,3,96" option="int" enable="eq(-1,2)+eq(-3,true)" />
-		<setting id="watch_user" type="bool" label="52022" default="true" enable="eq(-4,true)" />
-		<setting id="progressdialog" type="bool" label="52016" default="true"/>
+		<setting id="starttype" label="30013" type="enum" lvalues="30030|30031|30032" enable="eq(-2,true)" default="2"/>
+		<setting id="interval" type="slider" label="30014" default="24" range="3,3,96" option="int" enable="eq(-1,2)+eq(-3,true)" />
+		<setting id="watch_user" type="bool" label="30022" default="true" enable="eq(-4,true)" />
+		<setting id="progressdialog" type="bool" label="30016" default="true"/>
 		
 		<!-- Option für externe Datenbank-Datei, um die gesehen-Liste im Netzwerk zu verwalten -->
     </category>
 	
-    <category label="52002">
-		<setting id="extdb" type="bool" label="52017" default="false"/>
-		<setting id="dbpath" type="folder" label="52018" default="" enable="eq(-1,true)"/>
-		<setting id="dbfilename" type="text" label="52019" default="watchedlist.db" enable="eq(-2,true)"/>
-		<setting id="dbbackup" type="bool" label="52020" default="false"/>
+    <category label="30002">
+		<setting id="extdb" type="bool" label="30017" default="false"/>
+		<setting id="dbpath" type="folder" label="30018" default="" enable="eq(-1,true)"/>
+		<setting id="dbfilename" type="text" label="30019" default="watchedlist.db" enable="eq(-2,true)"/>
+		<setting id="dbbackup" type="bool" label="30020" default="false"/>
     </category>
 </settings>

@@ -87,7 +87,7 @@ def executeJSON(request):
     json_query = unicode(json_query, 'utf-8', errors='ignore')
     json_response = simplejson.loads(json_query)  
     # in case of exception this will be sent
-    buggalo.addExtraData('json_query',json_query);
+    buggalo.addExtraData('len(json_query)',len(str(json_query)));
     buggalo.addExtraData('len(json_response)', len(str(json_response)));
     return json_response
 
