@@ -37,7 +37,12 @@ class WatchedList:
         self.dbcopydone = False   
         
         self.watch_user_changes_count = 0
+        
+        # normal access of files or access over the xbmc virtual file system (on unix)
+        self.dbfileaccess = 'normal'
                 
+        self.dbpath = ''
+        self.dbdirectory = ''
             
     # infinite loop for periodic database update
     def runProgram(self):
@@ -47,7 +52,10 @@ class WatchedList:
             # workaround to disable autostart, if requested
             if utils.getSetting("autostart") == 'false':
                 return 0
-            if self.sqlcursor == 0 or self.sqlcon == 0: self.load_db()
+            if self.sqlcursor == 0 or self.sqlcon == 0: 
+                if self.load_db():
+                    utils.showNotification(utils.getString(32102), utils.getString(32601))
+                    return 3
             if len(self.tvshownames) == 0: self.sync_tvshows()
             if len(self.watchedmovielist_wl) == 0: self.get_watched_wl(1)
             if len(self.watchedmovielist_xbmc) == 0: self.get_watched_xbmc(1)
@@ -147,7 +155,7 @@ class WatchedList:
                 return 6
             
             # close the sqlite database (addon)
-            self.close_db()
+            self.close_db() # should be closed by the functions directly accessing the database
             
             # export from addon database into xbmc database
             res = self.write_xbmc_wdata((utils.getSetting("progressdialog") == 'true'), 2)
@@ -175,14 +183,37 @@ class WatchedList:
             else:
                 # use a user specified file, for example to synchronize multiple clients
                 self.dbdirectory = xbmc.translatePath( utils.getSetting("dbpath") ).decode('utf-8')
+                self.dbfileaccess = utils.fileaccessmode(self.dbdirectory)
                 self.dbdirectory = utils.translateSMB(self.dbdirectory)
-                buggalo.addExtraData('dbdirectory', self.dbdirectory);
+                
                 self.dbpath = os.path.join( self.dbdirectory , utils.getSetting("dbfilename").decode('utf-8') )
                 # xbmc.validatePath(self.dbdirectory) # does not work for smb
                 if not xbmcvfs.exists(self.dbdirectory): # do not use os.path.exists to access smb:// paths
-                    utils.showNotification(utils.getString(32102), utils.getString(32002)%(self.dbpath))
-                    utils.log('db path does not exist: %s' % self.dbpath)
+                    utils.log('db path does not exist: %s' % self.dbdirectory)
+                    utils.showNotification(utils.getString(32102), utils.getString(32002) % self.dbdirectory )
                     return 2     
+                
+            # on unix, smb-shares can not be accessed with sqlite3 --> copy the db with xbmc file system operations and work in mirror directory
+            buggalo.addExtraData('dbfileaccess', self.dbfileaccess);
+            buggalo.addExtraData('dbdirectory', self.dbdirectory);
+            buggalo.addExtraData('dbpath', self.dbpath);
+            if self.dbfileaccess == 'copy':
+                self.dbdirectory_copy = self.dbdirectory
+                self.dbpath_copy = self.dbpath # path to db file as in the settings (but not accessable)
+                buggalo.addExtraData('dbdirectory_copy', self.dbdirectory_copy);
+                buggalo.addExtraData('dbpath_copy', self.dbpath_copy);
+                # work in copy directory in the xbmc profile folder
+                self.dbdirectory = os.path.join( xbmc.translatePath( utils.data_dir() ).decode('utf-8'), 'dbcopy')
+                if not self.dbdirectory:
+                    xbmcvfs.mkdir(self.dbdirectory)
+                    utils.log('created directory %s' % str(self.dbdirectory))  
+                self.dbpath = os.path.join( self.dbdirectory , "watchedlist.db" )
+                if xbmcvfs.exists(self.dbpath_copy):
+                    xbmcvfs.copy(self.dbpath_copy, self.dbpath) # copy the external db file to local mirror directory
+                    utils.log('copied db file %s -> %s' % (self.dbpath_copy, self.dbpath), xbmc.LOGDEBUG)  
+            
+            buggalo.addExtraData('dbdirectory', self.dbdirectory);
+            buggalo.addExtraData('dbpath', self.dbpath);
             
             
             #connect to the database. create database if it does not exist
@@ -221,6 +252,12 @@ class WatchedList:
         if self.sqlcon:
             self.sqlcon.close()
         self.sqlcon = 0
+        
+        # copy the db file back to the shared directory, if needed
+        if self.dbfileaccess == 'copy':
+            if xbmcvfs.exists(self.dbpath):
+                xbmcvfs.copy(self.dbpath, self.dbpath_copy)
+                utils.log('copied db file %s -> %s' % (self.dbpath, self.dbpath_copy), xbmc.LOGDEBUG)  
         buggalo.addExtraData('db_connstatus', 'closed')
         # cursor is not changed -> error
         
@@ -313,7 +350,7 @@ class WatchedList:
             if not silent: utils.showNotification( utils.getString(32101), utils.getString(32299)%(len(self.watchedmovielist_xbmc), len(self.watchedepisodelist_xbmc)) )
             return 0
         except:
-            utils.log(u'get_watched_xbmc:  error getting the xbmc database : %s' % sys.exc_info()[2], xbmc.LOGERROR)
+            utils.log(u'get_watched_xbmc: error getting the xbmc database : %s' % sys.exc_info()[2], xbmc.LOGERROR)
             self.close_db()
             buggalo.onExceptionRaised()  
             return 1          
@@ -350,9 +387,11 @@ class WatchedList:
                         name = 'tvdb-id %d S%02dE%02d' % (int(row[0]), int(row[1]), int(row[2]))
                     self.watchedepisodelist_wl.append(list([int(row[0]), int(row[1]), int(row[2]), int(row[3]), int(row[4]), name, int(row[5])]))# 0imdbnumber, 1season, 2episode, 3lastplayed, 4playcount, 5name, 6lastChange
             if not silent: utils.showNotification(utils.getString(32101), utils.getString(32298)%(len(self.watchedmovielist_wl), len(self.watchedepisodelist_wl)))
+            self.close_db()
             return 0
         except sqlite3.Error:
             utils.log(u'get_watched_wl: SQLite Database error getting the wl database %s' % sqlite3.Error.args[0], xbmc.LOGERROR)
+            self.close_db()
             # error could be that the database is locked (for tv show strings). This is not an error to disturb the other functions
             return 3
         except:
@@ -368,6 +407,9 @@ class WatchedList:
     def sync_tvshows(self):
         try:
             utils.log(u'sync_tvshows: sync tvshows with wl database : %s' % sys.exc_info()[2], xbmc.LOGDEBUG)
+            if self.sqlcursor == 0 or self.sqlcon == 0:
+                if self.load_db():
+                    return 2
             # write eventually new tv shows to wl database
             for xbmcid in self.tvshows:
                 sql = 'INSERT OR IGNORE INTO tvshows (idShow,title) VALUES (?, ?)'
@@ -380,8 +422,10 @@ class WatchedList:
             rows = self.sqlcursor.fetchall() 
             for i in range(len(rows)):
                 self.tvshownames[int(rows[i][0])] = rows[i][1]
+            self.close_db()
         except sqlite3.Error:
             utils.log(u'sync_tvshows: SQLite Database error accessing the wl database', xbmc.LOGERROR)
+            self.close_db()
             # error could be that the database is locked (for tv show strings).
             return 1
         except:
@@ -396,6 +440,9 @@ class WatchedList:
     def write_wl_wdata(self):
         # Go through all watched movies from xbmc and check whether they are up to date in the addon database
         buggalo.addExtraData('self_sqlcursor', self.sqlcursor); buggalo.addExtraData('self_sqlcon', self.sqlcon);
+        if self.sqlcursor == 0 or self.sqlcon == 0:
+            if self.load_db():
+                return 2
         for modus in ['movie', 'episode']:
             buggalo.addExtraData('modus', modus);
             if modus == 'movie' and utils.getSetting("w_movies") != 'true':
@@ -432,6 +479,7 @@ class WatchedList:
 
                 except sqlite3.Error:
                     utils.log(u'write_wl_wdata: Database error while updating %s %s' % (modus, row_xbmc[5]))
+                    self.close_db()
                     # error at this place is the result of duplicate movies, which produces a DUPLICATE PRIMARY KEY ERROR
                     continue
                 except:
@@ -450,6 +498,7 @@ class WatchedList:
             if modus == 'movie': strno = [32202, 32301]
             else: strno = [32203, 32301];
             utils.showNotification(utils.getString(strno[0]), utils.getString(strno[1])%(count_insert, count_update))
+        self.close_db()
         return 0
         
         
@@ -591,6 +640,9 @@ class WatchedList:
     # create a copy of the database, in case something goes wrong
     def database_copy(self):
         if utils.getSetting('dbbackup') == 'true' and (not self.dbcopydone):
+            if not xbmcvfs.exists(self.dbpath): 
+                utils.log('database_copy: directory %s does not exist. No backup possible.' % self.dbpath)
+                return 1
             now = datetime.datetime.now()
             timestr = '%04d%02d%02d_%02d%02d%02d' % (now.year, now.month, now.day, now.hour, now.minute, now.second)
             zipfilename = os.path.join(self.dbdirectory, timestr + ' - watchedlist.db.zip')
@@ -601,11 +653,17 @@ class WatchedList:
                 zf.close()
                 self.dbcopydone = True
                 utils.log('database_copy: database backup copy created to %s' % zipfilename)
+                # copy the zip file with xbmc file system, if needed
+                if self.dbfileaccess == 'copy':
+                    xbmcvfs.copy(zipfilename, os.path.join(self.dbdirectory_copy, timestr + ' - watchedlist.db.zip'))
+                    xbmcvfs.delete(zipfilename)
+                return 0
             except:
                 if zf:
                     zf.close()
                 buggalo.addExtraData('zipfilename', zipfilename);
                 buggalo.onExceptionRaised()  
+                return 2
                 
             
     # check if the user made changes in the watched states. Especially setting movies as "not watched". This can not be
@@ -685,6 +743,7 @@ class WatchedList:
                 # update xbmc watched status, e.g. to set duplicate movies also as watched
             if len(indices_changed) > 0:    
                 self.write_xbmc_wdata(0, 1) # this changes self.watchedmovielist_xbmc
+                self.close_db() # keep the db closed most of the time (no access problems)
         
  
                 
@@ -697,6 +756,9 @@ class WatchedList:
         buggalo.addExtraData('len_self_tvshownames', len(self.tvshownames))
         buggalo.addExtraData('row_xbmc', row_xbmc)
         buggalo.addExtraData('saveanyway', saveanyway)
+        if self.sqlcursor == 0 or self.sqlcon == 0:
+            if self.load_db():
+                return 2
         for modus in [mediatype]:
             buggalo.addExtraData('modus', modus)
             # row_xbmc: 0imdbnumber, 1empty, 2empty, 3lastPlayed, 4playCount, 5title, 6empty, 7movieid

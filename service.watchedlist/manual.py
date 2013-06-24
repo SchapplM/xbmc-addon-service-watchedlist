@@ -26,6 +26,6 @@ WL = WatchedList()
 if (not utils.getSetting("autostart") == 'true') or xbmcgui.Dialog().yesno( utils.getString(32101),utils.getString(32001) ):
     #run the program
     utils.log("Update Library Manual Run...")
-    WL.runProgram() # function executed on autostart. For Test purpose
-    # WL.runUpdate() # one time update
+    # WL.runProgram() # function executed on autostart. For Test purpose
+    WL.runUpdate() # one time update
 

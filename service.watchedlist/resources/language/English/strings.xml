@@ -17,7 +17,7 @@
 	<!-- Notification text -->
 	
 	<string id="32003">next update in %d hours</string>
-	<string id="32004">begin update %d minutes</string>
+	<string id="32004">begin update in %d minutes</string>
 	<string id="32005">running observation of changes of watched states</string>
 	
 	<string id="32001">manually run the database update again?</string>
@@ -57,7 +57,7 @@
 	<string id="30031">one update</string>
 	<string id="30032">periodic</string>
 	
-	<string id="30014">Uupdate interval [hours]</string>
+	<string id="30014">Update interval [hours]</string>
 	<string id="30015">Startup delay befor action [minutes]</string>
 	
 	<string id="30021">Start with XBMC (autorun)</string>

@@ -87,8 +87,8 @@ def executeJSON(request):
     json_query = unicode(json_query, 'utf-8', errors='ignore')
     json_response = simplejson.loads(json_query)  
     # in case of exception this will be sent
-    buggalo.addExtraData('len(json_query)',len(str(json_query)));
-    buggalo.addExtraData('len(json_response)', len(str(json_response)));
+    buggalo.addExtraData('len(json_query)',len(json_query));
+    buggalo.addExtraData('len(json_response)', len(json_response));
     return json_response
 
 def buggalo_extradata_settings():
@@ -117,7 +117,21 @@ def translateSMB(path):
             # path is not smb://...
             return path
         else:
+            # create smb path
             return '\\\\'+res[0][0]+'\\'+res[0][1].replace('/', '\\')
     else:
+        # linux os. Path with smb:// is correct, but can not be accessed with normal python file access
         return path
-   
+def fileaccessmode(path):
+    # determine file access mode in case of smb share no direct access possible
+    if os.sep == '\\': # windows os
+        res = re.compile('smb://(\w+)/(.+)').findall(path)
+        if len(res) == 0:
+            # path is not smb://...
+            return 'normal'
+        else:
+            # smb accessable in windows
+            return 'normal'
+    else:
+        # linux os. Path with smb:// is correct, but can not be accessed with normal python file access
+        return 'copy'
