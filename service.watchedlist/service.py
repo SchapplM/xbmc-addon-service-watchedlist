@@ -282,7 +282,11 @@ class WatchedList:
                 if json_response.has_key('result') and json_response['result'] != None and json_response['result'].has_key('tvshows'):
                     for item in json_response['result']['tvshows']:
                         tvshowId_xbmc = int(item['tvshowid'])
-                        tvshowId_imdb = int(item['imdbnumber'])
+                        try:
+                            tvshowId_imdb = int(item['imdbnumber'])
+                        except:
+                            utils.log('get_watched_xbmc: tv show "%s" has no imdb-number in database. tvshowid=%d Try rescraping.' % (item['title'], tvshowId_xbmc), xbmc.LOGDEBUG)
+                            continue
                         self.tvshows[tvshowId_xbmc] = list([tvshowId_imdb, item['title']])
                         self.tvshownames[tvshowId_imdb] = item['title']
             
