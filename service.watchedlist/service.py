@@ -474,7 +474,7 @@ class WatchedList:
                 else:
                     row_xbmc = self.watchedepisodelist_xbmc[i]
 
-                if utils.getSetting("progressdialog") == 'true':
+                if utils.getSetting("progressdialog") == 'true' and list_length > 1:
                     DIALOG_PROGRESS.update(100*i/(list_length-1), utils.getString(32105), utils.getString(32610) % (i+1, list_length, row_xbmc[5]) )  
 
                 try:
@@ -548,7 +548,7 @@ class WatchedList:
                 imdbId = row_wl[0]
                 name =  row_wl[5]
 
-                if progressdialogue:
+                if progressdialogue and list_length > 1:
                     DIALOG_PROGRESS.update(100*j/(list_length-1), utils.getString(32106), utils.getString(32610) % (j+1, list_length, name) )
                 try:
                     # search the unique movie/episode id in the xbmc-list
