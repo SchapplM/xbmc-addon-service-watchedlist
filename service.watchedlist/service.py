@@ -467,15 +467,17 @@ class WatchedList:
             for i in range(list_length):
                 if xbmc.abortRequested: break # this loop can take some time in debug mode and prevents xbmc exit
                 if utils.getSetting("progressdialog") == 'true' and DIALOG_PROGRESS.iscanceled():
-                    utils.showNotification(utils.getString(32202), utils.getString(32301)%(count_insert, count_update))
+                    if modus == 'movie': strno = 32202
+                    else: strno = 32203;
+                    utils.showNotification(utils.getString(strno), utils.getString(32301)%(count_insert, count_update))
                     return 2
                 if modus == 'movie':
                     row_xbmc = self.watchedmovielist_xbmc[i]
                 else:
                     row_xbmc = self.watchedepisodelist_xbmc[i]
 
-                if utils.getSetting("progressdialog") == 'true' and list_length > 1:
-                    DIALOG_PROGRESS.update(100*i/(list_length-1), utils.getString(32105), utils.getString(32610) % (i+1, list_length, row_xbmc[5]) )  
+                if utils.getSetting("progressdialog") == 'true':
+                    DIALOG_PROGRESS.update(100*(i+1)/list_length, utils.getString(32105), utils.getString(32610) % (i+1, list_length, row_xbmc[5]) )  
 
                 try:
                     count = self.wl_update_media(modus, row_xbmc, 0, 0)
@@ -548,8 +550,8 @@ class WatchedList:
                 imdbId = row_wl[0]
                 name =  row_wl[5]
 
-                if progressdialogue and list_length > 1:
-                    DIALOG_PROGRESS.update(100*j/(list_length-1), utils.getString(32106), utils.getString(32610) % (j+1, list_length, name) )
+                if progressdialogue:
+                    DIALOG_PROGRESS.update(100*(j+1)/list_length, utils.getString(32106), utils.getString(32610) % (j+1, list_length, name) )
                 try:
                     # search the unique movie/episode id in the xbmc-list
                     if modus == 'movie':
