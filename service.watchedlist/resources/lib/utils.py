@@ -6,6 +6,7 @@ import time
 import sys
 import buggalo
 import re
+import random
     
 __addon_id__= 'service.watchedlist'
 __Addon = xbmcaddon.Addon(__addon_id__)
@@ -72,7 +73,15 @@ def sqlDateTimeToTimeStamp(sqlDateTime):
     if sqlDateTime == '':
         return 0 # NULL timestamp
     else:
-        return int(time.mktime(time.strptime(sqlDateTime,"%Y-%m-%d %H:%M:%S")))
+        # the usage of strptime produces the error "Failed to import _strptime because the import lock is held by another thread."
+        # to solve this, in case of error try again after random time
+        for i in range(5):
+            try:
+                return int(time.mktime(time.strptime(sqlDateTime,"%Y-%m-%d %H:%M:%S")))
+            except:
+
+                xbmc.wait( random.randint(200, 500) )
+                
 
 #  1368213804  --->  "2013-05-10 21:23:24"
 def TimeStamptosqlDateTime(TimeStamp):

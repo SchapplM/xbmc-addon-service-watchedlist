@@ -1,3 +1,6 @@
+version 0.9.2
+ * Fixed minor bugs
+
 version 0.9.1
  * Fixed: Network share problems in Linux
 
