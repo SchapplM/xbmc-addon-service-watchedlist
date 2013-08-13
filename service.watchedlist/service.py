@@ -61,18 +61,26 @@ class WatchedList:
             if len(self.watchedmovielist_xbmc) == 0: self.get_watched_xbmc(1)
             executioncount = 0
             idletime = 0
+            
+            # wait the delay time after startup
+            delaytime = float(utils.getSetting("delay")) * 60 # in seconds
+            utils.log('Delay time before execution: %d seconds' % delaytime, xbmc.LOGDEBUG)
+            utils.showNotification(utils.getString(32101), utils.getString(32004)%float(utils.getSetting("delay")))
+            starttime = time.time()
+            while 1:
+                if time.time() > starttime + delaytime:
+                    break
+                xbmc.sleep(1000) # wait 1 second until next check if xbmc terminates
+            
+            
             if utils.getSetting("watch_user") == 'true': utils.showNotification(utils.getString(32101), utils.getString(32005))
             # handle the periodic execution
-            while int(utils.getSetting("starttype")) > 0 or utils.getSetting("watch_user") == 'true':
+            while float(utils.getSetting("starttype")) > 0 or utils.getSetting("watch_user") == 'true':
                 starttime = time.time()
                 # determine sleeptime before full watched-database update
-                if int(utils.getSetting("starttype")) > 0: 
-                    if executioncount == 0:
-                        sleeptime = int(utils.getSetting("delay")) * 60
-                        utils.log('Delay time before execution: %d seconds' % sleeptime, xbmc.LOGDEBUG)
-                        utils.showNotification(utils.getString(32101), utils.getString(32004)%int(utils.getSetting("delay")))
-                    elif utils.getSetting("starttype") == '2':
-                        sleeptime = int(utils.getSetting("interval")) * 3600 # wait interval until next startup in [seconds]
+                if float(utils.getSetting("starttype")) > 0: 
+                    if utils.getSetting("starttype") == '2':
+                        sleeptime = float(utils.getSetting("interval")) * 3600 # wait interval until next startup in [seconds]
                         # wait and then update again
                         utils.log('wait %d seconds until next update' % sleeptime)
                         utils.showNotification(utils.getString(32101), utils.getString(32003)%(sleeptime/3600))
@@ -97,7 +105,7 @@ class WatchedList:
                 if utils.getSetting("starttype") == '1' and executioncount == 0 or utils.getSetting("starttype") == '2':
                     self.runUpdate()
                     executioncount += 1
-                if int(utils.getSetting("starttype")) < 2 and utils.getSetting("watch_user") == 'false':
+                if float(utils.getSetting("starttype")) < 2 and utils.getSetting("watch_user") == 'false':
                     return 0 # the program may exit. No purpose for background process
             # do not use the periodic update
             return 0
@@ -181,17 +189,23 @@ class WatchedList:
                 buggalo.addExtraData('dbdirectory', self.dbdirectory);
                 self.dbpath = os.path.join( self.dbdirectory , "watchedlist.db" )
             else:
-                # use a user specified file, for example to synchronize multiple clients
-                self.dbdirectory = xbmc.translatePath( utils.getSetting("dbpath") ).decode('utf-8')
-                self.dbfileaccess = utils.fileaccessmode(self.dbdirectory)
-                self.dbdirectory = utils.translateSMB(self.dbdirectory)
-                
-                self.dbpath = os.path.join( self.dbdirectory , utils.getSetting("dbfilename").decode('utf-8') )
-                # xbmc.validatePath(self.dbdirectory) # does not work for smb
-                if not xbmcvfs.exists(self.dbdirectory): # do not use os.path.exists to access smb:// paths
-                    utils.log('db path does not exist: %s' % self.dbdirectory)
-                    utils.showNotification(utils.getString(32102), utils.getString(32002) % self.dbdirectory )
-                    return 2     
+                for i in range(3600):
+                    # use a user specified file, for example to synchronize multiple clients
+                    self.dbdirectory = xbmc.translatePath( utils.getSetting("dbpath") ).decode('utf-8')
+                    self.dbfileaccess = utils.fileaccessmode(self.dbdirectory)
+                    self.dbdirectory = utils.translateSMB(self.dbdirectory)
+                    
+                    self.dbpath = os.path.join( self.dbdirectory , utils.getSetting("dbfilename").decode('utf-8') )
+                    # xbmc.validatePath(self.dbdirectory) # does not work for smb
+                    if not xbmcvfs.exists(self.dbdirectory): # do not use os.path.exists to access smb:// paths
+                        utils.log('db path does not exist: %s' % self.dbdirectory)
+                        utils.showNotification(utils.getString(32102), utils.getString(32002) % self.dbdirectory )
+                        if i == 3:
+                            return 2  
+                        else:
+                            xbmc.sleep(60*1000) # Wait one minute until next check for file path (necessary on network shares, that are not active
+                    else:
+                        break      
                 
             # on unix, smb-shares can not be accessed with sqlite3 --> copy the db with xbmc file system operations and work in mirror directory
             buggalo.addExtraData('dbfileaccess', self.dbfileaccess);
