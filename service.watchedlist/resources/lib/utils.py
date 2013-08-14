@@ -75,12 +75,15 @@ def sqlDateTimeToTimeStamp(sqlDateTime):
     else:
         # the usage of strptime produces the error "Failed to import _strptime because the import lock is held by another thread."
         # to solve this, in case of error try again after random time
-        for i in range(5):
-            try:
-                return int(time.mktime(time.strptime(sqlDateTime,"%Y-%m-%d %H:%M:%S")))
-            except:
-
-                xbmc.wait( random.randint(200, 500) )
+        try:
+            for i in range(5):
+                try:
+                    return int(time.mktime(time.strptime(sqlDateTime,"%Y-%m-%d %H:%M:%S")))
+                except:
+                    xbmc.wait( random.randint(200, 500) )
+        except:
+            return 0 # error, but timestamp=0 works in the addon
+                    
                 
 
 #  1368213804  --->  "2013-05-10 21:23:24"
