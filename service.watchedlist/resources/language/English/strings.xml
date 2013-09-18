@@ -42,6 +42,7 @@
 		<string id="32603">Error loading xbmc-database</string>
 		<string id="32604">Error updating WL database</string>
 		<string id="32605">Error updating xbmc-database</string>
+		<string id="32606">Writing the WL-database file %s</string>
 		
 		<!-- Progress Dialog -->
 		<string id="32610">%d/%d: %s</string>

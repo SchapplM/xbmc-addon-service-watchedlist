@@ -124,26 +124,37 @@ def buggalo_extradata_settings():
 def translateSMB(path):
     # translate "smb://..." to "\\..." in windows. Don't change other paths
     if os.sep == '\\': # windows os
-        res = re.compile('smb://(\w+)/(.+)').findall(path)
-        if len(res) == 0:
+        res_smb = re.compile('smb://(\w+)/(.+)').findall(path)
+        if len(res_smb) == 0:
             # path is not smb://...
             return path
         else:
             # create smb path
-            return '\\\\'+res[0][0]+'\\'+res[0][1].replace('/', '\\')
+            return '\\\\'+res_smb[0][0]+'\\'+res_smb[0][1].replace('/', '\\')
     else:
         # linux os. Path with smb:// is correct, but can not be accessed with normal python file access
         return path
+    
 def fileaccessmode(path):
     # determine file access mode in case of smb share no direct access possible
+    res_smb = re.compile('smb://(\w+)/(.+)').findall(path)
+    res_nw = re.compile('(\w+)://(.*?)').findall(path)
     if os.sep == '\\': # windows os
-        res = re.compile('smb://(\w+)/(.+)').findall(path)
-        if len(res) == 0:
-            # path is not smb://...
-            return 'normal'
-        else:
+        if len(res_smb) != 0:
             # smb accessable in windows
             return 'normal'
+        elif len(res_nw) != 0:
+            # path is ftp or nfs network
+            return 'copy'
+        else:
+            # path is not smb://...
+            return 'normal'
     else:
-        # linux os. Path with smb:// is correct, but can not be accessed with normal python file access
-        return 'copy'
+        # linux os. 
+        if len(res_nw) != 0:
+            # Path with smb:// or ftp:// is correct, but can not be accessed with normal python file access
+            # use virtual file system
+            return 'copy'
+        else:
+            # "normal" path
+            return 'normal'

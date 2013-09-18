@@ -1,13 +1,13 @@
 # XBMC Media Center language file
 # Addon Name: WatchedList
 # Addon id: service.watchedlist
-# Addon version: 0.9.0
+# Addon version: 0.9.2
 # Addon Provider: schapplm
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC-Addons\n"
 "Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
-"POT-Creation-Date: 2013-06-23 22:03+0000\n"
+"POT-Creation-Date: 2013-09-03 13:37+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE\n"
@@ -58,7 +58,7 @@ msgid "autostart mode"
 msgstr ""
 
 msgctxt "#30014"
-msgid "Uupdate interval [hours]"
+msgid "Update interval [hours]"
 msgstr ""
 
 msgctxt "#30015"
@@ -122,7 +122,7 @@ msgid "next update in %d hours"
 msgstr ""
 
 msgctxt "#32004"
-msgid "begin update %d minutes"
+msgid "begin update in %d minutes"
 msgstr ""
 
 msgctxt "#32005"
@@ -247,8 +247,12 @@ msgctxt "#32605"
 msgid "Error updating xbmc-database"
 msgstr ""
 
+msgctxt "#32606"
+msgid "Writing the WL-database file %s"
+msgstr ""
+
 #Progress Dialog
-#empty strings from id 32606 to 32609
+#empty strings from id 32607 to 32609
 
 msgctxt "#32610"
 msgid "%d/%d: %s"

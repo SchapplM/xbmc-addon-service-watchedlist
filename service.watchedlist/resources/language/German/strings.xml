@@ -43,6 +43,7 @@
 		<string id="32603">Laden der XBMC-Datenbank</string>
 		<string id="32604">Aktualisieren der Gesehen-Datenbank</string>
 		<string id="32605">Aktualisieren der XBMC-Datenbank</string>
+		<string id="32606">Beim Schreiben der Gesehen-Datenbank %s</string>
 		
 		<!-- Progress Dialog -->
 		<string id="32610">%d/%d: %s</string>

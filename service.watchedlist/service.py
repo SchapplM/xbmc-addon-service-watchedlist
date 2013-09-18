@@ -9,6 +9,7 @@ import buggalo
 buggalo.GMAIL_RECIPIENT = "msahadl60@gmail.com"
 # buggalo.SUBMIT_URL = 'http://msahadl.ms.funpic.de/buggalo-web/submit.php'
 
+
 import resources.lib.utils as utils
 
 if utils.getSetting('dbbackup') == 'true':
@@ -49,6 +50,7 @@ class WatchedList:
         try:
             utils.buggalo_extradata_settings()
             utils.footprint()
+            
             # workaround to disable autostart, if requested
             if utils.getSetting("autostart") == 'false':
                 return 0
@@ -117,6 +119,7 @@ class WatchedList:
     def runUpdate(self):
         try:
             utils.buggalo_extradata_settings()
+
             # check if player is running before doing the update
             while xbmc.Player().isPlaying() == True:
                if xbmc.abortRequested: return 1
@@ -130,7 +133,7 @@ class WatchedList:
           
             # load the addon-database
             
-            if self.load_db():
+            if self.load_db(True): # True: Manual start
                 utils.showNotification(utils.getString(32102), utils.getString(32601))
                 return 3
     
@@ -180,7 +183,8 @@ class WatchedList:
         except:
             buggalo.onExceptionRaised()  
 
-    def load_db(self):
+    def load_db(self, manualstart=False):
+        # if manualstart, only retry opening db once
         try:
             # load the db path
             if utils.getSetting("extdb") == 'false':
@@ -189,7 +193,9 @@ class WatchedList:
                 buggalo.addExtraData('dbdirectory', self.dbdirectory);
                 self.dbpath = os.path.join( self.dbdirectory , "watchedlist.db" )
             else:
-                for i in range(3600):
+                wait_minutes = 1 # retry waittime if db path does not exist/ is offline
+                    
+                while xbmc.abortRequested == False:
                     # use a user specified file, for example to synchronize multiple clients
                     self.dbdirectory = xbmc.translatePath( utils.getSetting("dbpath") ).decode('utf-8')
                     self.dbfileaccess = utils.fileaccessmode(self.dbdirectory)
@@ -198,12 +204,19 @@ class WatchedList:
                     self.dbpath = os.path.join( self.dbdirectory , utils.getSetting("dbfilename").decode('utf-8') )
                     # xbmc.validatePath(self.dbdirectory) # does not work for smb
                     if not xbmcvfs.exists(self.dbdirectory): # do not use os.path.exists to access smb:// paths
-                        utils.log('db path does not exist: %s' % self.dbdirectory)
-                        utils.showNotification(utils.getString(32102), utils.getString(32002) % self.dbdirectory )
-                        if i == 3:
-                            return 2  
+                        if manualstart:
+                            utils.log('db path does not exist: %s' % self.dbdirectory)
+                            return 1 # error
                         else:
-                            xbmc.sleep(60*1000) # Wait one minute until next check for file path (necessary on network shares, that are not active
+                            utils.log('db path does not exist, wait %d minutes: %s' % (wait_minutes, self.dbdirectory))
+                            
+                        utils.showNotification(utils.getString(32102), utils.getString(32002) % self.dbdirectory )
+                        wait_minutes += wait_minutes # increase waittime until next check
+                        j = 0
+                        # Wait "wait_minutes" minutes until next check for file path (necessary on network shares, that are offline)
+                        while xbmc.abortRequested == False and j < wait_minutes*60:
+                            j += 1
+                            xbmc.sleep(1000) # wait one second until next check for abortRequested
                     else:
                         break      
                 
@@ -223,8 +236,8 @@ class WatchedList:
                     utils.log('created directory %s' % str(self.dbdirectory))  
                 self.dbpath = os.path.join( self.dbdirectory , "watchedlist.db" )
                 if xbmcvfs.exists(self.dbpath_copy):
-                    xbmcvfs.copy(self.dbpath_copy, self.dbpath) # copy the external db file to local mirror directory
-                    utils.log('copied db file %s -> %s' % (self.dbpath_copy, self.dbpath), xbmc.LOGDEBUG)  
+                    success = xbmcvfs.copy(self.dbpath_copy, self.dbpath) # copy the external db file to local mirror directory
+                    utils.log('copied db file %s -> %s. Success: %d' % (self.dbpath_copy, self.dbpath, success), xbmc.LOGDEBUG)  
             
             buggalo.addExtraData('dbdirectory', self.dbdirectory);
             buggalo.addExtraData('dbpath', self.dbpath);
@@ -270,9 +283,13 @@ class WatchedList:
         # copy the db file back to the shared directory, if needed
         if self.dbfileaccess == 'copy':
             if xbmcvfs.exists(self.dbpath):
-                xbmcvfs.copy(self.dbpath, self.dbpath_copy)
-                utils.log('copied db file %s -> %s' % (self.dbpath, self.dbpath_copy), xbmc.LOGDEBUG)  
+                success = xbmcvfs.copy(self.dbpath, self.dbpath_copy)
+                utils.log('copied db file %s -> %s. Success: %d' % (self.dbpath, self.dbpath_copy, success), xbmc.LOGDEBUG)  
+                if not success:
+                    utils.showNotification(utils.getString(32102), utils.getString(32606) % self.dbpath )
+                    return 1
         buggalo.addExtraData('db_connstatus', 'closed')
+        return 0
         # cursor is not changed -> error
         
 
@@ -731,9 +748,11 @@ class WatchedList:
                 mediaid = row_xbmc[7]
                 lastplayed_new = row_xbmc[3]
                 playcount_new = row_xbmc[4]
-                
+                # debug: remove later!
+                buggalo.addExtraData('i_n', i_n)
+                buggalo.addExtraData('list_old', list_old)
                 # index of this movie/episode in the old database (before the change by the user)
-                if (len(list_old) >= i_n) and (list_old[7] == mediaid): i_o = i_n # db did not change
+                if (len(list_old) >= i_n-1) and (list_old[i_n][7] == mediaid): i_o = i_n # db did not change
                 else: # search the movieid
                     i_o = [i for i, x in enumerate(list_old) if x[7] == mediaid]
                     if len(i_o) == 0: continue #movie is not in old array
@@ -759,7 +778,15 @@ class WatchedList:
                 lastplayed_old = list_old[i_o][3]; playcount_old = list_old[i_o][4];
                 lastplayed_new = row_xbmc[3]; playcount_new = row_xbmc[4]; mediaid = row_xbmc[7]
                 utils.log('watch_user_changes: %s "%s" changed playcount {%d -> %d} lastplayed {"%s" -> "%s"}. %sid=%d' % (modus, row_xbmc[5], playcount_old, playcount_new, utils.TimeStamptosqlDateTime(lastplayed_old), utils.TimeStamptosqlDateTime(lastplayed_new), modus, mediaid))
-                self.wl_update_media(modus, row_xbmc, 1, 1)
+                try:
+                    self.wl_update_media(modus, row_xbmc, 1, 1)
+                except sqlite3.Error:
+                    utils.log(u'write_wl_wdata: Database error (%s) while updating %s %s' % (sqlite3.Error.args[0], modus, row_xbmc[5]))
+                    if utils.getSetting("debug") == 'true':
+                        utils.showNotification(utils.getString(32102), utils.getString(32606) % ('(%s)' % sqlite3.Error.args[0]))   
+                    # error because of db locked or similar error
+                    self.close_db()
+                    break
                 # update xbmc watched status, e.g. to set duplicate movies also as watched
             if len(indices_changed) > 0:    
                 self.write_xbmc_wdata(0, 1) # this changes self.watchedmovielist_xbmc
@@ -880,5 +907,6 @@ class WatchedList:
                     else:
                         utils.showNotification(utils.getString(32405), name)
             if commit:
-                self.sqlcon.commit()     
+                self.sqlcon.commit()  
+                
         return count_return
