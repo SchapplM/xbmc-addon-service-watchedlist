@@ -748,9 +748,6 @@ class WatchedList:
                 mediaid = row_xbmc[7]
                 lastplayed_new = row_xbmc[3]
                 playcount_new = row_xbmc[4]
-                # debug: remove later!
-                buggalo.addExtraData('i_n', i_n)
-                buggalo.addExtraData('list_old', list_old)
                 # index of this movie/episode in the old database (before the change by the user)
                 if (len(list_old) > i_n) and (list_old[i_n][7] == mediaid): i_o = i_n # db did not change
                 else: # search the movieid

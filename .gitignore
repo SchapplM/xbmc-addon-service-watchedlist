@@ -1,2 +1,5 @@
 
 *.pyo
+/resources/language/English/strings.xml
+
+/resources/language/German/strings.xml
