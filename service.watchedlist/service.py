@@ -752,7 +752,7 @@ class WatchedList:
                 buggalo.addExtraData('i_n', i_n)
                 buggalo.addExtraData('list_old', list_old)
                 # index of this movie/episode in the old database (before the change by the user)
-                if (len(list_old) >= i_n-1) and (list_old[i_n][7] == mediaid): i_o = i_n # db did not change
+                if (len(list_old) > i_n) and (list_old[i_n][7] == mediaid): i_o = i_n # db did not change
                 else: # search the movieid
                     i_o = [i for i, x in enumerate(list_old) if x[7] == mediaid]
                     if len(i_o) == 0: continue #movie is not in old array
