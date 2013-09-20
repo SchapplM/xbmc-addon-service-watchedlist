@@ -1,3 +1,6 @@
+version 0.9.5 (09.18.2013)
+ * Fixed bug in watching user actions
+
 version 0.9.4 (09.09.2013)
  * Fixed bug in watching user actions
 
