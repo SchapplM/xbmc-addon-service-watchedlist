@@ -314,7 +314,14 @@ class WatchedList:
                     for item in json_response['result']['tvshows']:
                         tvshowId_xbmc = int(item['tvshowid'])
                         try:
-                            tvshowId_imdb = int(item['imdbnumber'])
+                            # check if series number is in imdb-format (scraper=imdb?)
+                            res = re.compile('tt(\d+)').findall(item['imdbnumber'])
+                            if len(res) == 0:
+                                # number in thetvdb-format
+                                tvshowId_imdb = int(item['imdbnumber'])
+                            else:
+                                # number in imdb-format
+                                tvshowId_imdb = int(res[0])
                         except:
                             utils.log('get_watched_xbmc: tv show "%s" has no imdb-number in database. tvshowid=%d Try rescraping.' % (item['title'], tvshowId_xbmc), xbmc.LOGDEBUG)
                             continue
@@ -366,7 +373,7 @@ class WatchedList:
                                 utils.log('get_watched_xbmc: Movie %s has no imdb-number in database. movieid=%d Try rescraping' % (name, int(item['movieid'])), xbmc.LOGDEBUG)
                                 continue
                             imdbId = int(res[0])
-                        else:
+                        else: # episodes
                             tvshowId_xbmc = item['tvshowid']
                             name = '%s S%02dE%02d' % (item['showtitle'], item['season'], item['episode'])
                             try:
