@@ -35,7 +35,8 @@ def log(message,loglevel=xbmc.LOGNOTICE):
 def showNotification(title,message, time=4000):
     __addoniconpath__ = os.path.join(addon_dir(),"icon.png")
     log('Notification. %s: %s' % (title, message) )
-    xbmc.executebuiltin('Notification("' + encode(title) + '","' + encode(message) + '",'+str(time)+',"' + __addoniconpath__ + '")')
+    if xbmc.Player().isPlaying() == False:
+        xbmc.executebuiltin('Notification("' + encode(title) + '","' + encode(message) + '",'+str(time)+',"' + __addoniconpath__ + '")')
     if getSetting('debug') == 'true':
         xbmc.sleep(250) # time to read the message
         

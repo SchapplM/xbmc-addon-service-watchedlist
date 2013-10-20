@@ -1,7 +1,7 @@
-version 0.9.6 (09.18.2013)
+version 0.9.6 (27.18.2013)
  * Fixed tvshow id with imdb-scraper
 
-version 0.9.5 (09.18.2013)
+version 0.9.5 (18.09.2013)
  * Fixed bug in watching user actions
 
 version 0.9.4 (09.09.2013)
