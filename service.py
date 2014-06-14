@@ -47,6 +47,9 @@ class WatchedList:
             
     # infinite loop for periodic database update
     def runProgram(self):
+        # return codes:
+        # 0    success
+        # 3    error/exit
         try:
             utils.buggalo_extradata_settings()
             utils.footprint()
@@ -68,11 +71,8 @@ class WatchedList:
             delaytime = float(utils.getSetting("delay")) * 60 # in seconds
             utils.log('Delay time before execution: %d seconds' % delaytime, xbmc.LOGDEBUG)
             utils.showNotification(utils.getString(32101), utils.getString(32004)%float(utils.getSetting("delay")))
-            starttime = time.time()
-            while 1:
-                if time.time() > starttime + delaytime:
-                    break
-                xbmc.sleep(1000) # wait 1 second until next check if xbmc terminates
+            if utils.sleepsafe(delaytime):
+                return 0
             
             
             if utils.getSetting("watch_user") == 'true': utils.showNotification(utils.getString(32101), utils.getString(32005))
@@ -117,15 +117,21 @@ class WatchedList:
     # entry point for manual start.
     # perform the update step by step
     def runUpdate(self):
+        # return codes:
+        # 0    success
+        # 3    Error opening database
+        # 4    Error getting watched state from addon database
+        # 5    Error getting watched state from xbmc database
+        # 6    Error writing WL Database
+        # 7    Error writing XBMC database
         try:
             utils.buggalo_extradata_settings()
 
             # check if player is running before doing the update
             while xbmc.Player().isPlaying() == True:
-               if xbmc.abortRequested: return 1
-               xbmc.sleep(60*1000) # wait one minute until next check for active playback
+               if utils.sleepsafe(60*1000): return 1 # wait one minute until next check for active playback
                if xbmc.Player().isPlaying() == False:
-                   xbmc.sleep(180*1000) # wait 3 minutes so the dialogue does not pop up directly after the playback ends
+                   if utils.sleepsafe(180*1000): return 1 # wait 3 minutes so the dialogue does not pop up directly after the playback ends
 
                
 
@@ -184,6 +190,11 @@ class WatchedList:
             buggalo.onExceptionRaised()  
 
     def load_db(self, manualstart=False):
+        # return codes:
+        # 0    successfully opened database
+        # 1    error
+        # 2    shutdown
+        
         # if manualstart, only retry opening db once
         try:
             # load the db path
@@ -211,14 +222,11 @@ class WatchedList:
                             utils.log('db path does not exist, wait %d minutes: %s' % (wait_minutes, self.dbdirectory))
                             
                         utils.showNotification(utils.getString(32102), utils.getString(32002) % self.dbdirectory )
-                        wait_minutes += wait_minutes # increase waittime until next check
-                        j = 0
                         # Wait "wait_minutes" minutes until next check for file path (necessary on network shares, that are offline)
-                        while xbmc.abortRequested == False and j < wait_minutes*60:
-                            j += 1
-                            xbmc.sleep(1000) # wait one second until next check for abortRequested
+                        wait_minutes += wait_minutes # increase waittime until next check
+                        if utils.sleepsafe(wait_minutes*60): return 2
                     else:
-                        break      
+                        break # directory exists, continue below      
                 
             # on unix, smb-shares can not be accessed with sqlite3 --> copy the db with xbmc file system operations and work in mirror directory
             buggalo.addExtraData('dbfileaccess', self.dbfileaccess);

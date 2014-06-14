@@ -158,3 +158,12 @@ def fileaccessmode(path):
         else:
             # "normal" path
             return 'normal'
+
+def sleepsafe(waittime):
+    # sleep waittime [seconds] and return if a shutdown is requested
+    starttime = time.time()
+    while not xbmc.abortRequested:
+        if time.time() > starttime + waittime:
+            return 0
+        xbmc.sleep(1000) # wait 1 second until next check if xbmc terminates
+    return 1 # shutdown requested
