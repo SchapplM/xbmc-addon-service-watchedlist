@@ -1,10 +1,10 @@
-version 0.9.7 (14.06.2013)
+version 0.9.7 (14.06.2014)
  * Added custom sleep function to handle requested shutdown in Gotham
 
-version 0.9.6 (09.18.2013)
+version 0.9.6 (23.09.2013)
  * Fixed tvshow id with imdb-scraper
 
-version 0.9.5 (09.18.2013)
+version 0.9.5 (18.09.2013)
  * Fixed bug in watching user actions
 
 version 0.9.4 (09.09.2013)
