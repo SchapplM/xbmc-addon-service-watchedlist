@@ -239,7 +239,7 @@ class WatchedList:
                 buggalo.addExtraData('dbpath_copy', self.dbpath_copy);
                 # work in copy directory in the xbmc profile folder
                 self.dbdirectory = os.path.join( xbmc.translatePath( utils.data_dir() ).decode('utf-8'), 'dbcopy')
-                if not self.dbdirectory:
+                if not xbmcvfs.exists(self.dbdirectory):
                     xbmcvfs.mkdir(self.dbdirectory)
                     utils.log('created directory %s' % str(self.dbdirectory))  
                 self.dbpath = os.path.join( self.dbdirectory , "watchedlist.db" )
@@ -440,7 +440,11 @@ class WatchedList:
             self.close_db()
             return 0
         except sqlite3.Error:
-            utils.log(u'get_watched_wl: SQLite Database error getting the wl database %s' % sqlite3.Error.args[0], xbmc.LOGERROR)
+            try:
+                string = sqlite3.Error.args[0] # TODO: Find out, why this does not work some times
+            except:
+                string = ''
+            utils.log(u'get_watched_wl: SQLite Database error getting the wl database %s' % string, xbmc.LOGERROR)
             self.close_db()
             # error could be that the database is locked (for tv show strings). This is not an error to disturb the other functions
             return 3
@@ -793,9 +797,13 @@ class WatchedList:
                 try:
                     self.wl_update_media(modus, row_xbmc, 1, 1)
                 except sqlite3.Error:
-                    utils.log(u'write_wl_wdata: Database error (%s) while updating %s %s' % (sqlite3.Error.args[0], modus, row_xbmc[5]))
+                    try:
+                        string = sqlite3.Error.args[0] # TODO: Find out, why this does not work some times
+                    except:
+                        string = ''
+                    utils.log(u'write_wl_wdata: Database error (%s) while updating %s %s' % (string, modus, row_xbmc[5]))
                     if utils.getSetting("debug") == 'true':
-                        utils.showNotification(utils.getString(32102), utils.getString(32606) % ('(%s)' % sqlite3.Error.args[0]))   
+                        utils.showNotification(utils.getString(32102), utils.getString(32606) % ('(%s)' % string))   
                     # error because of db locked or similar error
                     self.close_db()
                     break
