@@ -129,13 +129,9 @@ class WatchedList:
 
             # check if player is running before doing the update
             while xbmc.Player().isPlaying() == True:
-               if utils.sleepsafe(60*1000): return 1 # wait one minute until next check for active playback
-               if xbmc.Player().isPlaying() == False:
-                   if utils.sleepsafe(180*1000): return 1 # wait 3 minutes so the dialogue does not pop up directly after the playback ends
-
-               
-
-    
+                if utils.sleepsafe(60*1000): return 1 # wait one minute until next check for active playback
+                if xbmc.Player().isPlaying() == False:
+                    if utils.sleepsafe(180*1000): return 1 # wait 3 minutes so the dialogue does not pop up directly after the playback ends
           
             # load the addon-database
             
@@ -152,7 +148,6 @@ class WatchedList:
                 utils.showNotification(utils.getString(32102), utils.getString(32602))
                 return 4
             
-
             # get watched state from xbmc
             if self.get_watched_xbmc(0):
                 utils.showNotification(utils.getString(32102), utils.getString(32603))
@@ -162,7 +157,6 @@ class WatchedList:
                 utils.showNotification(utils.getString(32102), utils.getString(32604))
                 return 5
 
-    
             # import from xbmc into addon database
             res = self.write_wl_wdata()
             if res == 2: # user exit
@@ -193,7 +187,7 @@ class WatchedList:
         # return codes:
         # 0    successfully opened database
         # 1    error
-        # 2    shutdown
+        # 2    shutdown (serious error in subfunction)
         
         # if manualstart, only retry opening db once
         try:
@@ -370,7 +364,6 @@ class WatchedList:
                 else: searchkey = 'episodes'     
                 if json_response.has_key('result') and json_response['result'] != None and json_response['result'].has_key(searchkey):
                     
-                    totalcount = json_response['result']['limits']['total']
                     # go through all watched movies and save them in the class-variable self.watchedmovielist_xbmc
                     for item in json_response['result'][searchkey]:
                         if modus == 'movie':
@@ -410,6 +403,11 @@ class WatchedList:
 
         
     def get_watched_wl(self, silent):
+        # return codes:
+        # 0    successfully got watched states from WL-database
+        # 1    unknown error (programming related)
+        # 2    shutdown (error in subfunction)
+        # 3    error related to opening the database
         try:
             buggalo.addExtraData('self_sqlcursor', self.sqlcursor); buggalo.addExtraData('self_sqlcon', self.sqlcon);
             if self.sqlcursor == 0 or self.sqlcon == 0:
@@ -439,9 +437,9 @@ class WatchedList:
             if not silent: utils.showNotification(utils.getString(32101), utils.getString(32298)%(len(self.watchedmovielist_wl), len(self.watchedepisodelist_wl)))
             self.close_db()
             return 0
-        except sqlite3.Error:
+        except sqlite3.Error as e:
             try:
-                string = sqlite3.Error.args[0] # TODO: Find out, why this does not work some times
+                string = e.args[0] # TODO: Find out, why this does not work some times
             except:
                 string = ''
             utils.log(u'get_watched_wl: SQLite Database error getting the wl database %s' % string, xbmc.LOGERROR)
@@ -507,8 +505,8 @@ class WatchedList:
             count_insert = 0
             count_update = 0
             if utils.getSetting("progressdialog") == 'true':
-                 DIALOG_PROGRESS = xbmcgui.DialogProgress()
-                 DIALOG_PROGRESS.create( utils.getString(32101) , utils.getString(32105))
+                DIALOG_PROGRESS = xbmcgui.DialogProgress()
+                DIALOG_PROGRESS.create( utils.getString(32101) , utils.getString(32105))
             if modus == 'movie':
                 list_length = len(self.watchedmovielist_xbmc)
             else:
@@ -576,8 +574,8 @@ class WatchedList:
             utils.log('write_xbmc_wdata: Write watched %ss to xbmc database (pd=%d, noti=%d)' % (modus, progressdialogue, notifications), xbmc.LOGDEBUG)
             count_update = 0
             if progressdialogue:
-                 DIALOG_PROGRESS = xbmcgui.DialogProgress()
-                 DIALOG_PROGRESS.create( utils.getString(32101), utils.getString(32106))
+                DIALOG_PROGRESS = xbmcgui.DialogProgress()
+                DIALOG_PROGRESS.create( utils.getString(32101), utils.getString(32106))
             
             # list to iterate over
             if modus == 'movie':
@@ -763,7 +761,6 @@ class WatchedList:
                 continue
             for i_n, row_xbmc in enumerate(list_new):
                 if xbmc.abortRequested: return
-                imdbId = row_xbmc[0]
                 mediaid = row_xbmc[7]
                 lastplayed_new = row_xbmc[3]
                 playcount_new = row_xbmc[4]
@@ -788,9 +785,7 @@ class WatchedList:
             for icx in indices_changed:  
                 if xbmc.abortRequested: return 1
                 i_o = icx[1]; row_xbmc = icx[2]
-                i_n = icx[0]; imdbId = row_xbmc[0]
-                if modus == 'episode':
-                    season = row_xbmc[1]; episode = row_xbmc[2]
+                i_n = icx[0];
                 lastplayed_old = list_old[i_o][3]; playcount_old = list_old[i_o][4];
                 lastplayed_new = row_xbmc[3]; playcount_new = row_xbmc[4]; mediaid = row_xbmc[7]
                 utils.log('watch_user_changes: %s "%s" changed playcount {%d -> %d} lastplayed {"%s" -> "%s"}. %sid=%d' % (modus, row_xbmc[5], playcount_old, playcount_new, utils.TimeStamptosqlDateTime(lastplayed_old), utils.TimeStamptosqlDateTime(lastplayed_new), modus, mediaid))
