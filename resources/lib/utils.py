@@ -8,7 +8,7 @@ import buggalo
 import re
 import random
     
-__addon_id__= 'service.watchedlist'
+__addon_id__= u'service.watchedlist'
 __Addon = xbmcaddon.Addon(__addon_id__)
 
 # XBMC-JSON
@@ -19,24 +19,33 @@ else:
 
 
 def data_dir():
+    # get user data directory of this addon. 
+    # according to http://wiki.xbmc.org/index.php?title=Add-on_Rules#Requirements_for_scripts_and_plugins
     __datapath__ = xbmc.translatePath( __Addon.getAddonInfo('profile') ).decode('utf-8')
     if not xbmcvfs.exists(__datapath__):
         xbmcvfs.mkdir(__datapath__)
     return __datapath__
 
 def addon_dir():
-    return __Addon.getAddonInfo('path')
+    # get source directory of this addon.
+    # according to http://wiki.xbmc.org/index.php?title=Add-on_Rules#Requirements_for_scripts_and_plugins
+    return __Addon.getAddonInfo('path').decode('utf-8')
 
 def log(message,loglevel=xbmc.LOGNOTICE):
-    # loglevels: LOGDEBUG, xbmc.LOGNOTICE
-    xbmc.log(encode(__addon_id__ + ": " + message),level=loglevel)
+    # save message to xbmc.log. `message` has to be unicode
+    # loglevels: xbmc.LOGDEBUG, xbmc.LOGINFO, xbmc.LOGNOTICE, xbmc.LOGWARNING, xbmc.LOGERROR, xbmc.LOGFATAL
+    
+    # message should be unicode object. Encoding according to http://wiki.xbmc.org/index.php?title=Add-on_unicode_paths#Logging
+    xbmc.log(encode(__addon_id__ + u": " + message), level=loglevel)
 
 
 def showNotification(title,message, time=4000):
+    # Show Notification with given `title` and `message`.
+    # `title` and `message` have to be unicode
     __addoniconpath__ = os.path.join(addon_dir(),"icon.png")
-    log('Notification. %s: %s' % (title, message) )
+    log(u'Notification. %s: %s' % (title, message) )
     if xbmc.Player().isPlaying() == False:
-        xbmc.executebuiltin('Notification("' + encode(title) + '","' + encode(message) + '",'+str(time)+',"' + __addoniconpath__ + '")')
+        xbmc.executebuiltin(encode('Notification("' + title + '","' + message + '",'+(str(time)).decode('utf-8')+',"' + __addoniconpath__ + '")'))
     if getSetting('debug') == 'true':
         xbmc.sleep(250) # time to read the message
         
@@ -48,26 +57,32 @@ def getSetting(name):
     return __Addon.getSetting(name)
     
 def getString(string_id):
+    # return a localized string from resources/language/*.po
+    # The returned string is unicode
     return __Addon.getLocalizedString(string_id)
 
 def encode(string):
     return string.encode('UTF-8','replace')
 
+def decode(string):
+    return string.decode('UTF-8') 
+
+
 def footprint():
-    log('data_dir() = %s' % data_dir(), xbmc.LOGDEBUG)
-    log('addon_dir() = %s' % addon_dir(), xbmc.LOGDEBUG)
-    log('debug = %s' % getSetting('debug'), xbmc.LOGDEBUG)
-    log('w_movies = %s' % getSetting('w_movies'), xbmc.LOGDEBUG)
-    log('w_episodes = %s' % getSetting('w_episodes'), xbmc.LOGDEBUG)
-    log('autostart = %s' % getSetting('autostart'), xbmc.LOGDEBUG)
-    log('periodic = %s' % getSetting('periodic'), xbmc.LOGDEBUG)
-    log('interval = %s' % getSetting('interval'), xbmc.LOGDEBUG)
-    log('delay = %s' % getSetting('delay'), xbmc.LOGDEBUG)
-    log('progressdialog = %s' % getSetting('progressdialog'), xbmc.LOGDEBUG)
-    log('extdb = %s' % getSetting('extdb'), xbmc.LOGDEBUG)
-    log('dbpath = %s' % getSetting('dbpath'), xbmc.LOGDEBUG)
-    log('dbfilename = %s' % getSetting('dbfilename'), xbmc.LOGDEBUG)
-    log('dbbackup = %s' % getSetting('dbbackup'), xbmc.LOGDEBUG)
+    log(u'data_dir() = %s' % data_dir(), xbmc.LOGDEBUG)
+    log(u'addon_dir() = %s' % addon_dir(), xbmc.LOGDEBUG)
+    log(u'debug = %s' % getSetting('debug'), xbmc.LOGDEBUG)
+    log(u'w_movies = %s' % getSetting('w_movies'), xbmc.LOGDEBUG)
+    log(u'w_episodes = %s' % getSetting('w_episodes'), xbmc.LOGDEBUG)
+    log(u'autostart = %s' % getSetting('autostart'), xbmc.LOGDEBUG)
+    log(u'periodic = %s' % getSetting('periodic'), xbmc.LOGDEBUG)
+    log(u'interval = %s' % getSetting('interval'), xbmc.LOGDEBUG)
+    log(u'delay = %s' % getSetting('delay'), xbmc.LOGDEBUG)
+    log(u'progressdialog = %s' % getSetting('progressdialog'), xbmc.LOGDEBUG)
+    log(u'extdb = %s' % getSetting('extdb'), xbmc.LOGDEBUG)
+    log(u'dbpath = %s' % getSetting('dbpath'), xbmc.LOGDEBUG)
+    log(u'dbfilename = %s' % getSetting('dbfilename'), xbmc.LOGDEBUG)
+    log(u'dbbackup = %s' % getSetting('dbbackup'), xbmc.LOGDEBUG)
     
 # "2013-05-10 21:23:24"  --->  1368213804
 def sqlDateTimeToTimeStamp(sqlDateTime):

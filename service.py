@@ -71,7 +71,7 @@ class WatchedList:
             
             # wait the delay time after startup
             delaytime = float(utils.getSetting("delay")) * 60 # in seconds
-            utils.log('Delay time before execution: %d seconds' % delaytime, xbmc.LOGDEBUG)
+            utils.log(u'Delay time before execution: %d seconds' % delaytime, xbmc.LOGDEBUG)
             utils.showNotification(utils.getString(32101), utils.getString(32004)%float(utils.getSetting("delay")))
             if utils.sleepsafe(delaytime):
                 return 0
@@ -86,7 +86,7 @@ class WatchedList:
                     if utils.getSetting("starttype") == '2':
                         sleeptime = float(utils.getSetting("interval")) * 3600 # wait interval until next startup in [seconds]
                         # wait and then update again
-                        utils.log('wait %d seconds until next update' % sleeptime)
+                        utils.log(u'wait %d seconds until next update' % sleeptime)
                         utils.showNotification(utils.getString(32101), utils.getString(32003)%(sleeptime/3600))
                     else:
                         sleeptime = 3600 # arbitrary time for infinite loop
@@ -179,7 +179,7 @@ class WatchedList:
                 return 7
             
             utils.showNotification(utils.getString(32101), utils.getString(32107))
-            utils.log('runUpdate exited with success', xbmc.LOGDEBUG)
+            utils.log(u'runUpdate exited with success', xbmc.LOGDEBUG)
             
             return 0
         except:
@@ -212,10 +212,10 @@ class WatchedList:
                     # xbmc.validatePath(self.dbdirectory) # does not work for smb
                     if not xbmcvfs.exists(self.dbdirectory): # do not use os.path.exists to access smb:// paths
                         if manualstart:
-                            utils.log('db path does not exist: %s' % self.dbdirectory)
+                            utils.log(u'db path does not exist: %s' % self.dbdirectory)
                             return 1 # error
                         else:
-                            utils.log('db path does not exist, wait %d minutes: %s' % (wait_minutes, self.dbdirectory))
+                            utils.log(u'db path does not exist, wait %d minutes: %s' % (wait_minutes, self.dbdirectory))
                             
                         utils.showNotification(utils.getString(32102), utils.getString(32002) % self.dbdirectory )
                         # Wait "wait_minutes" minutes until next check for file path (necessary on network shares, that are offline)
@@ -237,11 +237,11 @@ class WatchedList:
                 self.dbdirectory = os.path.join( xbmc.translatePath( utils.data_dir() ).decode('utf-8'), 'dbcopy')
                 if not xbmcvfs.exists(self.dbdirectory):
                     xbmcvfs.mkdir(self.dbdirectory)
-                    utils.log('created directory %s' % str(self.dbdirectory))  
+                    utils.log(u'created directory %s' % str(self.dbdirectory))  
                 self.dbpath = os.path.join( self.dbdirectory , "watchedlist.db" )
                 if xbmcvfs.exists(self.dbpath_copy):
                     success = xbmcvfs.copy(self.dbpath_copy, self.dbpath) # copy the external db file to local mirror directory
-                    utils.log('copied db file %s -> %s. Success: %d' % (self.dbpath_copy, self.dbpath, success), xbmc.LOGDEBUG)  
+                    utils.log(u'copied db file %s -> %s. Success: %d' % (self.dbpath_copy, self.dbpath, success), xbmc.LOGDEBUG)  
             
             buggalo.addExtraData('dbdirectory', self.dbdirectory);
             buggalo.addExtraData('dbpath', self.dbpath);
@@ -266,12 +266,12 @@ class WatchedList:
                 errstring = e.args[0] # TODO: Find out, why this does not work some times
             except:
                 errstring = ''
-            utils.log("Database error while opening %s. '%s'" % self.dbpath, errstring)
+            utils.log(u"Database error while opening %s. '%s'" % self.dbpath, errstring)
             self.close_db()
             buggalo.addExtraData('db_connstatus', 'sqlite3 error, closed')
             return 1
         except:
-            utils.log("Error while opening %s: %s" % (self.dbpath, sys.exc_info()[2]))
+            utils.log(u"Error while opening %s: %s" % (self.dbpath, sys.exc_info()[2]))
             self.close_db()
             buggalo.addExtraData('dbpath', self.dbpath)
             buggalo.addExtraData('db_connstatus', 'error, closed')
@@ -292,7 +292,7 @@ class WatchedList:
         if self.dbfileaccess == 'copy':
             if xbmcvfs.exists(self.dbpath):
                 success = xbmcvfs.copy(self.dbpath, self.dbpath_copy)
-                utils.log('copied db file %s -> %s. Success: %d' % (self.dbpath, self.dbpath_copy, success), xbmc.LOGDEBUG)  
+                utils.log(u'copied db file %s -> %s. Success: %d' % (self.dbpath, self.dbpath_copy, success), xbmc.LOGDEBUG)  
                 if not success:
                     utils.showNotification(utils.getString(32102), utils.getString(32606) % self.dbpath )
                     return 1
@@ -309,7 +309,7 @@ class WatchedList:
             if utils.getSetting("w_episodes") == 'true':
                 ############################################
                 # get imdb tv-show id from xbmc database
-                utils.log('get_watched_xbmc: Get all episodes from xbmc database', xbmc.LOGDEBUG)
+                utils.log(u'get_watched_xbmc: Get all episodes from xbmc database', xbmc.LOGDEBUG)
                 json_response = utils.executeJSON({
                           "jsonrpc": "2.0", 
                           "method": "VideoLibrary.GetTVShows", 
@@ -331,7 +331,7 @@ class WatchedList:
                                 # number in imdb-format
                                 tvshowId_imdb = int(res[0])
                         except:
-                            utils.log('get_watched_xbmc: tv show "%s" has no imdb-number in database. tvshowid=%d Try rescraping.' % (item['title'], tvshowId_xbmc), xbmc.LOGDEBUG)
+                            utils.log(u'get_watched_xbmc: tv show "%s" has no imdb-number in database. tvshowid=%d Try rescraping.' % (item['title'], tvshowId_xbmc), xbmc.LOGDEBUG)
                             continue
                         self.tvshows[tvshowId_xbmc] = list([tvshowId_imdb, item['title']])
                         self.tvshownames[tvshowId_imdb] = item['title']
@@ -345,7 +345,7 @@ class WatchedList:
                     continue
                 if modus == 'episode' and utils.getSetting("w_episodes") != 'true':
                     continue
-                utils.log('get_watched_xbmc: Get all %ss from xbmc database' % modus, xbmc.LOGDEBUG)
+                utils.log(u'get_watched_xbmc: Get all %ss from xbmc database' % modus, xbmc.LOGDEBUG)
                 if modus == 'movie':
                     # use the JSON-RPC to access the xbmc-database.
                     json_response = utils.executeJSON({
@@ -377,7 +377,7 @@ class WatchedList:
                             res = re.compile('tt(\d+)').findall(item['imdbnumber'])
                             if len(res) == 0:
                                 # no imdb-number for this movie in database. Skip
-                                utils.log('get_watched_xbmc: Movie %s has no imdb-number in database. movieid=%d Try rescraping' % (name, int(item['movieid'])), xbmc.LOGDEBUG)
+                                utils.log(u'get_watched_xbmc: Movie %s has no imdb-number in database. movieid=%d Try rescraping' % (name, int(item['movieid'])), xbmc.LOGDEBUG)
                                 continue
                             imdbId = int(res[0])
                         else: # episodes
@@ -386,7 +386,7 @@ class WatchedList:
                             try:
                                 tvshowId_imdb = self.tvshows[tvshowId_xbmc][0]
                             except:
-                                utils.log('get_watched_xbmc: xbmc tv showid %d is not in table xbmc-tvshows. Skipping %s' % (item['tvshowid'], name), xbmc.LOGWARNING)
+                                utils.log(u'get_watched_xbmc: xbmc tv showid %d is not in table xbmc-tvshows. Skipping %s' % (item['tvshowid'], name), xbmc.LOGWARNING)
                                 continue
 
                         lastplayed = utils.sqlDateTimeToTimeStamp(item['lastplayed']) # convert to integer-timestamp
@@ -422,7 +422,7 @@ class WatchedList:
             # get watched movies from addon database
             self.watchedmovielist_wl = list([])
             if utils.getSetting("w_movies") == 'true':
-                utils.log('get_watched_wl: Get watched movies from WL database', xbmc.LOGDEBUG)
+                utils.log(u'get_watched_wl: Get watched movies from WL database', xbmc.LOGDEBUG)
                 self.sqlcursor.execute("SELECT idMovieImdb, lastPlayed, playCount, title, lastChange FROM movie_watched ORDER BY title") 
                 rows = self.sqlcursor.fetchall() 
                 for row in rows:
@@ -431,7 +431,7 @@ class WatchedList:
             # get watched episodes from addon database
             self.watchedepisodelist_wl = list([])
             if utils.getSetting("w_episodes") == 'true':
-                utils.log('get_watched_wl: Get watched episodes from WL database', xbmc.LOGDEBUG)
+                utils.log(u'get_watched_wl: Get watched episodes from WL database', xbmc.LOGDEBUG)
                 self.sqlcursor.execute("SELECT idShow, season, episode, lastPlayed, playCount, lastChange FROM episode_watched ORDER BY idShow, season, episode") 
                 rows = self.sqlcursor.fetchall() 
                 for row in rows:
@@ -520,7 +520,7 @@ class WatchedList:
                 continue
             if modus == 'episode' and utils.getSetting("w_episodes") != 'true':
                 continue
-            utils.log('write_wl_wdata: Write watched %ss to WL database' % modus, xbmc.LOGDEBUG)
+            utils.log(u'write_wl_wdata: Write watched %ss to WL database' % modus, xbmc.LOGDEBUG)
             count_insert = 0
             count_update = 0
             if utils.getSetting("progressdialog") == 'true':
@@ -599,7 +599,7 @@ class WatchedList:
             if modus == 'episode' and utils.getSetting("w_episodes") != 'true':
                 continue
                      
-            utils.log('write_xbmc_wdata: Write watched %ss to xbmc database (pd=%d, noti=%d)' % (modus, progressdialogue, notifications), xbmc.LOGDEBUG)
+            utils.log(u'write_xbmc_wdata: Write watched %ss to xbmc database (pd=%d, noti=%d)' % (modus, progressdialogue, notifications), xbmc.LOGDEBUG)
             count_update = 0
             if progressdialogue:
                 DIALOG_PROGRESS = xbmcgui.DialogProgress()
@@ -657,7 +657,7 @@ class WatchedList:
                                 change_xbmc_db = True
                             if not change_xbmc_db:    
                                 if utils.getSetting("debug") == 'true':
-                                    # utils.log('write_xbmc_wdata: xbmc database up-to-date for tt%d, %s' % (imdbId, row_xbmc[2]), xbmc.LOGDEBUG)
+                                    # utils.log(u'write_xbmc_wdata: xbmc database up-to-date for tt%d, %s' % (imdbId, row_xbmc[2]), xbmc.LOGDEBUG)
                                     pass
                                 continue
                             # check if the lastplayed-timestamp in wl is useful
@@ -680,7 +680,7 @@ class WatchedList:
                                       }
                             json_response = utils.executeJSON(jsondict)
                             if (json_response.has_key('result') and json_response['result'] == 'OK'):
-                                utils.log('write_xbmc_wdata: xbmc database updated for %s. playcount: {%d -> %d}, lastplayed: {"%s" -> "%s"} (%sid=%d)' % (name, playcount_xbmc, playcount_wl, utils.TimeStamptosqlDateTime(lastplayed_xbmc), utils.TimeStamptosqlDateTime(lastplayed_new), modus, mediaid))
+                                utils.log(u'write_xbmc_wdata: xbmc database updated for %s. playcount: {%d -> %d}, lastplayed: {"%s" -> "%s"} (%sid=%d)' % (name, playcount_xbmc, playcount_wl, utils.TimeStamptosqlDateTime(lastplayed_xbmc), utils.TimeStamptosqlDateTime(lastplayed_new), modus, mediaid))
                                 if utils.getSetting("debug") == 'true':
                                     if playcount_wl == 0:
                                         if notifications > 0: utils.showNotification(utils.getString(32404), name)
@@ -695,14 +695,14 @@ class WatchedList:
                                     self.watchedepisodelist_xbmc[i][3] = lastplayed_new
                                     self.watchedepisodelist_xbmc[i][4] = playcount_wl
                             else:
-                                utils.log('write_xbmc_wdata: error updating xbmc database. %s. json_response=%s' % (name, str(json_response)))
+                                utils.log(u'write_xbmc_wdata: error updating xbmc database. %s. json_response=%s' % (name, str(json_response)))
                         
                     else:
                         # the movie is in the watched-list but not in the xbmc-list -> no action
-                        # utils.log('write_xbmc_wdata: movie not in xbmc database: tt%d, %s' % (imdbId, row_xbmc[2]), xbmc.LOGDEBUG)
+                        # utils.log(u'write_xbmc_wdata: movie not in xbmc database: tt%d, %s' % (imdbId, row_xbmc[2]), xbmc.LOGDEBUG)
                         continue
                 except:
-                    utils.log("write_xbmc_wdata: Error while updating %s %s: %s" % (modus, name, sys.exc_info()[2]))
+                    utils.log(u"write_xbmc_wdata: Error while updating %s %s: %s" % (modus, name, sys.exc_info()[2]))
                     if progressdialogue: DIALOG_PROGRESS.close()
                     buggalo.addExtraData('count_update', count_update);
                     buggalo.onExceptionRaised()  
@@ -728,21 +728,21 @@ class WatchedList:
         
         if utils.getSetting('dbbackup') == 'true' and (not self.dbcopydone):
             if not xbmcvfs.exists(self.dbpath): 
-                utils.log('database_copy: directory %s does not exist. No backup possible.' % self.dbpath)
+                utils.log(u'database_copy: directory %s does not exist. No backup possible.' % self.dbpath)
                 return 1
             now = datetime.datetime.now()
-            timestr = '%04d%02d%02d_%02d%02d%02d' % (now.year, now.month, now.day, now.hour, now.minute, now.second)
-            zipfilename = os.path.join(self.dbdirectory, timestr + ' - watchedlist.db.zip')
+            timestr = u'%04d%02d%02d_%02d%02d%02d' % (now.year, now.month, now.day, now.hour, now.minute, now.second)
+            zipfilename = os.path.join(self.dbdirectory, utils.decode(timestr + u'-watchedlist.db.zip'))
             zf = False
             try:
                 zf = zipfile.ZipFile(zipfilename, 'w')
-                zf.write(self.dbpath, compress_type=zipfile.ZIP_DEFLATED, arcname='watchedlist.db')
+                zf.write(self.dbpath, compress_type=zipfile.ZIP_DEFLATED)
                 zf.close()
                 self.dbcopydone = True
-                utils.log('database_copy: database backup copy created to %s' % zipfilename)
+                utils.log(u'database_copy: database backup copy created to %s' % zipfilename)
                 # copy the zip file with xbmc file system, if needed
                 if self.dbfileaccess == 'copy':
-                    xbmcvfs.copy(zipfilename, os.path.join(self.dbdirectory_copy, timestr + ' - watchedlist.db.zip'))
+                    xbmcvfs.copy(zipfilename, os.path.join(self.dbdirectory_copy, utils.decode(timestr + u'-watchedlist.db.zip')))
                     xbmcvfs.delete(zipfilename)
                 return 0
             except:
@@ -763,7 +763,7 @@ class WatchedList:
         if idletime > idletime_old:
             # the idle time increased. No user interaction probably happened
             return
-        utils.log('watch_user_changes: Check for user changes (no. %d)' % self.watch_user_changes_count, xbmc.LOGDEBUG)
+        utils.log(u'watch_user_changes: Check for user changes (no. %d)' % self.watch_user_changes_count, xbmc.LOGDEBUG)
         self.watch_user_changes_count = self.watch_user_changes_count + 1
                         
         # save previous state
@@ -823,7 +823,7 @@ class WatchedList:
                 i_n = icx[0];
                 lastplayed_old = list_old[i_o][3]; playcount_old = list_old[i_o][4];
                 lastplayed_new = row_xbmc[3]; playcount_new = row_xbmc[4]; mediaid = row_xbmc[7]
-                utils.log('watch_user_changes: %s "%s" changed playcount {%d -> %d} lastplayed {"%s" -> "%s"}. %sid=%d' % (modus, row_xbmc[5], playcount_old, playcount_new, utils.TimeStamptosqlDateTime(lastplayed_old), utils.TimeStamptosqlDateTime(lastplayed_new), modus, mediaid))
+                utils.log(u'watch_user_changes: %s "%s" changed playcount {%d -> %d} lastplayed {"%s" -> "%s"}. %sid=%d' % (modus, row_xbmc[5], playcount_old, playcount_new, utils.TimeStamptosqlDateTime(lastplayed_old), utils.TimeStamptosqlDateTime(lastplayed_new), modus, mediaid))
                 try:
                     self.wl_update_media(modus, row_xbmc, 1, 1)
                 except sqlite3.Error as e:
