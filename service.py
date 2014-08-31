@@ -51,12 +51,14 @@ class WatchedList:
         # 0    success
         # 3    error/exit
         try:
-            utils.buggalo_extradata_settings()
-            utils.footprint()
-            
             # workaround to disable autostart, if requested
             if utils.getSetting("autostart") == 'false':
                 return 0
+            
+            utils.buggalo_extradata_settings()
+            utils.footprint()
+            
+
             if self.sqlcursor == 0 or self.sqlcon == 0: 
                 if self.load_db():
                     utils.showNotification(utils.getString(32102), utils.getString(32601))
@@ -259,8 +261,12 @@ class WatchedList:
             self.sqlcursor.execute(sql)
             
             buggalo.addExtraData('db_connstatus', 'connected')
-        except sqlite3.Error:
-            utils.log("Database error while opening %s" % self.dbpath)
+        except sqlite3.Error as e:
+            try:
+                errstring = e.args[0] # TODO: Find out, why this does not work some times
+            except:
+                errstring = ''
+            utils.log("Database error while opening %s. '%s'" % self.dbpath, errstring)
             self.close_db()
             buggalo.addExtraData('db_connstatus', 'sqlite3 error, closed')
             return 1
@@ -439,10 +445,10 @@ class WatchedList:
             return 0
         except sqlite3.Error as e:
             try:
-                string = e.args[0] # TODO: Find out, why this does not work some times
+                errstring = e.args[0] # TODO: Find out, why this does not work some times
             except:
-                string = ''
-            utils.log(u'get_watched_wl: SQLite Database error getting the wl database %s' % string, xbmc.LOGERROR)
+                errstring = ''
+            utils.log(u'get_watched_wl: SQLite Database error getting the wl database %s' % errstring, xbmc.LOGERROR)
             self.close_db()
             # error could be that the database is locked (for tv show strings). This is not an error to disturb the other functions
             return 3
@@ -457,6 +463,10 @@ class WatchedList:
         
         
     def sync_tvshows(self):
+        # return codes:
+        # 0    successfully synched tv shows
+        # 1    database access error
+        # 2    database loading error
         try:
             utils.log(u'sync_tvshows: sync tvshows with wl database : %s' % sys.exc_info()[2], xbmc.LOGDEBUG)
             if self.sqlcursor == 0 or self.sqlcon == 0:
@@ -475,8 +485,12 @@ class WatchedList:
             for i in range(len(rows)):
                 self.tvshownames[int(rows[i][0])] = rows[i][1]
             self.close_db()
-        except sqlite3.Error:
-            utils.log(u'sync_tvshows: SQLite Database error accessing the wl database', xbmc.LOGERROR)
+        except sqlite3.Error as e:
+            try:
+                errstring = e.args[0] # TODO: Find out, why this does not work some times
+            except:
+                errstring = ''
+            utils.log(u'sync_tvshows: SQLite Database error accessing the wl database: ''%s''' % errstring, xbmc.LOGERROR)
             self.close_db()
             # error could be that the database is locked (for tv show strings).
             return 1
@@ -491,6 +505,11 @@ class WatchedList:
         
     def write_wl_wdata(self):
         # Go through all watched movies from xbmc and check whether they are up to date in the addon database
+        # return codes:
+        # 0    successfully written WL
+        # 1    program exception
+        # 2    database loading error
+        
         buggalo.addExtraData('self_sqlcursor', self.sqlcursor); buggalo.addExtraData('self_sqlcon', self.sqlcon);
         if self.sqlcursor == 0 or self.sqlcon == 0:
             if self.load_db():
@@ -531,8 +550,12 @@ class WatchedList:
                     count = self.wl_update_media(modus, row_xbmc, 0, 0)
                     count_insert += count[0]; count_update += count[1];
 
-                except sqlite3.Error:
-                    utils.log(u'write_wl_wdata: Database error while updating %s %s' % (modus, row_xbmc[5]))
+                except sqlite3.Error as e:
+                    try:
+                        errstring = e.args[0] # TODO: Find out, why this does not work some times
+                    except:
+                        errstring = ''
+                    utils.log(u'write_wl_wdata: Database error ''%s'' while updating %s %s' % (errstring, modus, row_xbmc[5]))
                     self.close_db()
                     # error at this place is the result of duplicate movies, which produces a DUPLICATE PRIMARY KEY ERROR
                     continue
@@ -564,6 +587,11 @@ class WatchedList:
     # notifications: 0= no, 1=only changed info, 2=all
     def write_xbmc_wdata(self, progressdialogue, notifications):
         # Go through all watched movies/episodes from the wl-database and check, if the xbmc-database is up to date
+        # return codes:
+        # 0    successfully written XBMC database
+        # 1    program exception
+        # 2    cancel by user interaction
+        
         for modus in ['movie', 'episode']:
             buggalo.addExtraData('modus', modus);
             if modus == 'movie' and utils.getSetting("w_movies") != 'true':
@@ -693,6 +721,11 @@ class WatchedList:
     
     # create a copy of the database, in case something goes wrong
     def database_copy(self):
+        # return codes:
+        # 0    successfully copied database
+        # 1    file writing error
+        # 2    program exception
+        
         if utils.getSetting('dbbackup') == 'true' and (not self.dbcopydone):
             if not xbmcvfs.exists(self.dbpath): 
                 utils.log('database_copy: directory %s does not exist. No backup possible.' % self.dbpath)
@@ -723,6 +756,8 @@ class WatchedList:
     # check if the user made changes in the watched states. Especially setting movies as "not watched". This can not be
     # recognized by the functions above
     def watch_user_changes(self, idletime_old, idletime):
+        # return codes: Not defined
+        
         if xbmc.Player().isPlaying() == True:
             return
         if idletime > idletime_old:
@@ -791,14 +826,14 @@ class WatchedList:
                 utils.log('watch_user_changes: %s "%s" changed playcount {%d -> %d} lastplayed {"%s" -> "%s"}. %sid=%d' % (modus, row_xbmc[5], playcount_old, playcount_new, utils.TimeStamptosqlDateTime(lastplayed_old), utils.TimeStamptosqlDateTime(lastplayed_new), modus, mediaid))
                 try:
                     self.wl_update_media(modus, row_xbmc, 1, 1)
-                except sqlite3.Error:
+                except sqlite3.Error as e:
                     try:
-                        string = sqlite3.Error.args[0] # TODO: Find out, why this does not work some times
+                        errstring = e.args[0] # TODO: Find out, why this does not work some times
                     except:
-                        string = ''
-                    utils.log(u'write_wl_wdata: Database error (%s) while updating %s %s' % (string, modus, row_xbmc[5]))
+                        errstring = ''
+                    utils.log(u'write_wl_wdata: Database error (%s) while updating %s %s' % (errstring, modus, row_xbmc[5]))
                     if utils.getSetting("debug") == 'true':
-                        utils.showNotification(utils.getString(32102), utils.getString(32606) % ('(%s)' % string))   
+                        utils.showNotification(utils.getString(32102), utils.getString(32606) % ('(%s)' % errstring))   
                     # error because of db locked or similar error
                     self.close_db()
                     break
@@ -812,6 +847,10 @@ class WatchedList:
     # update the wl database for one movie/episode with the information in row_xbmc.
     # Use saveanyway to skip checks whether not to save the changes. With commit, the db change is committed directly (slow with many movies, but safe)    
     def wl_update_media(self, mediatype, row_xbmc, saveanyway, commit):
+        # return codes:
+
+        # 2    error loading database
+        
         buggalo.addExtraData('self_sqlcursor', self.sqlcursor); buggalo.addExtraData('self_sqlcon', self.sqlcon);
         buggalo.addExtraData('len_self_watchedmovielist_wl', len(self.watchedmovielist_wl))
         buggalo.addExtraData('len_self_watchedepisodelist_wl', len(self.watchedepisodelist_wl))
