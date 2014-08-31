@@ -212,10 +212,10 @@ class WatchedList:
                     # xbmc.validatePath(self.dbdirectory) # does not work for smb
                     if not xbmcvfs.exists(self.dbdirectory): # do not use os.path.exists to access smb:// paths
                         if manualstart:
-                            utils.log(u'db path does not exist: %s' % self.dbdirectory)
+                            utils.log(u'db path does not exist: %s' % self.dbdirectory, xbmc.LOGWARNING)
                             return 1 # error
                         else:
-                            utils.log(u'db path does not exist, wait %d minutes: %s' % (wait_minutes, self.dbdirectory))
+                            utils.log(u'db path does not exist, wait %d minutes: %s' % (wait_minutes, self.dbdirectory), xbmc.LOGWARNING)
                             
                         utils.showNotification(utils.getString(32102), utils.getString(32002) % self.dbdirectory )
                         # Wait "wait_minutes" minutes until next check for file path (necessary on network shares, that are offline)
@@ -266,12 +266,12 @@ class WatchedList:
                 errstring = e.args[0] # TODO: Find out, why this does not work some times
             except:
                 errstring = ''
-            utils.log(u"Database error while opening %s. '%s'" % self.dbpath, errstring)
+            utils.log(u"Database error while opening %s. '%s'" % (self.dbpath, errstring), xbmc.LOGERROR)
             self.close_db()
             buggalo.addExtraData('db_connstatus', 'sqlite3 error, closed')
             return 1
         except:
-            utils.log(u"Error while opening %s: %s" % (self.dbpath, sys.exc_info()[2]))
+            utils.log(u"Error while opening %s: %s" % (self.dbpath, sys.exc_info()[2]), xbmc.LOGERROR)
             self.close_db()
             buggalo.addExtraData('dbpath', self.dbpath)
             buggalo.addExtraData('db_connstatus', 'error, closed')
@@ -495,7 +495,7 @@ class WatchedList:
             # error could be that the database is locked (for tv show strings).
             return 1
         except:
-            utils.log(u'sync_tvshows:  error getting the wl database : %s' % sys.exc_info()[2], xbmc.LOGERROR)
+            utils.log(u'sync_tvshows: Error getting the wl database: ''%s''' % sys.exc_info()[2], xbmc.LOGERROR)
             self.close_db()
             buggalo.onExceptionRaised()  
             return 1   
@@ -555,12 +555,12 @@ class WatchedList:
                         errstring = e.args[0] # TODO: Find out, why this does not work some times
                     except:
                         errstring = ''
-                    utils.log(u'write_wl_wdata: Database error ''%s'' while updating %s %s' % (errstring, modus, row_xbmc[5]))
+                    utils.log(u'write_wl_wdata: Database error ''%s'' while updating %s %s' % (errstring, modus, row_xbmc[5]), xbmc.LOGERROR)
                     self.close_db()
                     # error at this place is the result of duplicate movies, which produces a DUPLICATE PRIMARY KEY ERROR
                     continue
                 except:
-                    utils.log(u'write_wl_wdata: Error while updating %s %s: %s' % (modus, row_xbmc[5], sys.exc_info()[2]))
+                    utils.log(u'write_wl_wdata: Error while updating %s %s: %s' % (modus, row_xbmc[5], sys.exc_info()[2]), xbmc.LOGERROR)
                     self.close_db()
                     if utils.getSetting("progressdialog") == 'true': DIALOG_PROGRESS.close()
                     buggalo.addExtraData('count_update', count_update); buggalo.addExtraData('count_insert', count_insert); 
@@ -680,7 +680,7 @@ class WatchedList:
                                       }
                             json_response = utils.executeJSON(jsondict)
                             if (json_response.has_key('result') and json_response['result'] == 'OK'):
-                                utils.log(u'write_xbmc_wdata: xbmc database updated for %s. playcount: {%d -> %d}, lastplayed: {"%s" -> "%s"} (%sid=%d)' % (name, playcount_xbmc, playcount_wl, utils.TimeStamptosqlDateTime(lastplayed_xbmc), utils.TimeStamptosqlDateTime(lastplayed_new), modus, mediaid))
+                                utils.log(u'write_xbmc_wdata: xbmc database updated for %s. playcount: {%d -> %d}, lastplayed: {"%s" -> "%s"} (%sid=%d)' % (name, playcount_xbmc, playcount_wl, utils.TimeStamptosqlDateTime(lastplayed_xbmc), utils.TimeStamptosqlDateTime(lastplayed_new), modus, mediaid), xbmc.LOGINFO)
                                 if utils.getSetting("debug") == 'true':
                                     if playcount_wl == 0:
                                         if notifications > 0: utils.showNotification(utils.getString(32404), name)
@@ -695,14 +695,14 @@ class WatchedList:
                                     self.watchedepisodelist_xbmc[i][3] = lastplayed_new
                                     self.watchedepisodelist_xbmc[i][4] = playcount_wl
                             else:
-                                utils.log(u'write_xbmc_wdata: error updating xbmc database. %s. json_response=%s' % (name, str(json_response)))
+                                utils.log(u'write_xbmc_wdata: error updating xbmc database. %s. json_response=%s' % (name, str(json_response)), xbmc.LOGERROR)
                         
                     else:
                         # the movie is in the watched-list but not in the xbmc-list -> no action
                         # utils.log(u'write_xbmc_wdata: movie not in xbmc database: tt%d, %s' % (imdbId, row_xbmc[2]), xbmc.LOGDEBUG)
                         continue
                 except:
-                    utils.log(u"write_xbmc_wdata: Error while updating %s %s: %s" % (modus, name, sys.exc_info()[2]))
+                    utils.log(u"write_xbmc_wdata: Error while updating %s %s: %s" % (modus, name, sys.exc_info()[2]), xbmc.LOGERROR)
                     if progressdialogue: DIALOG_PROGRESS.close()
                     buggalo.addExtraData('count_update', count_update);
                     buggalo.onExceptionRaised()  
@@ -728,7 +728,7 @@ class WatchedList:
         
         if utils.getSetting('dbbackup') == 'true' and (not self.dbcopydone):
             if not xbmcvfs.exists(self.dbpath): 
-                utils.log(u'database_copy: directory %s does not exist. No backup possible.' % self.dbpath)
+                utils.log(u'database_copy: directory %s does not exist. No backup possible.' % self.dbpath, xbmc.LOGERROR)
                 return 1
             now = datetime.datetime.now()
             timestr = u'%04d%02d%02d_%02d%02d%02d' % (now.year, now.month, now.day, now.hour, now.minute, now.second)
@@ -739,7 +739,7 @@ class WatchedList:
                 zf.write(self.dbpath, compress_type=zipfile.ZIP_DEFLATED)
                 zf.close()
                 self.dbcopydone = True
-                utils.log(u'database_copy: database backup copy created to %s' % zipfilename)
+                utils.log(u'database_copy: database backup copy created to %s' % zipfilename, xbmc.LOGINFO)
                 # copy the zip file with xbmc file system, if needed
                 if self.dbfileaccess == 'copy':
                     xbmcvfs.copy(zipfilename, os.path.join(self.dbdirectory_copy, utils.decode(timestr + u'-watchedlist.db.zip')))
