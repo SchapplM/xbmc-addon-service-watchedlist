@@ -3,11 +3,16 @@
 	<!-- Notification headers -->
 	<string id="32101">WatchedList</string>
 	<string id="32102">Watchedlist: Error</string>
+	<string id="32103">Watchedlist: MySQL Error (WL DB)</string>
 	
 	<string id="32202">Addon movie database</string>
 	<string id="32203">Addon episode database</string>
 	<string id="32204">xbmc-movie database</string>
 	<string id="32205">xbmc-episode database</string>
+	
+	<string id="32208">Access Denied (username/password/rights)</string>
+	<string id="32209">Database '%s' does not exist</string>
+	<string id="32210">Access denied (user '%s', DB '%s')</string>
 	
 	<string id="32401">Set as watched (XBMC-DB)</string>
 	<string id="32402">Remember as newly watched (WL-DB)</string>
@@ -60,15 +65,23 @@
 	
 	<string id="30014">Update interval [hours]</string>
 	<string id="30015">Startup delay befor action [minutes]</string>
-	
 	<string id="30021">Start with XBMC (autorun)</string>
 	<string id="30016">Progress Dialog</string>
 	<string id="30022">follow user setting watched/unwatched</string>
 	
 	<string id="30002">Database</string>
+	<string id="30040">DB Method</string>
+	<string id="30041">File</string>
+	<string id="30042">MySQL</string>
 	<string id="30017">Use non-default database file</string>
 	<string id="30018">Path to database file</string>
 	<string id="30019">Database filename (SQLite Database, *.db)</string>
 	<string id="30020">Backup copy before accessing database file</string>
+	
+	<string id="30051">MySQL Server</string>
+	<string id="30052">MySQL Database</string>
+	<string id="30053">MySQL Username</string>
+	<string id="30054">MySQL Password</string>
+	<string id="30055">MySQL Port</string>
 </strings>
 

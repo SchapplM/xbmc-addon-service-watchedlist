@@ -1,13 +1,13 @@
 # XBMC Media Center language file
 # Addon Name: WatchedList
 # Addon id: service.watchedlist
-# Addon version: 0.9.2
+# Addon version: 0.9.9
 # Addon Provider: schapplm
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC-Addons\n"
 "Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
-"POT-Creation-Date: 2013-09-03 13:37+0000\n"
+"POT-Creation-Date: 2014-09-01 19:50+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE\n"
@@ -101,6 +101,38 @@ msgctxt "#30032"
 msgid "periodic"
 msgstr "Periodisch"
 
+msgctxt "#30040"
+msgid "DB Method"
+msgstr "DB-Art"
+
+msgctxt "#30041"
+msgid "File"
+msgstr "Datei"
+
+msgctxt "#30042"
+msgid "MySQL"
+msgstr "MySQL"
+
+msgctxt "#30051"
+msgid "MySQL Server"
+msgstr "MySQL Server"
+
+msgctxt "#30052"
+msgid "MySQL Database"
+msgstr "MySQL Datenbank"
+
+msgctxt "#30053"
+msgid "MySQL Username"
+msgstr "MySQL Benutzername"
+
+msgctxt "#30054"
+msgid "MySQL Password"
+msgstr "MySQL Kennwort"
+
+msgctxt "#30055"
+msgid "MySQL Port"
+msgstr "MySQL Port"
+
 msgctxt "#32001"
 msgid "manually run the database update again?"
 msgstr "Datenbank-Aktualisierung nochmal starten?"
@@ -130,8 +162,8 @@ msgid "Watchedlist: Error"
 msgstr "WatchedList: Fehler"
 
 msgctxt "#32103"
-msgid "Load watched states from addon-database..."
-msgstr "Lade Gesehen-Status aus Gesehen-Datenbank..."
+msgid "Watchedlist: MySQL Error (WL DB)"
+msgstr "Watchedlist: MySQL Fehler (WL DB)"
 
 msgctxt "#32104"
 msgid "load watched states xbmc-database ..."
@@ -164,6 +196,18 @@ msgstr "XBMC-Filmdatenbank"
 msgctxt "#32205"
 msgid "xbmc-episode database"
 msgstr "XBMC-Episodendatenbank"
+
+msgctxt "#32208"
+msgid "Access Denied (username/password/rights)"
+msgstr "Zugriff verweigert (Benutzername/Kennwort/Rechte)"
+
+msgctxt "#32209"
+msgid "Database '%s' does not exist"
+msgstr "Datenbank '%s' existiert nicht"
+
+msgctxt "#32210"
+msgid "Access denied (user '%s', DB '%s')"
+msgstr "Zugriff verweigert (Benutzer '%s', DB '%s')"
 
 msgctxt "#32298"
 msgid "%d movies and %d episodes read from WL."

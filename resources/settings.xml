@@ -1,25 +1,32 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
     <category label="30001">
-        <setting id="debug" type="bool" label="30010" default="false"/>
-		<setting id="w_movies" type="bool" label="30011" default="true"/>
-		<setting id="w_episodes" type="bool" label="30012" default="true"/>
+        <setting id="debug" type="bool" label="30010" default="false" />
+		<setting id="w_movies" type="bool" label="30011" default="true" />
+		<setting id="w_episodes" type="bool" label="30012" default="true" />
 		
-		<setting id="autostart" type="bool" label="30021" default="true"/>
+		<setting id="autostart" type="bool" label="30021" default="true" />
 		<setting id="delay" type="slider" label="30015" default="5" range="0,5,60" option="int" enable="eq(-1,true)" />
 		<!-- starttype: no, one, periodic update -->
-		<setting id="starttype" label="30013" type="enum" lvalues="30030|30031|30032" enable="eq(-2,true)" default="2"/>
+		<setting id="starttype" type="enum" label="30013" lvalues="30030|30031|30032" default="2" enable="eq(-2,true)" />
 		<setting id="interval" type="slider" label="30014" default="24" range="3,3,96" option="int" enable="eq(-1,2)+eq(-3,true)" />
 		<setting id="watch_user" type="bool" label="30022" default="true" enable="eq(-4,true)" />
-		<setting id="progressdialog" type="bool" label="30016" default="true"/>
-		
-		<!-- Option für externe Datenbank-Datei, um die gesehen-Liste im Netzwerk zu verwalten -->
+		<setting id="progressdialog" type="bool" label="30016" default="true" />
     </category>
 	
     <category label="30002">
-		<setting id="extdb" type="bool" label="30017" default="false"/>
-		<setting id="dbpath" type="folder" label="30018" default="" enable="eq(-1,true)"/>
-		<setting id="dbfilename" type="text" label="30019" default="watchedlist.db" enable="eq(-2,true)"/>
-		<setting id="dbbackup" type="bool" label="30020" default="false"/>
+		<setting id="db_format" label="32040" type="labelenum" lvalues="30041|30042" default="1" />
+		<!-- File Database Options --> 
+		<setting id="extdb" type="bool" label="30017" default="false" enable="eq(-1,0)" />
+		<setting id="dbpath" type="folder" label="30018" default="" enable="eq(-1,true)+eq(-2,0)" />
+		<setting id="dbfilename" type="text" label="30019" default="watchedlist.db" enable="eq(-2,true)+eq(-3,0)" />
+		<setting id="dbbackup" type="bool" label="30020" default="false" enable="eq(-4,0)" />
+		
+		<!-- MySQL Database Options --> 
+		<setting id="mysql_server" type="ipaddress" label="30051" default="127.0.0.1" enable="eq(-5,1)" />
+		<setting id="mysql_port" type="number" label="30055" default="3306" enable="eq(-6,1)" />
+		<setting id="mysql_db" type="text" label="30052" default="WatchedList" enable="eq(-7,1)" />
+		<setting id="mysql_user" type="text" label="30053" default="xbmc" enable="eq(-8,1)" />
+		<setting id="mysql_pass" type="text" label="30054" default="xbmc" enable="eq(-9,1)" />
     </category>
 </settings>

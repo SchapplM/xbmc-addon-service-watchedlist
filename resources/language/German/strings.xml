@@ -3,11 +3,16 @@
 	<!-- Notification headers -->
 	<string id="32101">WatchedList</string>
 	<string id="32102">WatchedList: Fehler</string>
+	<string id="32103">Watchedlist: MySQL Fehler (WL DB)</string>
 	
 	<string id="32202">Gesehen-Datenbank (Filme)</string>
 	<string id="32203">Gesehen-Datenbank (Episoden)</string>
 	<string id="32204">XBMC-Filmdatenbank</string>
 	<string id="32205">XBMC-Episodendatenbank</string>
+	
+	<string id="32208">Zugriff verweigert (Benutzername/Kennwort/Rechte)</string>
+	<string id="32209">Datenbank '%s' existiert nicht</string>
+	<string id="32210">Zugriff verweigert (Benutzer '%s', DB '%s')</string>
 	
 	<string id="32401">Als gesehen markiert (XBMC-DB)</string>
 	<string id="32402">Merke als neu gesehen (WL-DB)</string>
@@ -67,8 +72,17 @@
 	<string id="30022">Gesehen-Änderungen laufend überwachen</string>
 	
 	<string id="30002">Datenbank</string>
+	<string id="30040">DB-Art</string>
+	<string id="30041">Datei</string>
+	<string id="30042">MySQL</string>
 	<string id="30017">Eigene Datenbank-Datei</string>
 	<string id="30018">Pfad zur Datenbank-Datei</string>
 	<string id="30019">Dateiname (*.db)</string>
 	<string id="30020">Sicherungskopie vor Datenbankzugriff</string>
+	
+	<string id="30051">MySQL Server</string>
+	<string id="30052">MySQL Datenbank</string>
+	<string id="30053">MySQL Benutzername</string>
+	<string id="30054">MySQL Kennwort</string>
+	<string id="30055">MySQL Port</string>
 </strings>
