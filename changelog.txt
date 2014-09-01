@@ -1,3 +1,6 @@
+version 1.0.0 (01.09.2014)
+ * Added mySQL Database support for the WatchedList Database
+
 version 0.9.8 (31.08.2014)
  * Fix for Unicode Path problems
  * Fix for SQLite Error handling
