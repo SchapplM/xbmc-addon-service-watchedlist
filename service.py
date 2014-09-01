@@ -4,6 +4,7 @@ import sys, os
 import unicodedata
 import time
 import sqlite3
+import mysql.connector
 
 import buggalo
 buggalo.GMAIL_RECIPIENT = "msahadl60@gmail.com"
@@ -33,6 +34,8 @@ class WatchedList:
         
         self.sqlcon = 0
         self.sqlcursor = 0
+        
+        self.db_method = 'file' # either 'file' or 'mysql'
         
         # flag to remember copying the databasefile if requested
         self.dbcopydone = False   
@@ -107,7 +110,7 @@ class WatchedList:
                         break
                     xbmc.sleep(1000) # wait 1 second until next check if xbmc terminates
                 if utils.getSetting("starttype") == '1' and executioncount == 0 or utils.getSetting("starttype") == '2':
-                    self.runUpdate()
+                    self.runUpdate(False)
                     executioncount += 1
                 if float(utils.getSetting("starttype")) < 2 and utils.getSetting("watch_user") == 'false':
                     return 0 # the program may exit. No purpose for background process
@@ -118,7 +121,7 @@ class WatchedList:
             
     # entry point for manual start.
     # perform the update step by step
-    def runUpdate(self):
+    def runUpdate(self, manualstart):
         # return codes:
         # 0    success
         # 3    Error opening database
@@ -129,8 +132,8 @@ class WatchedList:
         try:
             utils.buggalo_extradata_settings()
 
-            # check if player is running before doing the update
-            while xbmc.Player().isPlaying() == True:
+            # check if player is running before doing the update. Only do this check for automatic start
+            while xbmc.Player().isPlaying() == True and not manualstart:
                 if utils.sleepsafe(60*1000): return 1 # wait one minute until next check for active playback
                 if xbmc.Player().isPlaying() == False:
                     if utils.sleepsafe(180*1000): return 1 # wait 3 minutes so the dialogue does not pop up directly after the playback ends
@@ -193,72 +196,104 @@ class WatchedList:
         
         # if manualstart, only retry opening db once
         try:
-            # load the db path
-            if utils.getSetting("extdb") == 'false':
-                # use the default file 
-                self.dbdirectory = xbmc.translatePath( utils.data_dir() ).decode('utf-8')
-                buggalo.addExtraData('dbdirectory', self.dbdirectory);
-                self.dbpath = os.path.join( self.dbdirectory , "watchedlist.db" )
-            else:
-                wait_minutes = 1 # retry waittime if db path does not exist/ is offline
-                    
-                while xbmc.abortRequested == False:
-                    # use a user specified file, for example to synchronize multiple clients
-                    self.dbdirectory = xbmc.translatePath( utils.getSetting("dbpath") ).decode('utf-8')
-                    self.dbfileaccess = utils.fileaccessmode(self.dbdirectory)
-                    self.dbdirectory = utils.translateSMB(self.dbdirectory)
-                    
-                    self.dbpath = os.path.join( self.dbdirectory , utils.getSetting("dbfilename").decode('utf-8') )
-                    # xbmc.validatePath(self.dbdirectory) # does not work for smb
-                    if not xbmcvfs.exists(self.dbdirectory): # do not use os.path.exists to access smb:// paths
-                        if manualstart:
-                            utils.log(u'db path does not exist: %s' % self.dbdirectory, xbmc.LOGWARNING)
-                            return 1 # error
+            if utils.getSetting("db_format") == 0:
+                # SQlite3 database in a file
+                # load the db path
+                if utils.getSetting("extdb") == 'false':
+                    # use the default file 
+                    self.dbdirectory = xbmc.translatePath( utils.data_dir() ).decode('utf-8')
+                    buggalo.addExtraData('dbdirectory', self.dbdirectory);
+                    self.dbpath = os.path.join( self.dbdirectory , "watchedlist.db" )
+                else:
+                    wait_minutes = 1 # retry waittime if db path does not exist/ is offline
+                        
+                    while xbmc.abortRequested == False:
+                        # use a user specified file, for example to synchronize multiple clients
+                        self.dbdirectory = xbmc.translatePath( utils.getSetting("dbpath") ).decode('utf-8')
+                        self.dbfileaccess = utils.fileaccessmode(self.dbdirectory)
+                        self.dbdirectory = utils.translateSMB(self.dbdirectory)
+                        
+                        self.dbpath = os.path.join( self.dbdirectory , utils.getSetting("dbfilename").decode('utf-8') )
+                        # xbmc.validatePath(self.dbdirectory) # does not work for smb
+                        if not xbmcvfs.exists(self.dbdirectory): # do not use os.path.exists to access smb:// paths
+                            if manualstart:
+                                utils.log(u'db path does not exist: %s' % self.dbdirectory, xbmc.LOGWARNING)
+                                return 1 # error
+                            else:
+                                utils.log(u'db path does not exist, wait %d minutes: %s' % (wait_minutes, self.dbdirectory), xbmc.LOGWARNING)
+                                
+                            utils.showNotification(utils.getString(32102), utils.getString(32002) % self.dbdirectory )
+                            # Wait "wait_minutes" minutes until next check for file path (necessary on network shares, that are offline)
+                            wait_minutes += wait_minutes # increase waittime until next check
+                            if utils.sleepsafe(wait_minutes*60): return 2
                         else:
-                            utils.log(u'db path does not exist, wait %d minutes: %s' % (wait_minutes, self.dbdirectory), xbmc.LOGWARNING)
-                            
-                        utils.showNotification(utils.getString(32102), utils.getString(32002) % self.dbdirectory )
-                        # Wait "wait_minutes" minutes until next check for file path (necessary on network shares, that are offline)
-                        wait_minutes += wait_minutes # increase waittime until next check
-                        if utils.sleepsafe(wait_minutes*60): return 2
-                    else:
-                        break # directory exists, continue below      
+                            break # directory exists, continue below      
+                    
+                # on unix, smb-shares can not be accessed with sqlite3 --> copy the db with xbmc file system operations and work in mirror directory
+                buggalo.addExtraData('dbfileaccess', self.dbfileaccess);
+                buggalo.addExtraData('dbdirectory', self.dbdirectory);
+                buggalo.addExtraData('dbpath', self.dbpath);
+                if self.dbfileaccess == 'copy':
+                    self.dbdirectory_copy = self.dbdirectory
+                    self.dbpath_copy = self.dbpath # path to db file as in the settings (but not accessable)
+                    buggalo.addExtraData('dbdirectory_copy', self.dbdirectory_copy);
+                    buggalo.addExtraData('dbpath_copy', self.dbpath_copy);
+                    # work in copy directory in the xbmc profile folder
+                    self.dbdirectory = os.path.join( xbmc.translatePath( utils.data_dir() ).decode('utf-8'), 'dbcopy')
+                    if not xbmcvfs.exists(self.dbdirectory):
+                        xbmcvfs.mkdir(self.dbdirectory)
+                        utils.log(u'created directory %s' % str(self.dbdirectory))  
+                    self.dbpath = os.path.join( self.dbdirectory , "watchedlist.db" )
+                    if xbmcvfs.exists(self.dbpath_copy):
+                        success = xbmcvfs.copy(self.dbpath_copy, self.dbpath) # copy the external db file to local mirror directory
+                        utils.log(u'copied db file %s -> %s. Success: %d' % (self.dbpath_copy, self.dbpath, success), xbmc.LOGDEBUG)  
                 
-            # on unix, smb-shares can not be accessed with sqlite3 --> copy the db with xbmc file system operations and work in mirror directory
-            buggalo.addExtraData('dbfileaccess', self.dbfileaccess);
-            buggalo.addExtraData('dbdirectory', self.dbdirectory);
-            buggalo.addExtraData('dbpath', self.dbpath);
-            if self.dbfileaccess == 'copy':
-                self.dbdirectory_copy = self.dbdirectory
-                self.dbpath_copy = self.dbpath # path to db file as in the settings (but not accessable)
-                buggalo.addExtraData('dbdirectory_copy', self.dbdirectory_copy);
-                buggalo.addExtraData('dbpath_copy', self.dbpath_copy);
-                # work in copy directory in the xbmc profile folder
-                self.dbdirectory = os.path.join( xbmc.translatePath( utils.data_dir() ).decode('utf-8'), 'dbcopy')
-                if not xbmcvfs.exists(self.dbdirectory):
-                    xbmcvfs.mkdir(self.dbdirectory)
-                    utils.log(u'created directory %s' % str(self.dbdirectory))  
-                self.dbpath = os.path.join( self.dbdirectory , "watchedlist.db" )
-                if xbmcvfs.exists(self.dbpath_copy):
-                    success = xbmcvfs.copy(self.dbpath_copy, self.dbpath) # copy the external db file to local mirror directory
-                    utils.log(u'copied db file %s -> %s. Success: %d' % (self.dbpath_copy, self.dbpath, success), xbmc.LOGDEBUG)  
-            
-            buggalo.addExtraData('dbdirectory', self.dbdirectory);
-            buggalo.addExtraData('dbpath', self.dbpath);
-            
-            
-            #connect to the database. create database if it does not exist
-            self.sqlcon = sqlite3.connect(self.dbpath);
-            self.sqlcursor = self.sqlcon.cursor()
+                buggalo.addExtraData('dbdirectory', self.dbdirectory);
+                buggalo.addExtraData('dbpath', self.dbpath);
+                
+                
+                #connect to the database. create database if it does not exist
+                self.sqlcon = sqlite3.connect(self.dbpath);
+                self.sqlcursor = self.sqlcon.cursor()
+            else:
+                # MySQL Database on a server
+                self.sqlcon = mysql.connector.connect(user=utils.getSetting("mysql_user"), password=utils.getSetting("mysql_pass"), database=utils.getSetting("mysql_db"), host=utils.getSetting("mysql_server"), port=utils.getSetting("mysql_port"))
+                self.sqlcursor = self.sqlcon.cursor()
+                
             # create tables if they don't exist
-            sql = "CREATE TABLE IF NOT EXISTS movie_watched (idMovieImdb INTEGER PRIMARY KEY,playCount INTEGER,lastChange INTEGER,lastPlayed INTEGER,title TEXT)"
-            self.sqlcursor.execute(sql)
-
-            sql = "CREATE TABLE IF NOT EXISTS episode_watched (idShow INTEGER, season INTEGER, episode INTEGER, playCount INTEGER,lastChange INTEGER,lastPlayed INTEGER, PRIMARY KEY (idShow, season, episode))"
-            self.sqlcursor.execute(sql)
-            
-            sql = "CREATE TABLE IF NOT EXISTS tvshows (idShow INTEGER, title TEXT, PRIMARY KEY (idShow))"
-            self.sqlcursor.execute(sql)
+            if utils.getSetting("db_format") == 0: # sqlite file
+                sql = "CREATE TABLE IF NOT EXISTS movie_watched (idMovieImdb INTEGER PRIMARY KEY,playCount INTEGER,lastChange INTEGER,lastPlayed INTEGER,title TEXT)"
+                self.sqlcursor.execute(sql)
+                sql = "CREATE TABLE IF NOT EXISTS episode_watched (idShow INTEGER, season INTEGER, episode INTEGER, playCount INTEGER,lastChange INTEGER,lastPlayed INTEGER, PRIMARY KEY (idShow, season, episode))"
+                self.sqlcursor.execute(sql)
+                sql = "CREATE TABLE IF NOT EXISTS tvshows (idShow INTEGER, title TEXT, PRIMARY KEY (idShow))"
+                self.sqlcursor.execute(sql)
+            else: # mysql network database
+                sql = ("CREATE TABLE IF NOT EXISTS `movie_watched` ("
+                      "`idMovieImdb` int(11) unsigned NOT NULL,"
+                      "`playCount` tinyint(6) unsigned DEFAULT NULL,"
+                      "`lastChange` timestamp(6) NULL DEFAULT NULL,"
+                      "`lastPlayed` timestamp(6) NULL DEFAULT NULL,"
+                      "`title` text,"
+                      "PRIMARY KEY (`idMovieImdb`)"
+                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8;")
+                self.sqlcursor.execute(sql)
+                sql = ("CREATE TABLE IF NOT EXISTS `episode_watched` ("
+                      "`idShow` int(11) unsigned NOT NULL DEFAULT '0',"
+                      "`season` smallint(11) unsigned NOT NULL DEFAULT '0',"
+                      "`episode` smallint(11) unsigned NOT NULL DEFAULT '0',"
+                      "`playCount` tinyint(6) unsigned DEFAULT NULL,"
+                      "`lastChange` timestamp(6) NULL DEFAULT NULL,"
+                      "`lastPlayed` timestamp(6) NULL DEFAULT NULL,"
+                      "PRIMARY KEY (`idShow`,`season`,`episode`)"
+                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8;")
+                self.sqlcursor.execute(sql)
+                sql = ("CREATE TABLE IF NOT EXISTS `tvshows` ("
+                      "`idShow` int(11) unsigned NOT NULL,"
+                      "`title` text,"
+                      "PRIMARY KEY (`idShow`)"
+                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8;")
+                self.sqlcursor.execute(sql)
             
             buggalo.addExtraData('db_connstatus', 'connected')
         except sqlite3.Error as e:
@@ -269,6 +304,17 @@ class WatchedList:
             utils.log(u"Database error while opening %s. '%s'" % (self.dbpath, errstring), xbmc.LOGERROR)
             self.close_db()
             buggalo.addExtraData('db_connstatus', 'sqlite3 error, closed')
+            return 1
+        except mysql.connector.Error as err:
+            # Catch common mysql errors and show them to guide the user
+            utils.log(u"Database error while opening mySQL DB %s [%s:%s@%s]. %s" % (utils.getSetting("mysql_db"), utils.getSetting("mysql_user"), utils.getSetting("mysql_pass"), utils.getSetting("mysql_db"), err), xbmc.LOGERROR)
+            if err.errno == mysql.connector.errorcode.ER_DBACCESS_DENIED_ERROR:
+                utils.showNotification(utils.getString(32103), utils.getString(32210) % (utils.getSetting("mysql_user"), utils.getSetting("mysql_db"))) 
+            elif err.errno == mysql.connector.errorcode.ER_ACCESS_DENIED_ERROR:
+                utils.showNotification(utils.getString(32103), utils.getString(32208)) 
+            elif err.errno == mysql.connector.errorcode.ER_BAD_DB_ERROR:
+                utils.showNotification(utils.getString(32103), utils.getString(32209) % utils.getSetting("mysql_db") ) 
+            self.close_db()
             return 1
         except:
             utils.log(u"Error while opening %s: %s" % (self.dbpath, sys.exc_info()[2]), xbmc.LOGERROR)
@@ -289,7 +335,7 @@ class WatchedList:
         self.sqlcon = 0
         
         # copy the db file back to the shared directory, if needed
-        if self.dbfileaccess == 'copy':
+        if utils.getSetting("db_format") == 0 and self.dbfileaccess == 'copy':
             if xbmcvfs.exists(self.dbpath):
                 success = xbmcvfs.copy(self.dbpath, self.dbpath_copy)
                 utils.log(u'copied db file %s -> %s. Success: %d' % (self.dbpath, self.dbpath_copy, success), xbmc.LOGDEBUG)  
@@ -426,7 +472,10 @@ class WatchedList:
                 self.sqlcursor.execute("SELECT idMovieImdb, lastPlayed, playCount, title, lastChange FROM movie_watched ORDER BY title") 
                 rows = self.sqlcursor.fetchall() 
                 for row in rows:
-                    self.watchedmovielist_wl.append(list([int(row[0]), 0, 0, int(row[1]), int(row[2]), row[3], int(row[4])])) # 0imdbnumber, 1empty, 2empty, 3lastPlayed, 4playCount, 5title, 6lastChange
+                    if utils.getSetting("db_format") == 0: # SQLite3 File. Timestamp stored as integer
+                        self.watchedmovielist_wl.append(list([int(row[0]), 0, 0, int(row[1]), int(row[2]), row[3], int(row[4])])) # 0imdbnumber, 1empty, 2empty, 3lastPlayed, 4playCount, 5title, 6lastChange
+                    else: # MySQL. Timestamp as Datetime
+                        self.watchedmovielist_wl.append(list([int(row[0]), 0, 0, utils.sqlDateTimeToTimeStamp(row[1]), int(row[2]), row[3], utils.sqlDateTimeToTimeStamp(row[4])]))
             
             # get watched episodes from addon database
             self.watchedepisodelist_wl = list([])
@@ -439,7 +488,10 @@ class WatchedList:
                         name = '%s S%02dE%02d' % (self.tvshownames[int(row[0])], int(row[1]), int(row[2]))
                     except:
                         name = 'tvdb-id %d S%02dE%02d' % (int(row[0]), int(row[1]), int(row[2]))
-                    self.watchedepisodelist_wl.append(list([int(row[0]), int(row[1]), int(row[2]), int(row[3]), int(row[4]), name, int(row[5])]))# 0imdbnumber, 1season, 2episode, 3lastplayed, 4playcount, 5name, 6lastChange
+                    if utils.getSetting("db_format") == 0: # SQLite3 File. Timestamp stored as integer
+                        self.watchedepisodelist_wl.append(list([int(row[0]), int(row[1]), int(row[2]), int(row[3]), int(row[4]), name, int(row[5])]))# 0imdbnumber, 1season, 2episode, 3lastplayed, 4playcount, 5name, 6lastChange
+                    else: # MySQL. Timestamp as Datetime
+                        self.watchedepisodelist_wl.append(list([int(row[0]), int(row[1]), int(row[2]), utils.sqlDateTimeToTimeStamp(row[3]), int(row[4]), name, utils.sqlDateTimeToTimeStamp(row[5])]))
             if not silent: utils.showNotification(utils.getString(32101), utils.getString(32298)%(len(self.watchedmovielist_wl), len(self.watchedepisodelist_wl)))
             self.close_db()
             return 0
@@ -448,9 +500,12 @@ class WatchedList:
                 errstring = e.args[0] # TODO: Find out, why this does not work some times
             except:
                 errstring = ''
-            utils.log(u'get_watched_wl: SQLite Database error getting the wl database %s' % errstring, xbmc.LOGERROR)
+            utils.log(u'get_watched_wl: SQLite Database error getting the wl database. %s' % errstring, xbmc.LOGERROR)
             self.close_db()
             # error could be that the database is locked (for tv show strings). This is not an error to disturb the other functions
+            return 3
+        except mysql.connector.Error as err:
+            utils.log(u'get_watched_wl: MySQL Database error getting the wl database. %s' % err, xbmc.LOGERROR)
             return 3
         except:
             utils.log(u'get_watched_wl:  error getting the wl database : %s' % sys.exc_info()[2], xbmc.LOGERROR)
@@ -474,7 +529,10 @@ class WatchedList:
                     return 2
             # write eventually new tv shows to wl database
             for xbmcid in self.tvshows:
-                sql = 'INSERT OR IGNORE INTO tvshows (idShow,title) VALUES (?, ?)'
+                if utils.getSetting("db_format") == 0: # sqlite3
+                    sql = "INSERT OR IGNORE INTO tvshows (idShow,title) VALUES (?, ?)"
+                else: # mysql
+                    sql = "INSERT IGNORE INTO tvshows (idShow,title) VALUES (%s, %s)"
                 values = self.tvshows[xbmcid]
                 self.sqlcursor.execute(sql, values)
             self.database_copy()    
@@ -493,6 +551,10 @@ class WatchedList:
             utils.log(u'sync_tvshows: SQLite Database error accessing the wl database: ''%s''' % errstring, xbmc.LOGERROR)
             self.close_db()
             # error could be that the database is locked (for tv show strings).
+            return 1
+        except mysql.connector.Error as err:
+            utils.log(u"sync_tvshows: MySQL Database error accessing the wl database: ''%s''" % (err), xbmc.LOGERROR)
+            self.close_db()
             return 1
         except:
             utils.log(u'sync_tvshows: Error getting the wl database: ''%s''' % sys.exc_info()[2], xbmc.LOGERROR)
@@ -555,9 +617,13 @@ class WatchedList:
                         errstring = e.args[0] # TODO: Find out, why this does not work some times
                     except:
                         errstring = ''
-                    utils.log(u'write_wl_wdata: Database error ''%s'' while updating %s %s' % (errstring, modus, row_xbmc[5]), xbmc.LOGERROR)
+                    utils.log(u'write_wl_wdata: SQLite Database error ''%s'' while updating %s %s' % (errstring, modus, row_xbmc[5]), xbmc.LOGERROR)
                     self.close_db()
                     # error at this place is the result of duplicate movies, which produces a DUPLICATE PRIMARY KEY ERROR
+                    continue
+                except mysql.connector.Error as err:
+                    utils.log(u'write_wl_wdata: MySQL Database error ''%s'' while updating %s %s' % (err, modus, row_xbmc[5]), xbmc.LOGERROR)
+                    self.close_db()
                     continue
                 except:
                     utils.log(u'write_wl_wdata: Error while updating %s %s: %s' % (modus, row_xbmc[5], sys.exc_info()[2]), xbmc.LOGERROR)
@@ -719,14 +785,20 @@ class WatchedList:
     
     
     
-    # create a copy of the database, in case something goes wrong
+    # create a copy of the database, in case something goes wrong (only if database file is used)
     def database_copy(self):
         # return codes:
         # 0    successfully copied database
         # 1    file writing error
         # 2    program exception
         
-        if utils.getSetting('dbbackup') == 'true' and (not self.dbcopydone):
+        if utils.getSetting("db_format") != 0:
+            return 0 # no backup needed since we are using mysql database
+        
+        if utils.getSetting('dbbackup') == 'false':
+            return 0 # no backup requested in the addon settings
+        
+        if not self.dbcopydone:
             if not xbmcvfs.exists(self.dbpath): 
                 utils.log(u'database_copy: directory %s does not exist. No backup possible.' % self.dbpath, xbmc.LOGERROR)
                 return 1
@@ -831,12 +903,20 @@ class WatchedList:
                         errstring = e.args[0] # TODO: Find out, why this does not work some times
                     except:
                         errstring = ''
-                    utils.log(u'write_wl_wdata: Database error (%s) while updating %s %s' % (errstring, modus, row_xbmc[5]))
+                    utils.log(u'write_wl_wdata: SQLite Database error (%s) while updating %s %s' % (errstring, modus, row_xbmc[5]))
                     if utils.getSetting("debug") == 'true':
                         utils.showNotification(utils.getString(32102), utils.getString(32606) % ('(%s)' % errstring))   
                     # error because of db locked or similar error
                     self.close_db()
                     break
+                except mysql.connector.Error as err:
+                    # Catch common mysql errors and show them to guide the user
+                    utils.log(u'write_wl_wdata: MySQL Database error (%s) while updating %s %s' % (err, modus, row_xbmc[5]))
+                    if utils.getSetting("debug") == 'true':
+                        utils.showNotification(utils.getString(32102), utils.getString(32606) % ('(%s)' % err))
+                    self.close_db()
+                    break
+                
                 # update xbmc watched status, e.g. to set duplicate movies also as watched
             if len(indices_changed) > 0:    
                 self.write_xbmc_wdata(0, 1) # this changes self.watchedmovielist_xbmc
@@ -919,10 +999,16 @@ class WatchedList:
   
                 lastchange_new = int(time.time())
                 if modus == 'movie':
-                    sql = 'UPDATE movie_watched SET playCount = ?, lastplayed = ?, lastChange = ? WHERE idMovieImdb LIKE ?'
+                    if utils.getSetting("db_format") == 0: # sqlite3
+                        sql = 'UPDATE movie_watched SET playCount = ?, lastplayed = ?, lastChange = ? WHERE idMovieImdb LIKE ?'
+                    else: # mysql
+                        sql = 'UPDATE movie_watched SET playCount = %s, lastplayed = %s, lastChange = FROM_UNIXTIME(%s) WHERE idMovieImdb LIKE ?'
                     values = list([playcount_xbmc, lastplayed_new, lastchange_new, imdbId])
                 else:
-                    sql = 'UPDATE episode_watched SET playCount = ?, lastPlayed = ?, lastChange = ? WHERE idShow LIKE ? AND season LIKE ? AND episode LIKE ?'
+                    if utils.getSetting("db_format") == 0: # sqlite3
+                        sql = 'UPDATE episode_watched SET playCount = ?, lastPlayed = ?, lastChange = ? WHERE idShow LIKE ? AND season LIKE ? AND episode LIKE ?'
+                    else: # mysql
+                        sql = 'UPDATE episode_watched SET playCount = %s, lastPlayed = FROM_UNIXTIME(%s), lastChange = FROM_UNIXTIME(%s) WHERE idShow LIKE %s AND season LIKE %s AND episode LIKE %s'
                     values = list([playcount_xbmc, lastplayed_new, lastchange_new, imdbId, season, episode])
                 self.sqlcursor.execute(sql, values)
                 count_return[1] = 1
@@ -942,10 +1028,16 @@ class WatchedList:
                 # order: idMovieImdb,playCount,lastChange,lastPlayed,title
                 lastchange_new = int(time.time())
                 if modus == 'movie':
-                    sql = 'INSERT INTO movie_watched (idMovieImdb,playCount,lastChange,lastPlayed,title) VALUES (?, ?, ?, ?, ?)'
+                    if utils.getSetting("db_format") == 0: # sqlite3
+                        sql = 'INSERT INTO movie_watched (idMovieImdb,playCount,lastChange,lastPlayed,title) VALUES (?, ?, ?, ?, ?)'
+                    else: # mysql
+                        sql = 'INSERT INTO movie_watched (idMovieImdb,playCount,lastChange,lastPlayed,title) VALUES (%s, %s, FROM_UNIXTIME(%s), FROM_UNIXTIME(%s), %s)'
                     values = list([imdbId, playcount_xbmc, lastchange_new, lastplayed_xbmc, name])
                 else:
-                    sql = 'INSERT INTO episode_watched (idShow,season,episode,playCount,lastChange,lastPlayed) VALUES (?, ?, ?, ?, ?, ?)'
+                    if utils.getSetting("db_format") == 0: # sqlite3
+                        sql = 'INSERT INTO episode_watched (idShow,season,episode,playCount,lastChange,lastPlayed) VALUES (?, ?, ?, ?, ?, ?)'
+                    else: # mysql
+                        sql = 'INSERT INTO episode_watched (idShow,season,episode,playCount,lastChange,lastPlayed) VALUES (%s, %s, %s, %s, FROM_UNIXTIME(%s), FROM_UNIXTIME(%s))'
                     values = list([imdbId, season, episode, playcount_xbmc, lastchange_new, lastplayed_xbmc])
                 self.sqlcursor.execute(sql, values)
                 utils.log(u'wl_update_%s: new entry for wl database: "%s", lastChange="%s", lastPlayed="%s", playCount=%d' % (modus, name, utils.TimeStamptosqlDateTime(lastchange_new), utils.TimeStamptosqlDateTime(lastplayed_xbmc), playcount_xbmc))
