@@ -314,6 +314,7 @@ class WatchedList:
                 utils.showNotification(utils.getString(32103), utils.getString(32208)) 
             elif err.errno == mysql.connector.errorcode.ER_BAD_DB_ERROR:
                 utils.showNotification(utils.getString(32103), utils.getString(32209) % utils.getSetting("mysql_db") ) 
+            buggalo.addExtraData('db_connstatus', 'mysql error, closed')
             self.close_db()
             return 1
         except:

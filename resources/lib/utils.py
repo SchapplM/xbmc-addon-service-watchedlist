@@ -136,7 +136,12 @@ def buggalo_extradata_settings():
     buggalo.addExtraData('setting_dbpath', getSetting("dbpath"));
     buggalo.addExtraData('setting_dbfilename', getSetting("dbfilename"));
     buggalo.addExtraData('setting_dbbackup', getSetting("dbbackup"));
+    buggalo.addExtraData('setting_db_format', getSetting("db_format"));
+    buggalo.addExtraData('setting_mysql_server', getSetting("mysql_server"));
+    buggalo.addExtraData('setting_mysql_port', getSetting("mysql_port"));
+    buggalo.addExtraData('setting_mysql_db', getSetting("mysql_db"));
 
+    
 def translateSMB(path):
     # translate "smb://..." to "\\..." in windows. Don't change other paths
     if os.sep == '\\': # windows os
