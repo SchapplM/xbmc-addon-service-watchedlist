@@ -10,11 +10,13 @@ if __remotedebug__:
     try:
         import pysrc.pydevd as pydevd
     # stdoutToServer and stderrToServer redirect stdout and stderr to eclipse console
-        pydevd.settrace('localhost', stdoutToServer=True, stderrToServer=True)
+        pydevd.settrace('localhost', port=60678, stdoutToServer=True, stderrToServer=True)
     except ImportError:
         sys.stderr.write("Error: " +
             "You must add org.python.pydev.debug.pysrc to your PYTHONPATH.")
         sys.exit(1)
+    except:
+        sys.stderr.write("Error importing the debugger")
 
 # this file is entry point for manual start via the programs menu
 
