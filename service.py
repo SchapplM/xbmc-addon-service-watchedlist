@@ -270,26 +270,26 @@ class WatchedList:
                 self.sqlcursor.execute(sql)
             else: # mysql network database
                 sql = ("CREATE TABLE IF NOT EXISTS `movie_watched` ("
-                      "`idMovieImdb` int(11) unsigned NOT NULL,"
-                      "`playCount` tinyint(6) unsigned DEFAULT NULL,"
-                      "`lastChange` timestamp(6) NULL DEFAULT NULL,"
-                      "`lastPlayed` timestamp(6) NULL DEFAULT NULL,"
+                      "`idMovieImdb` int unsigned NOT NULL,"
+                      "`playCount` tinyint unsigned DEFAULT NULL,"
+                      "`lastChange` timestamp NULL DEFAULT NULL,"
+                      "`lastPlayed` timestamp NULL DEFAULT NULL,"
                       "`title` text,"
                       "PRIMARY KEY (`idMovieImdb`)"
                         ") ENGINE=InnoDB DEFAULT CHARSET=utf8;")
                 self.sqlcursor.execute(sql)
                 sql = ("CREATE TABLE IF NOT EXISTS `episode_watched` ("
-                      "`idShow` int(11) unsigned NOT NULL DEFAULT '0',"
-                      "`season` smallint(11) unsigned NOT NULL DEFAULT '0',"
-                      "`episode` smallint(11) unsigned NOT NULL DEFAULT '0',"
-                      "`playCount` tinyint(6) unsigned DEFAULT NULL,"
-                      "`lastChange` timestamp(6) NULL DEFAULT NULL,"
-                      "`lastPlayed` timestamp(6) NULL DEFAULT NULL,"
+                      "`idShow` int unsigned NOT NULL DEFAULT '0',"
+                      "`season` smallint unsigned NOT NULL DEFAULT '0',"
+                      "`episode` smallint unsigned NOT NULL DEFAULT '0',"
+                      "`playCount` tinyint unsigned DEFAULT NULL,"
+                      "`lastChange` timestamp NULL DEFAULT NULL,"
+                      "`lastPlayed` timestamp NULL DEFAULT NULL,"
                       "PRIMARY KEY (`idShow`,`season`,`episode`)"
                         ") ENGINE=InnoDB DEFAULT CHARSET=utf8;")
                 self.sqlcursor.execute(sql)
                 sql = ("CREATE TABLE IF NOT EXISTS `tvshows` ("
-                      "`idShow` int(11) unsigned NOT NULL,"
+                      "`idShow` int unsigned NOT NULL,"
                       "`title` text,"
                       "PRIMARY KEY (`idShow`)"
                         ") ENGINE=InnoDB DEFAULT CHARSET=utf8;")
