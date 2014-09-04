@@ -44,7 +44,7 @@ def showNotification(title,message, time=4000):
     # `title` and `message` have to be unicode
     __addoniconpath__ = os.path.join(addon_dir(),"icon.png")
     log(u'Notification. %s: %s' % (title, message) )
-    if xbmc.Player().isPlaying() == False:
+    if xbmc.Player().isPlaying() == False: # do not show the notification, if a video is being played.
         xbmc.executebuiltin(encode('Notification("' + title + '","' + message + '",'+(str(time)).decode('utf-8')+',"' + __addoniconpath__ + '")'))
     if getSetting('debug') == 'true':
         xbmc.sleep(250) # time to read the message
@@ -86,6 +86,7 @@ def footprint():
     
 # "2013-05-10 21:23:24"  --->  1368213804
 def sqlDateTimeToTimeStamp(sqlDateTime):
+    # sqlDateTime is a string (only from SQLite db. Mysql returns object)
     if sqlDateTime == '':
         return 0 # NULL timestamp
     else:

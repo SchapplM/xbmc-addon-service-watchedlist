@@ -470,29 +470,31 @@ class WatchedList:
             self.watchedmovielist_wl = list([])
             if utils.getSetting("w_movies") == 'true':
                 utils.log(u'get_watched_wl: Get watched movies from WL database', xbmc.LOGDEBUG)
-                self.sqlcursor.execute("SELECT idMovieImdb, lastPlayed, playCount, title, lastChange FROM movie_watched ORDER BY title") 
+                if utils.getSetting("db_format") == 0: # SQLite3 File. Timestamp stored as integer
+                    self.sqlcursor.execute("SELECT idMovieImdb, lastPlayed, playCount, title, lastChange FROM movie_watched ORDER BY title") 
+                else: # mySQL: Create integer timestamp with the request
+                    self.sqlcursor.execute("SELECT `idMovieImdb`, UNIX_TIMESTAMP(`lastPlayed`), `playCount`, `title`, UNIX_TIMESTAMP(`lastChange`) FROM `movie_watched` ORDER BY `title`") 
                 rows = self.sqlcursor.fetchall() 
                 for row in rows:
-                    if utils.getSetting("db_format") == 0: # SQLite3 File. Timestamp stored as integer
-                        self.watchedmovielist_wl.append(list([int(row[0]), 0, 0, int(row[1]), int(row[2]), row[3], int(row[4])])) # 0imdbnumber, 1empty, 2empty, 3lastPlayed, 4playCount, 5title, 6lastChange
-                    else: # MySQL. Timestamp as Datetime
-                        self.watchedmovielist_wl.append(list([int(row[0]), 0, 0, utils.sqlDateTimeToTimeStamp(row[1]), int(row[2]), row[3], utils.sqlDateTimeToTimeStamp(row[4])]))
-            
+                    self.watchedmovielist_wl.append(list([int(row[0]), 0, 0, int(row[1]), int(row[2]), row[3], int(row[4])])) # 0imdbnumber, 1empty, 2empty, 3lastPlayed, 4playCount, 5title, 6lastChange
+
             # get watched episodes from addon database
             self.watchedepisodelist_wl = list([])
             if utils.getSetting("w_episodes") == 'true':
                 utils.log(u'get_watched_wl: Get watched episodes from WL database', xbmc.LOGDEBUG)
-                self.sqlcursor.execute("SELECT idShow, season, episode, lastPlayed, playCount, lastChange FROM episode_watched ORDER BY idShow, season, episode") 
+                if utils.getSetting("db_format") == 0: # SQLite3 File. Timestamp stored as integer
+                    self.sqlcursor.execute("SELECT idShow, season, episode, lastPlayed, playCount, lastChange FROM episode_watched ORDER BY idShow, season, episode") 
+                else: # mySQL: Create integer timestamp with the request
+                    self.sqlcursor.execute("SELECT `idShow`, `season`, `episode`, UNIX_TIMESTAMP(`lastPlayed`), `playCount`, UNIX_TIMESTAMP(`lastChange`) FROM `episode_watched` ORDER BY `idShow`, `season`, `episode`") 
+                
                 rows = self.sqlcursor.fetchall() 
                 for row in rows:
                     try:
                         name = '%s S%02dE%02d' % (self.tvshownames[int(row[0])], int(row[1]), int(row[2]))
                     except:
                         name = 'tvdb-id %d S%02dE%02d' % (int(row[0]), int(row[1]), int(row[2]))
-                    if utils.getSetting("db_format") == 0: # SQLite3 File. Timestamp stored as integer
-                        self.watchedepisodelist_wl.append(list([int(row[0]), int(row[1]), int(row[2]), int(row[3]), int(row[4]), name, int(row[5])]))# 0imdbnumber, 1season, 2episode, 3lastplayed, 4playcount, 5name, 6lastChange
-                    else: # MySQL. Timestamp as Datetime
-                        self.watchedepisodelist_wl.append(list([int(row[0]), int(row[1]), int(row[2]), utils.sqlDateTimeToTimeStamp(row[3]), int(row[4]), name, utils.sqlDateTimeToTimeStamp(row[5])]))
+                    self.watchedepisodelist_wl.append(list([int(row[0]), int(row[1]), int(row[2]), int(row[3]), int(row[4]), name, int(row[5])]))# 0imdbnumber, 1season, 2episode, 3lastplayed, 4playcount, 5name, 6lastChange
+
             if not silent: utils.showNotification(utils.getString(32101), utils.getString(32298)%(len(self.watchedmovielist_wl), len(self.watchedepisodelist_wl)))
             self.close_db()
             return 0
@@ -509,15 +511,12 @@ class WatchedList:
             utils.log(u'get_watched_wl: MySQL Database error getting the wl database. %s' % err, xbmc.LOGERROR)
             return 3
         except:
-            utils.log(u'get_watched_wl:  error getting the wl database : %s' % sys.exc_info()[2], xbmc.LOGERROR)
+            utils.log(u'get_watched_wl: Error getting the wl database : %s' % sys.exc_info()[2], xbmc.LOGERROR)
             self.close_db()
             buggalo.onExceptionRaised()  
             return 1     
         
-        
-        
-        
-        
+ 
     def sync_tvshows(self):
         # return codes:
         # 0    successfully synched tv shows
@@ -619,13 +618,12 @@ class WatchedList:
                     except:
                         errstring = ''
                     utils.log(u'write_wl_wdata: SQLite Database error ''%s'' while updating %s %s' % (errstring, modus, row_xbmc[5]), xbmc.LOGERROR)
-                    self.close_db()
                     # error at this place is the result of duplicate movies, which produces a DUPLICATE PRIMARY KEY ERROR
-                    continue
+                    return 1
                 except mysql.connector.Error as err:
                     utils.log(u'write_wl_wdata: MySQL Database error ''%s'' while updating %s %s' % (err, modus, row_xbmc[5]), xbmc.LOGERROR)
                     self.close_db()
-                    continue
+                    return 1 # error while writing. Do not continue with episodes, if movies raised an exception
                 except:
                     utils.log(u'write_wl_wdata: Error while updating %s %s: %s' % (modus, row_xbmc[5], sys.exc_info()[2]), xbmc.LOGERROR)
                     self.close_db()
@@ -1003,7 +1001,7 @@ class WatchedList:
                     if utils.getSetting("db_format") == 0: # sqlite3
                         sql = 'UPDATE movie_watched SET playCount = ?, lastplayed = ?, lastChange = ? WHERE idMovieImdb LIKE ?'
                     else: # mysql
-                        sql = 'UPDATE movie_watched SET playCount = %s, lastplayed = %s, lastChange = FROM_UNIXTIME(%s) WHERE idMovieImdb LIKE ?'
+                        sql = 'UPDATE movie_watched SET playCount = %s, lastplayed = %s, lastChange = FROM_UNIXTIME(%s) WHERE idMovieImdb LIKE %s'
                     values = list([playcount_xbmc, lastplayed_new, lastchange_new, imdbId])
                 else:
                     if utils.getSetting("db_format") == 0: # sqlite3
