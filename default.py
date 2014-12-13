@@ -1,9 +1,13 @@
+"""
+This file is entry point for automatic start via XBMC
+"""
+
 import resources.lib.utils as utils
 from service import WatchedList
 import xbmc
 
 __remotedebug__ = False
-# append pydev remote debugger
+# Append pydev remote debugger
 if __remotedebug__:
     # Make pydev debugger works for auto reload.
     # Note pydevd module need to be copied in XBMC\system\python\Lib\pysrc
@@ -18,12 +22,7 @@ if __remotedebug__:
     except:
         sys.stderr.write("Error importing the debugger")
 
-# this file is entry point for manual start via the programs menu
-
-#run the program
+# Run the program
 xbmc.sleep(1500) # wait 1.5 seconds to prevent import-errors
 utils.log("WatchedList Database Service starting...")
-
-
-
 WatchedList().runProgram()

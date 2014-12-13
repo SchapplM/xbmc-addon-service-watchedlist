@@ -1,3 +1,7 @@
+"""
+This file contains the class of the addon
+"""
+
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
 import re
 import sys, os
@@ -20,9 +24,15 @@ if utils.getSetting('dbbackup') == 'true':
 
 
         
-# Main class of the add-on
+# 
 class WatchedList:
+    """
+    Main class of the add-on
+    """
     def __init__(self):
+        """
+        Initialize Class, default values for all class variables
+        """
         self.watchedmovielist_wl = list([]) # 0imdbnumber, 1empty, 2empty, 3lastPlayed, 4playCount, 5title, 6lastChange
         self.watchedepisodelist_wl = list([]) # 0imdbnumber, 1season, 2episode, 3lastplayed, 4playcount, 5empty, 6lastChange
         
@@ -47,12 +57,16 @@ class WatchedList:
                 
         self.dbpath = ''
         self.dbdirectory = ''
-            
-    # infinite loop for periodic database update
+
     def runProgram(self):
-        # return codes:
-        # 0    success
-        # 3    error/exit
+        """Main function to call other functions
+        infinite loop for periodic database update
+        
+        Returns:
+            return codes:
+            0    success
+            3    error/exit
+        """
         try:
             # workaround to disable autostart, if requested
             if utils.getSetting("autostart") == 'false':
@@ -79,23 +93,22 @@ class WatchedList:
             if utils.sleepsafe(delaytime):
                 return 0
             
-            
             if utils.getSetting("watch_user") == 'true': utils.showNotification(utils.getString(32101), utils.getString(32005))
+            
             # handle the periodic execution
             while float(utils.getSetting("starttype")) > 0 or utils.getSetting("watch_user") == 'true':
                 starttime = time.time()
-                # determine sleeptime before full watched-database update
-                if float(utils.getSetting("starttype")) > 0: 
-                    if utils.getSetting("starttype") == '2':
-                        sleeptime = float(utils.getSetting("interval")) * 3600 # wait interval until next startup in [seconds]
-                        # wait and then update again
-                        utils.log(u'wait %d seconds until next update' % sleeptime)
-                        utils.showNotification(utils.getString(32101), utils.getString(32003)%(sleeptime/3600))
-                    else:
-                        sleeptime = 3600 # arbitrary time for infinite loop
-                else:
+                # determine sleeptime before next full watched-database update
+                if utils.getSetting("starttype") == '1' and executioncount == 0: # one execution after startup
+                    sleeptime = 0
+                elif utils.getSetting("starttype") == '2': # periodic execution
+                    sleeptime = float(utils.getSetting("interval")) * 3600 # wait interval until next startup in [seconds]
+                    # wait and then update again
+                    utils.log(u'wait %d seconds until next update' % sleeptime)
+                    utils.showNotification(utils.getString(32101), utils.getString(32003)%(sleeptime/3600))
+                else: # no autostart, only watch user
                     sleeptime = 3600 # arbitrary time for infinite loop
-               
+                
                 # workaround to sleep the requested time. When using the sleep-function, xbmc can not exit 
                 while 1:
                     if xbmc.abortRequested: return 1
@@ -109,26 +122,37 @@ class WatchedList:
                     if time.time() > starttime + sleeptime:
                         break
                     xbmc.sleep(1000) # wait 1 second until next check if xbmc terminates
+                # perform full update
                 if utils.getSetting("starttype") == '1' and executioncount == 0 or utils.getSetting("starttype") == '2':
                     self.runUpdate(False)
                     executioncount += 1
+                    
+                # check for exiting program
                 if float(utils.getSetting("starttype")) < 2 and utils.getSetting("watch_user") == 'false':
                     return 0 # the program may exit. No purpose for background process
-            # do not use the periodic update
+                
             return 0
         except:
             buggalo.onExceptionRaised()  
             
-    # entry point for manual start.
-    # perform the update step by step
+
     def runUpdate(self, manualstart):
-        # return codes:
-        # 0    success
-        # 3    Error opening database
-        # 4    Error getting watched state from addon database
-        # 5    Error getting watched state from xbmc database
-        # 6    Error writing WL Database
-        # 7    Error writing XBMC database
+        """entry point for manual start.
+        perform the update step by step
+        
+        Args:
+            manualstart: True if called manually
+            
+        Returns:
+            return code:
+            0    success
+            3    Error opening database
+            4    Error getting watched state from addon database
+            5    Error getting watched state from xbmc database
+            6    Error writing WL Database
+            7    Error writing XBMC database
+        """
+
         try:
             utils.buggalo_extradata_settings()
 
@@ -189,12 +213,18 @@ class WatchedList:
             buggalo.onExceptionRaised()  
 
     def load_db(self, manualstart=False):
-        # return codes:
-        # 0    successfully opened database
-        # 1    error
-        # 2    shutdown (serious error in subfunction)
+        """Load WL database
         
-        # if manualstart, only retry opening db once
+        Args:
+            manualstart: True if called manually; only retry opening db once
+            
+        Returns:
+            return code:
+            0    successfully opened database
+            1    error
+            2    shutdown (serious error in subfunction)
+        """
+        
         try:
             if utils.getSetting("db_format") == 0:
                 # SQlite3 database in a file
@@ -331,6 +361,14 @@ class WatchedList:
 
 
     def close_db(self):
+        """Close WL database
+                  
+        Returns:
+            return code:
+            0    successfully closed database
+            1    error
+        """
+        
         if self.sqlcon:
             self.sqlcon.close()
         self.sqlcon = 0
@@ -349,6 +387,16 @@ class WatchedList:
         
 
     def get_watched_xbmc(self, silent):
+        """Get Watched States of XBMC Database
+        
+        Args:
+            silent: Do not show notifications if True
+            
+        Returns:
+            return code:
+            0    success
+            1    error
+        """
         try:
             
             ############################################        
@@ -451,16 +499,21 @@ class WatchedList:
             buggalo.onExceptionRaised()  
             return 1          
         
-     
-        
 
-        
     def get_watched_wl(self, silent):
-        # return codes:
-        # 0    successfully got watched states from WL-database
-        # 1    unknown error (programming related)
-        # 2    shutdown (error in subfunction)
-        # 3    error related to opening the database
+        """Get Watched States of WL Database
+        
+        Args:
+            silent: Do not show notifications if True
+            
+        Returns:
+            return code:
+            0    successfully got watched states from WL-database
+            1    unknown error (programming related)
+            2    shutdown (error in subfunction)
+            3    error related to opening the database
+        """
+
         try:
             buggalo.addExtraData('self_sqlcursor', self.sqlcursor); buggalo.addExtraData('self_sqlcon', self.sqlcon);
             if self.sqlcursor == 0 or self.sqlcon == 0:
@@ -518,10 +571,15 @@ class WatchedList:
         
  
     def sync_tvshows(self):
-        # return codes:
-        # 0    successfully synched tv shows
-        # 1    database access error
-        # 2    database loading error
+        """Sync List of TV Shows between WL and XBMC Database
+
+        Returns:
+            return code:
+            0    successfully synched tv shows
+            1    database access error
+            2    database loading error
+        """
+
         try:
             utils.log(u'sync_tvshows: sync tvshows with wl database : %s' % sys.exc_info()[2], xbmc.LOGDEBUG)
             if self.sqlcursor == 0 or self.sqlcon == 0:
@@ -566,11 +624,14 @@ class WatchedList:
 
         
     def write_wl_wdata(self):
-        # Go through all watched movies from xbmc and check whether they are up to date in the addon database
-        # return codes:
-        # 0    successfully written WL
-        # 1    program exception
-        # 2    database loading error
+        """Go through all watched movies from xbmc and check whether they are up to date in the addon database
+
+        Returns:
+            return code:
+            0    successfully written WL
+            1    program exception
+            2    database loading error
+        """
         
         buggalo.addExtraData('self_sqlcursor', self.sqlcursor); buggalo.addExtraData('self_sqlcon', self.sqlcon);
         if self.sqlcursor == 0 or self.sqlcon == 0:
@@ -643,19 +704,21 @@ class WatchedList:
         self.close_db()
         return 0
         
-        
-        
-        
-        
-    # update the xbmc database.
-    # progressdialogue
-    # notifications: 0= no, 1=only changed info, 2=all
+
     def write_xbmc_wdata(self, progressdialogue, notifications):
-        # Go through all watched movies/episodes from the wl-database and check, if the xbmc-database is up to date
-        # return codes:
-        # 0    successfully written XBMC database
-        # 1    program exception
-        # 2    cancel by user interaction
+        """Go through all watched movies/episodes from the wl-database and check, 
+        if the xbmc-database is up to date
+
+        Args:
+            progressdialogue: Show Progress Bar if True
+            notifications: 0= no, 1=only changed info, 2=all
+            
+        Returns:
+            return code:
+            0    successfully written XBMC database
+            1    program exception
+            2    cancel by user interaction
+        """
         
         for modus in ['movie', 'episode']:
             buggalo.addExtraData('modus', modus);
@@ -780,16 +843,17 @@ class WatchedList:
                 utils.showNotification(utils.getString(strno[0]), utils.getString(strno[1])%(count_update))    
         return 0
     
-    
-    
-    
-    
-    # create a copy of the database, in case something goes wrong (only if database file is used)
+
     def database_copy(self):
-        # return codes:
-        # 0    successfully copied database
-        # 1    file writing error
-        # 2    program exception
+        """create a copy of the database, in case something goes wrong (only if database file is used)
+            
+        Returns:
+            return code:
+            0    successfully copied database
+            1    file writing error
+            2    program exception
+        
+        """
         
         if utils.getSetting("db_format") != 0:
             return 0 # no backup needed since we are using mysql database
@@ -823,11 +887,14 @@ class WatchedList:
                 buggalo.onExceptionRaised()  
                 return 2
                 
-            
-    # check if the user made changes in the watched states. Especially setting movies as "not watched". This can not be
-    # recognized by the functions above
     def watch_user_changes(self, idletime_old, idletime):
-        # return codes: Not defined
+        """check if the user made changes in the watched states. Especially setting movies as "not watched". 
+        This can not be recognized by the other functions     
+        
+        Args:
+            idletime_old: Old Idle Time
+            idletime: New Idle Time
+        """
         
         if xbmc.Player().isPlaying() == True:
             return
@@ -916,20 +983,28 @@ class WatchedList:
                     self.close_db()
                     break
                 
-                # update xbmc watched status, e.g. to set duplicate movies also as watched
+            # update xbmc watched status, e.g. to set duplicate movies also as watched
             if len(indices_changed) > 0:    
                 self.write_xbmc_wdata(0, 1) # this changes self.watchedmovielist_xbmc
                 self.close_db() # keep the db closed most of the time (no access problems)
         
- 
-                
-    # update the wl database for one movie/episode with the information in row_xbmc.
-    # Use saveanyway to skip checks whether not to save the changes. With commit, the db change is committed directly (slow with many movies, but safe)    
-    def wl_update_media(self, mediatype, row_xbmc, saveanyway, commit):
-        # return codes:
 
-        # 2    error loading database
+    def wl_update_media(self, mediatype, row_xbmc, saveanyway, commit):
+        """update the wl database for one movie/episode with the information in row_xbmc.
         
+        Args:
+            mediatype: 'episode' or 'movie'
+            row_xbmc: One row of the xbmc media table self.watchedmovielist_xbmc.
+            saveanyway: Skip checks whether not to save the changes
+            commit: The db change is committed directly (slow with many movies, but safe)  
+            
+        Returns:
+            return code:
+            2    error loading database
+            count_return:
+            list with 2 entries: ???
+        """
+
         buggalo.addExtraData('self_sqlcursor', self.sqlcursor); buggalo.addExtraData('self_sqlcon', self.sqlcon);
         buggalo.addExtraData('len_self_watchedmovielist_wl', len(self.watchedmovielist_wl))
         buggalo.addExtraData('len_self_watchedepisodelist_wl', len(self.watchedepisodelist_wl))

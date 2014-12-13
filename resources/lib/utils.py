@@ -1,3 +1,7 @@
+"""
+This file contains additional utility functions
+"""
+
 import xbmc
 import xbmcvfs
 import xbmcaddon
@@ -19,29 +23,38 @@ else:
 
 
 def data_dir():
-    # get user data directory of this addon. 
-    # according to http://wiki.xbmc.org/index.php?title=Add-on_Rules#Requirements_for_scripts_and_plugins
+    """"get user data directory of this addon. 
+    according to http://wiki.xbmc.org/index.php?title=Add-on_Rules#Requirements_for_scripts_and_plugins
+    """
     __datapath__ = xbmc.translatePath( __Addon.getAddonInfo('profile') ).decode('utf-8')
     if not xbmcvfs.exists(__datapath__):
         xbmcvfs.mkdir(__datapath__)
     return __datapath__
 
 def addon_dir():
-    # get source directory of this addon.
-    # according to http://wiki.xbmc.org/index.php?title=Add-on_Rules#Requirements_for_scripts_and_plugins
+    """"get source directory of this addon.
+    according to http://wiki.xbmc.org/index.php?title=Add-on_Rules#Requirements_for_scripts_and_plugins
+    """
     return __Addon.getAddonInfo('path').decode('utf-8')
 
 def log(message,loglevel=xbmc.LOGNOTICE):
-    # save message to xbmc.log. `message` has to be unicode
-    # loglevels: xbmc.LOGDEBUG, xbmc.LOGINFO, xbmc.LOGNOTICE, xbmc.LOGWARNING, xbmc.LOGERROR, xbmc.LOGFATAL
+    """"save message to xbmc.log.
     
-    # message should be unicode object. Encoding according to http://wiki.xbmc.org/index.php?title=Add-on_unicode_paths#Logging
+    Args:
+        message: has to be unicode, http://wiki.xbmc.org/index.php?title=Add-on_unicode_paths#Logging
+        loglevel: xbmc.LOGDEBUG, xbmc.LOGINFO, xbmc.LOGNOTICE, xbmc.LOGWARNING, xbmc.LOGERROR, xbmc.LOGFATAL
+    """
     xbmc.log(encode(__addon_id__ + u": " + message), level=loglevel)
 
 
 def showNotification(title,message, time=4000):
-    # Show Notification with given `title` and `message`.
-    # `title` and `message` have to be unicode
+    """Show Notification
+
+    Args: 
+        title: has to be unicode
+        message: has to be unicode
+        time: Time that the message is beeing displayed
+    """
     __addoniconpath__ = os.path.join(addon_dir(),"icon.png")
     log(u'Notification. %s: %s' % (title, message) )
     if xbmc.Player().isPlaying() == False: # do not show the notification, if a video is being played.
@@ -69,6 +82,7 @@ def decode(string):
 
 
 def footprint():
+    """Print settings to log file"""
     log(u'data_dir() = %s' % data_dir(), xbmc.LOGDEBUG)
     log(u'addon_dir() = %s' % addon_dir(), xbmc.LOGDEBUG)
     log(u'debug = %s' % getSetting('debug'), xbmc.LOGDEBUG)
@@ -84,8 +98,15 @@ def footprint():
     log(u'dbfilename = %s' % getSetting('dbfilename'), xbmc.LOGDEBUG)
     log(u'dbbackup = %s' % getSetting('dbbackup'), xbmc.LOGDEBUG)
     
-# "2013-05-10 21:23:24"  --->  1368213804
+# 
 def sqlDateTimeToTimeStamp(sqlDateTime):
+    """Convert SQLite DateTime to Unix Timestamp
+    
+        Args:
+            sqlDateTime: E.g. "2013-05-10 21:23:24"
+        Returns:
+            timestamp: E.g. 1368213804
+    """
     # sqlDateTime is a string (only from SQLite db. Mysql returns object)
     if sqlDateTime == '':
         return 0 # NULL timestamp
@@ -101,16 +122,26 @@ def sqlDateTimeToTimeStamp(sqlDateTime):
         except:
             return 0 # error, but timestamp=0 works in the addon
                     
-                
-
-#  1368213804  --->  "2013-05-10 21:23:24"
 def TimeStamptosqlDateTime(TimeStamp):
+    """Convert Unix Timestamp to SQLite DateTime
+    
+        Args: 
+            timestamp: E.g. 1368213804
+            
+        Returns:
+            sqlDateTime: E.g. "2013-05-10 21:23:24"
+    """
     if TimeStamp == 0:
         return ""
     else:
         return time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(TimeStamp))    
     
 def executeJSON(request):
+    """Execute JSON-RPC Command
+    
+    Args:
+        request: Dictionary with JSON-RPC Commands
+    """
     rpccmd = simplejson.dumps(request) # create string from dict
     json_query = xbmc.executeJSONRPC(rpccmd)
     json_query = unicode(json_query, 'utf-8', errors='ignore')
@@ -121,7 +152,8 @@ def executeJSON(request):
     return json_response
 
 def buggalo_extradata_settings():
-    # add extradata to buggalo
+    """"add extradata to buggalo"""
+    
     buggalo.addExtraData('data_dir', data_dir());
     buggalo.addExtraData('addon_dir', addon_dir());
     buggalo.addExtraData('setting_debug', getSetting("debug"));
@@ -144,7 +176,14 @@ def buggalo_extradata_settings():
 
     
 def translateSMB(path):
-    # translate "smb://..." to "\\..." in windows. Don't change other paths
+    """"translate "smb://..." to "\\..." in windows. Don't change other paths
+    
+    Args:
+        path: Path to File in Linux notation
+        
+    Returns:
+        path: Path to File in Windows notation
+    """
     if os.sep == '\\': # windows os
         res_smb = re.compile('smb://(\w+)/(.+)').findall(path)
         if len(res_smb) == 0:
@@ -158,7 +197,15 @@ def translateSMB(path):
         return path
     
 def fileaccessmode(path):
-    # determine file access mode in case of smb share no direct access possible
+    """"determine file access mode in case of smb share no direct access possible
+    
+    Args:
+        path: Path to File
+        
+    Returns:
+        copy_mode: Mode of file access: 'copy' or 'normal'
+    """
+    
     res_smb = re.compile('smb://(\w+)/(.+)').findall(path)
     res_nw = re.compile('(\w+)://(.*?)').findall(path)
     if os.sep == '\\': # windows os
@@ -182,7 +229,15 @@ def fileaccessmode(path):
             return 'normal'
 
 def sleepsafe(waittime):
-    # sleep waittime [seconds] and return if a shutdown is requested
+    """"sleep waittime return if a shutdown is requested
+    
+    Args:
+        waittime: Time in [seconds] to wait
+        
+    Returns:
+        0 waited the requested time
+        1 shutdown detected within waiting time. Aborted waiting
+    """
     starttime = time.time()
     while not xbmc.abortRequested:
         if time.time() > starttime + waittime:
