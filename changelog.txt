@@ -1,3 +1,6 @@
+version 1.0.1 (13.12.2014)
+ * Fixed unwanted waiting time in autostart
+
 version 1.0.0 (01.09.2014)
  * Added mySQL Database support for the WatchedList Database
 
