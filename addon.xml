@@ -22,7 +22,7 @@
 		Import: Set the watched state for each video file in xbmc.
 		Automatic background process without user interaction.</description>
 		<description lang="de">
-		Export: Durchsucht die XBMC-Datenbank nach gesehenen Filmen und ordne den Dateien die eindeutigen Kennnummern von imdb und TheTVDB zu. Gesehene Filme und Episoden werden jeweils in einer eigenen Datenbank gespeichert.
+		Export: Durchsucht die XBMC-Datenbank nach gesehenen Filmen und ordnet den Dateien die eindeutigen Kennnummern von imdb und TheTVDB zu. Gesehene Filme und Episoden werden jeweils in einer eigenen Datenbank gespeichert.
 		Import: Der Gesehen-Status von Medien in XBMC wird aus der Gesehenen-Tabelle geholt.
 		Die Synchronisierung geschieht automatisch im Hintergrund ohne Benutzereingriff.</description>
 		<disclaimer lang="en">This script does not regard the file format. A Movie watched in DVD quality will also set	the 1080p version as watched.</disclaimer>
