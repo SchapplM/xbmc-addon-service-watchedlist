@@ -1,5 +1,7 @@
 """
 This file contains the class of the addon
+
+
 """
 
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
@@ -226,7 +228,7 @@ class WatchedList:
         """
         
         try:
-            if utils.getSetting("db_format") == 0:
+            if utils.getSetting("db_format") == '0':
                 # SQlite3 database in a file
                 # load the db path
                 if utils.getSetting("extdb") == 'false':
@@ -291,7 +293,7 @@ class WatchedList:
                 self.sqlcursor = self.sqlcon.cursor()
                 
             # create tables if they don't exist
-            if utils.getSetting("db_format") == 0: # sqlite file
+            if utils.getSetting("db_format") == '0': # sqlite file
                 sql = "CREATE TABLE IF NOT EXISTS movie_watched (idMovieImdb INTEGER PRIMARY KEY,playCount INTEGER,lastChange INTEGER,lastPlayed INTEGER,title TEXT)"
                 self.sqlcursor.execute(sql)
                 sql = "CREATE TABLE IF NOT EXISTS episode_watched (idShow INTEGER, season INTEGER, episode INTEGER, playCount INTEGER,lastChange INTEGER,lastPlayed INTEGER, PRIMARY KEY (idShow, season, episode))"
@@ -374,7 +376,7 @@ class WatchedList:
         self.sqlcon = 0
         
         # copy the db file back to the shared directory, if needed
-        if utils.getSetting("db_format") == 0 and self.dbfileaccess == 'copy':
+        if utils.getSetting("db_format") == '0' and self.dbfileaccess == 'copy':
             if xbmcvfs.exists(self.dbpath):
                 success = xbmcvfs.copy(self.dbpath, self.dbpath_copy)
                 utils.log(u'copied db file %s -> %s. Success: %d' % (self.dbpath, self.dbpath_copy, success), xbmc.LOGDEBUG)  
@@ -523,7 +525,7 @@ class WatchedList:
             self.watchedmovielist_wl = list([])
             if utils.getSetting("w_movies") == 'true':
                 utils.log(u'get_watched_wl: Get watched movies from WL database', xbmc.LOGDEBUG)
-                if utils.getSetting("db_format") == 0: # SQLite3 File. Timestamp stored as integer
+                if utils.getSetting("db_format") == '0': # SQLite3 File. Timestamp stored as integer
                     self.sqlcursor.execute("SELECT idMovieImdb, lastPlayed, playCount, title, lastChange FROM movie_watched ORDER BY title") 
                 else: # mySQL: Create integer timestamp with the request
                     self.sqlcursor.execute("SELECT `idMovieImdb`, UNIX_TIMESTAMP(`lastPlayed`), `playCount`, `title`, UNIX_TIMESTAMP(`lastChange`) FROM `movie_watched` ORDER BY `title`") 
@@ -535,7 +537,7 @@ class WatchedList:
             self.watchedepisodelist_wl = list([])
             if utils.getSetting("w_episodes") == 'true':
                 utils.log(u'get_watched_wl: Get watched episodes from WL database', xbmc.LOGDEBUG)
-                if utils.getSetting("db_format") == 0: # SQLite3 File. Timestamp stored as integer
+                if utils.getSetting("db_format") == '0': # SQLite3 File. Timestamp stored as integer
                     self.sqlcursor.execute("SELECT idShow, season, episode, lastPlayed, playCount, lastChange FROM episode_watched ORDER BY idShow, season, episode") 
                 else: # mySQL: Create integer timestamp with the request
                     self.sqlcursor.execute("SELECT `idShow`, `season`, `episode`, UNIX_TIMESTAMP(`lastPlayed`), `playCount`, UNIX_TIMESTAMP(`lastChange`) FROM `episode_watched` ORDER BY `idShow`, `season`, `episode`") 
@@ -587,7 +589,7 @@ class WatchedList:
                     return 2
             # write eventually new tv shows to wl database
             for xbmcid in self.tvshows:
-                if utils.getSetting("db_format") == 0: # sqlite3
+                if utils.getSetting("db_format") == '0': # sqlite3
                     sql = "INSERT OR IGNORE INTO tvshows (idShow,title) VALUES (?, ?)"
                 else: # mysql
                     sql = "INSERT IGNORE INTO tvshows (idShow,title) VALUES (%s, %s)"
@@ -855,7 +857,7 @@ class WatchedList:
         
         """
         
-        if utils.getSetting("db_format") != 0:
+        if utils.getSetting("db_format") != '0':
             return 0 # no backup needed since we are using mysql database
         
         if utils.getSetting('dbbackup') == 'false':
@@ -1056,7 +1058,7 @@ class WatchedList:
                     
                     # check if an update of the wl database is necessary (xbmc watched status newer)
                     if lastchange_wl > lastplayed_xbmc:
-                        return count_return
+                        return count_return# no update of WL-db. Return
                     
                     if playcount_wl >= playcount_xbmc and lastplayed_wl >= lastplayed_xbmc:
                         if utils.getSetting("debug") == 'true':
@@ -1073,13 +1075,13 @@ class WatchedList:
   
                 lastchange_new = int(time.time())
                 if modus == 'movie':
-                    if utils.getSetting("db_format") == 0: # sqlite3
+                    if utils.getSetting("db_format") == '0': # sqlite3
                         sql = 'UPDATE movie_watched SET playCount = ?, lastplayed = ?, lastChange = ? WHERE idMovieImdb LIKE ?'
                     else: # mysql
                         sql = 'UPDATE movie_watched SET playCount = %s, lastplayed = %s, lastChange = FROM_UNIXTIME(%s) WHERE idMovieImdb LIKE %s'
                     values = list([playcount_xbmc, lastplayed_new, lastchange_new, imdbId])
                 else:
-                    if utils.getSetting("db_format") == 0: # sqlite3
+                    if utils.getSetting("db_format") == '0': # sqlite3
                         sql = 'UPDATE episode_watched SET playCount = ?, lastPlayed = ?, lastChange = ? WHERE idShow LIKE ? AND season LIKE ? AND episode LIKE ?'
                     else: # mysql
                         sql = 'UPDATE episode_watched SET playCount = %s, lastPlayed = FROM_UNIXTIME(%s), lastChange = FROM_UNIXTIME(%s) WHERE idShow LIKE %s AND season LIKE %s AND episode LIKE %s'
@@ -1102,13 +1104,13 @@ class WatchedList:
                 # order: idMovieImdb,playCount,lastChange,lastPlayed,title
                 lastchange_new = int(time.time())
                 if modus == 'movie':
-                    if utils.getSetting("db_format") == 0: # sqlite3
+                    if utils.getSetting("db_format") == '0': # sqlite3
                         sql = 'INSERT INTO movie_watched (idMovieImdb,playCount,lastChange,lastPlayed,title) VALUES (?, ?, ?, ?, ?)'
                     else: # mysql
                         sql = 'INSERT INTO movie_watched (idMovieImdb,playCount,lastChange,lastPlayed,title) VALUES (%s, %s, FROM_UNIXTIME(%s), FROM_UNIXTIME(%s), %s)'
                     values = list([imdbId, playcount_xbmc, lastchange_new, lastplayed_xbmc, name])
                 else:
-                    if utils.getSetting("db_format") == 0: # sqlite3
+                    if utils.getSetting("db_format") == '0': # sqlite3
                         sql = 'INSERT INTO episode_watched (idShow,season,episode,playCount,lastChange,lastPlayed) VALUES (?, ?, ?, ?, ?, ?)'
                     else: # mysql
                         sql = 'INSERT INTO episode_watched (idShow,season,episode,playCount,lastChange,lastPlayed) VALUES (%s, %s, %s, %s, FROM_UNIXTIME(%s), FROM_UNIXTIME(%s))'
