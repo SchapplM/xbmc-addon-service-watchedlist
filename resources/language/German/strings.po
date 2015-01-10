@@ -1,13 +1,9 @@
 # XBMC Media Center language file
-# Addon Name: WatchedList
-# Addon id: service.watchedlist
-# Addon version: 0.9.9
-# Addon Provider: schapplm
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC-Addons\n"
 "Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
-"POT-Creation-Date: 2014-09-01 19:50+0000\n"
+"POT-Creation-Date: 2015-01-10 18:38+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE\n"
@@ -16,18 +12,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language: de\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-
-msgctxt "Addon Summary"
-msgid "Save watched Movies and TV Episodes independent from filenames"
-msgstr "Gesehen-Status von Filmen und Serien-Episoden unabhängig von Dateinamen speichern"
-
-msgctxt "Addon Description"
-msgid "\n		Export: Searches the XBMC-Database for watched files. Determine imdb-id and thetvdb-id to identify movies and TV-episodes. Then save the list to a new independent table.\n		Import: Set the watched state for each video file in xbmc.\n		Automatic background process without user interaction."
-msgstr "\n		Export: Durchsucht die XBMC-Datenbank nach gesehenen Filmen und ordne den Dateien die eindeutigen Kennnummern von imdb und TheTVDB zu. Gesehene Filme und Episoden werden jeweils in einer eigenen Datenbank gespeichert.\n		Import: Der Gesehen-Status von Medien in XBMC wird aus der Gesehenen-Tabelle geholt.\n		Die Synchronisierung geschieht automatisch im Hintergrund ohne Benutzereingriff."
-
-msgctxt "Addon Disclaimer"
-msgid "This script does not regard the file format. A Movie watched in DVD quality will also set	the 1080p version as watched."
-msgstr "Dieses Script ignoriert das Dateiformat. Ein gesehener Film in DVD-Qualität wird auch in der BlueRay-Version als gesehen gekennzeichnet."
 
 msgctxt "#30001"
 msgid "Basic Settings"
@@ -112,6 +96,14 @@ msgstr "Datei"
 msgctxt "#30042"
 msgid "MySQL"
 msgstr "MySQL"
+
+msgctxt "#30043"
+msgid "Options for accessing SQLite-DB-File"
+msgstr "Optionen für SQLite-Datei-Zugriff"
+
+msgctxt "#30044"
+msgid "Options for accessing MySQL-Server"
+msgstr "Optionen für MySQL-Server-Zugriff"
 
 msgctxt "#30051"
 msgid "MySQL Server"

@@ -1,13 +1,9 @@
 # XBMC Media Center language file
-# Addon Name: WatchedList
-# Addon id: service.watchedlist
-# Addon version: 0.9.9
-# Addon Provider: schapplm
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC-Addons\n"
 "Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
-"POT-Creation-Date: 2014-09-01 19:50+0000\n"
+"POT-Creation-Date: 2015-01-10 18:38+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE\n"
@@ -16,18 +12,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language: en\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-
-msgctxt "Addon Summary"
-msgid "Save watched Movies and TV Episodes independent from filenames"
-msgstr ""
-
-msgctxt "Addon Description"
-msgid "\n		Export: Searches the XBMC-Database for watched files. Determine imdb-id and thetvdb-id to identify movies and TV-episodes. Then save the list to a new independent table.\n		Import: Set the watched state for each video file in xbmc.\n		Automatic background process without user interaction."
-msgstr ""
-
-msgctxt "Addon Disclaimer"
-msgid "This script does not regard the file format. A Movie watched in DVD quality will also set	the 1080p version as watched."
-msgstr ""
 
 #Notification headers
 
@@ -121,7 +105,15 @@ msgctxt "#30042"
 msgid "MySQL"
 msgstr ""
 
-#empty strings from id 30043 to 30050
+msgctxt "#30043"
+msgid "Options for accessing SQLite-DB-File"
+msgstr ""
+
+msgctxt "#30044"
+msgid "Options for accessing MySQL-Server"
+msgstr ""
+
+#empty strings from id 30045 to 30050
 
 msgctxt "#30051"
 msgid "MySQL Server"

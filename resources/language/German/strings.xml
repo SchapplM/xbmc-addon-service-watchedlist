@@ -75,6 +75,8 @@
 	<string id="30040">DB-Art</string>
 	<string id="30041">Datei</string>
 	<string id="30042">MySQL</string>
+  <string id="30043">Optionen für SQLite-Datei-Zugriff</string>
+  <string id="30044">Optionen für MySQL-Server-Zugriff</string>
 	<string id="30017">Eigene Datenbank-Datei</string>
 	<string id="30018">Pfad zur Datenbank-Datei</string>
 	<string id="30019">Dateiname (*.db)</string>
