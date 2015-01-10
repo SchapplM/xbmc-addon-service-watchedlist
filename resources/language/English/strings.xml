@@ -73,6 +73,8 @@
 	<string id="30040">DB Method</string>
 	<string id="30041">File</string>
 	<string id="30042">MySQL</string>
+  <string id="30043">Options for accessing SQLite-DB-File</string>
+  <string id="30044">Options for accessing MySQL-Server</string>
 	<string id="30017">Use non-default database file</string>
 	<string id="30018">Path to database file</string>
 	<string id="30019">Database filename (SQLite Database, *.db)</string>
