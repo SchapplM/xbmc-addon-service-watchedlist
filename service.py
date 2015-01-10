@@ -1,7 +1,34 @@
 """
 This file contains the class of the addon
 
-
+Settings for this addon:
+w_movies
+    'true', 'false': save watched state of movies
+w_episodes
+    'true', 'false': save watched state of movies
+autostart
+delay
+starttype
+    '0' = No autostart
+    '1' = One Execution after xbmc start
+    '2' = Periodic start of the addon
+interval
+watch_user
+progressdialog
+db_format
+    '0' = SQLite File
+    '1' = MYSQL Server
+extdb
+    'true', 'false': Use external database file
+dbpath
+    String: Specify path to external database file
+dbfilename
+dbbackup
+mysql_server
+mysql_port
+mysql_db
+mysql_user
+mysql_pass
 """
 
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
