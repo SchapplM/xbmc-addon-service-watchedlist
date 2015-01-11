@@ -1,3 +1,7 @@
+version 1.0.3 (11.01.2015)
+ * Fixed wrong implementation of startup delay
+ * Fixed missing startup execution if autostart mode is set to periodic
+
 version 1.0.2 (10.01.2015)
  * Fixed support for Database file got lost in version 1.0.0
 
