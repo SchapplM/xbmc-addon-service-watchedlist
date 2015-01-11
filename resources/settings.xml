@@ -5,10 +5,10 @@
 		<setting id="w_movies" type="bool" label="30011" default="true" />
 		<setting id="w_episodes" type="bool" label="30012" default="true" />
 		
-		<setting id="autostart" type="bool" label="30021" default="true" />
+		<setting id="autostart" type="bool" label="30021" default="false" />
 		<setting id="delay" type="slider" label="30015" default="5" range="0,5,60" option="int" enable="eq(-1,true)" />
 		<!-- starttype: no, one, periodic update -->
-		<setting id="starttype" type="enum" label="30013" lvalues="30030|30031|30032" default="2" enable="eq(-2,true)" />
+		<setting id="starttype" type="enum" label="30013" lvalues="30030|30031|30032" default="0" enable="eq(-2,true)" />
 		<setting id="interval" type="slider" label="30014" default="24" range="3,3,96" option="int" enable="eq(-1,2)+eq(-3,true)" />
 		<setting id="watch_user" type="bool" label="30022" default="true" enable="eq(-4,true)" />
 		<setting id="progressdialog" type="bool" label="30016" default="true" />
