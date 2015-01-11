@@ -8,6 +8,7 @@ w_episodes
     'true', 'false': save watched state of movies
 autostart
 delay
+    delay after startup in minutes: '0', '5', '10', ...
 starttype
     '0' = No autostart
     '1' = One Execution after xbmc start
@@ -104,7 +105,14 @@ class WatchedList:
             utils.buggalo_extradata_settings()
             utils.footprint()
             
+            # wait the delay time after startup
+            delaytime = float(utils.getSetting("delay")) * 60 # in seconds
+            utils.log(u'Delay time before execution: %d seconds' % delaytime, xbmc.LOGDEBUG)
+            utils.showNotification(utils.getString(32101), utils.getString(32004)%float(utils.getSetting("delay")))
+            if utils.sleepsafe(delaytime):
+                return 0
 
+            # load all databases
             if self.sqlcursor == 0 or self.sqlcon == 0: 
                 if self.load_db():
                     utils.showNotification(utils.getString(32102), utils.getString(32601))
@@ -115,13 +123,6 @@ class WatchedList:
             executioncount = 0
             idletime = 0
             
-            # wait the delay time after startup
-            delaytime = float(utils.getSetting("delay")) * 60 # in seconds
-            utils.log(u'Delay time before execution: %d seconds' % delaytime, xbmc.LOGDEBUG)
-            utils.showNotification(utils.getString(32101), utils.getString(32004)%float(utils.getSetting("delay")))
-            if utils.sleepsafe(delaytime):
-                return 0
-            
             if utils.getSetting("watch_user") == 'true': utils.showNotification(utils.getString(32101), utils.getString(32005))
             
             # handle the periodic execution
@@ -131,10 +132,13 @@ class WatchedList:
                 if utils.getSetting("starttype") == '1' and executioncount == 0: # one execution after startup
                     sleeptime = 0
                 elif utils.getSetting("starttype") == '2': # periodic execution
-                    sleeptime = float(utils.getSetting("interval")) * 3600 # wait interval until next startup in [seconds]
-                    # wait and then update again
-                    utils.log(u'wait %d seconds until next update' % sleeptime)
-                    utils.showNotification(utils.getString(32101), utils.getString(32003)%(sleeptime/3600))
+                    if executioncount == 0: # with periodic execution, one update after startup and then periodic
+                        sleeptime = 0
+                    else:
+                        sleeptime = float(utils.getSetting("interval")) * 3600 # wait interval until next startup in [seconds]
+                        # wait and then update again
+                        utils.log(u'wait %d seconds until next update' % sleeptime)
+                        utils.showNotification(utils.getString(32101), utils.getString(32003)%(sleeptime/3600))
                 else: # no autostart, only watch user
                     sleeptime = 3600 # arbitrary time for infinite loop
                 
