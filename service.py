@@ -934,9 +934,9 @@ class WatchedList:
         if idletime > idletime_old:
             # the idle time increased. No user interaction probably happened
             return
-        utils.log(u'watch_user_changes: Check for user changes (no. %d)' % self.watch_user_changes_count, xbmc.LOGDEBUG)
         self.watch_user_changes_count = self.watch_user_changes_count + 1
-                        
+        utils.log(u'watch_user_changes: Check for user changes (no. %d)' % self.watch_user_changes_count, xbmc.LOGDEBUG)
+                     
         # save previous state
         old_watchedmovielist_xbmc = self.watchedmovielist_xbmc
         old_watchedepisodelist_xbmc = self.watchedepisodelist_xbmc
