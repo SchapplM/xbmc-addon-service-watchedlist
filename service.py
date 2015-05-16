@@ -1109,7 +1109,7 @@ class WatchedList:
                     if utils.getSetting("db_format") == '0': # sqlite3
                         sql = 'UPDATE movie_watched SET playCount = ?, lastplayed = ?, lastChange = ? WHERE idMovieImdb LIKE ?'
                     else: # mysql
-                        sql = 'UPDATE movie_watched SET playCount = %s, lastplayed = %s, lastChange = FROM_UNIXTIME(%s) WHERE idMovieImdb LIKE %s'
+                        sql = 'UPDATE movie_watched SET playCount = %s, lastplayed = FROM_UNIXTIME(%s), lastChange = FROM_UNIXTIME(%s) WHERE idMovieImdb LIKE %s'
                     values = list([playcount_xbmc, lastplayed_new, lastchange_new, imdbId])
                 else:
                     if utils.getSetting("db_format") == '0': # sqlite3
