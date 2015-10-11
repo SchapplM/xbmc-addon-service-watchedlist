@@ -15,20 +15,21 @@
     </category>
 	
     <category label="30002">
-		<setting id="db_format" type="enum" label="30040" lvalues="30041|30042" default="0" />
+		<setting id="db_format" type="enum" label="30040" lvalues="30041|30042|30045" default="0" />
 		<!-- File Database Options (first option in db_format) --> 
     <!--<setting label="30043" type="lsep"/>-->
 		<setting id="extdb" type="bool" label="30017" default="false" enable="eq(-1,0)" />
 		<setting id="dbpath" type="folder" label="30018" default="" enable="eq(-1,true)+eq(-2,0)" />
 		<setting id="dbfilename" type="text" label="30019" default="watchedlist.db" enable="eq(-2,true)+eq(-3,0)" />
 		<setting id="dbbackup" type="bool" label="30020" default="false" enable="eq(-4,0)" />
+		<setting id="dropbox_apikey" type="action" label="30023" action="RunScript(service.watchedlist, dropbox)" enable="eq(-5,2)" />
 		
 		<!-- MySQL Database Options (second option in db_format)--> 
     <!--<setting label="30044" type="lsep"/>-->
-		<setting id="mysql_server" type="ipaddress" label="30051" default="127.0.0.1" enable="eq(-5,1)" />
-		<setting id="mysql_port" type="number" label="30055" default="3306" enable="eq(-6,1)" />
-		<setting id="mysql_db" type="text" label="30052" default="WatchedList" enable="eq(-7,1)" />
-		<setting id="mysql_user" type="text" label="30053" default="xbmc" enable="eq(-8,1)" />
-		<setting id="mysql_pass" type="text" label="30054" default="xbmc" enable="eq(-9,1)" />
+		<setting id="mysql_server" type="ipaddress" label="30051" default="127.0.0.1" enable="eq(-6,1)" />
+		<setting id="mysql_port" type="number" label="30055" default="3306" enable="eq(-7,1)" />
+		<setting id="mysql_db" type="text" label="30052" default="WatchedList" enable="eq(-8,1)" />
+		<setting id="mysql_user" type="text" label="30053" default="xbmc" enable="eq(-9,1)" />
+		<setting id="mysql_pass" type="text" label="30054" default="xbmc" enable="eq(-10,1)" />
     </category>
 </settings>

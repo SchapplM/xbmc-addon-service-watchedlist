@@ -2,6 +2,10 @@
 This file is entry point for manual start via the programs menu
 """
 
+# work around bugalloo error when called for dropbox
+if len(sys.argv) == 2:
+    sys.argv.append('')
+
 import xbmcgui
 import resources.lib.utils as utils
 from service import WatchedList
@@ -23,13 +27,20 @@ if __remotedebug__:
         utils.showNotification('WatchedList Error', 'remote debug in pydev is activated, but remote server not responding.')
         sys.exit(1)
 
+# check to see if invoked from settings to setup dropbox
+dropbox = False
+if len(sys.argv) > 1:
+    if sys.argv[1] == 'dropbox':
+        dropbox = True
+
 # Create WatchedList Class
 WL = WatchedList()
 
-# Check if we should run updates (only ask if autostart is on)
-if (not utils.getSetting("autostart") == 'true') or xbmcgui.Dialog().yesno( utils.getString(32101),utils.getString(32001) ):
+if dropbox:
+    WL.authorizeDropbox()
+elif (not utils.getSetting("autostart") == 'true') or xbmcgui.Dialog().yesno( utils.getString(32101),utils.getString(32001) ):
+    # Check if we should run updates (only ask if autostart is on)
     # run the program
     utils.log("Update Library Manual Run.")
     # WL.runProgram() # function executed on autostart. For Test purpose
     WL.runUpdate(True) # one time update
-
