@@ -25,7 +25,7 @@
 		
 		<!-- MySQL Database Options (second option in db_format)--> 
     <!--<setting label="30044" type="lsep"/>-->
-		<setting id="mysql_server" type="ipaddress" label="30051" default="127.0.0.1" enable="eq(-5,1)" />
+		<setting id="mysql_server" type="string" label="30051" default="127.0.0.1" enable="eq(-5,1)" />
 		<setting id="mysql_port" type="number" label="30055" default="3306" enable="eq(-6,1)" />
 		<setting id="mysql_db" type="text" label="30052" default="WatchedList" enable="eq(-7,1)" />
 		<setting id="mysql_user" type="text" label="30053" default="xbmc" enable="eq(-8,1)" />
