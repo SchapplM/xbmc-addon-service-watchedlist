@@ -1261,7 +1261,7 @@ class WatchedList:
         # get the text to show the auth url (split on the url ? so it fits in the ok box
         auth_url_fmt_str = fmt_str % (authorize_url)
         chunks = auth_url_fmt_str.split('?') 
-
+        utils.log(u'Dropbox Message: %s' % auth_url_fmt_str, xbmc.LOGINFO)
         dialog = xbmcgui.Dialog()
         dialog.ok(utils.getString(32703), chunks[0] + '?', chunks[1],
                   utils.getString(32705))
