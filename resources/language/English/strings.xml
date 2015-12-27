@@ -48,13 +48,25 @@
 		<string id="32604">Error updating WL database</string>
 		<string id="32605">Error updating xbmc-database</string>
 		<string id="32606">Writing the WL-database file %s</string>
-		
+		<string id="32607">Unable to merge dropbox data</string>
+
 		<!-- Progress Dialog -->
 		<string id="32610">%d/%d: %s</string>
 		<string id="32611">%d/%d: %s S%02dE%02d</string>
-		
+
+    <!-- Dropbox related messages -->
+		<string id="32702">Setup Dropbox</string>
+		<string id="32703">Dropbox Authorization Code</string>
+		<string id="32704">Go to %s and</string>
+		<string id="32705">prepare to enter your the authorization code</string>
+		<string id="32706">Unable to authorize with dropbox</string>
+		<string id="32707">Dropbox successfully authorized</string>
+		<string id="32708">Dropbox Error</string>
+		<string id="32709">Unable to upload</string>
+		<string id="32710">Unable to download</string>
+
 	<!-- Settings Language Strings-->
-    <string id="30001">Basic Settings</string>
+  <string id="30001">Basic Settings</string>
 	<string id="30010">Debug mode</string>
 	<string id="30011">Update movies watched state</string>
 	<string id="30012">Update episodes watched state</string>
@@ -68,6 +80,7 @@
 	<string id="30021">Start with XBMC (autorun)</string>
 	<string id="30016">Progress Dialog</string>
 	<string id="30022">follow user setting watched/unwatched</string>
+	<string id="30023">Dropbox Auth Code</string>
 	
 	<string id="30002">Database</string>
 	<string id="30040">DB Method</string>
@@ -75,6 +88,7 @@
 	<string id="30042">MySQL</string>
   <string id="30043">Options for accessing SQLite-DB-File</string>
   <string id="30044">Options for accessing MySQL-Server</string>
+  <string id="30045">Dropbox</string>
 	<string id="30017">Use non-default database file</string>
 	<string id="30018">Path to database file</string>
 	<string id="30019">Database filename (SQLite Database, *.db)</string>

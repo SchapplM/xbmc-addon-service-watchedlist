@@ -1,9 +1,13 @@
 # XBMC Media Center language file
+# Addon Name: WatchedList
+# Addon id: service.watchedlist
+# Addon version: 1.0.5
+# Addon Provider: schapplm
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC-Addons\n"
 "Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
-"POT-Creation-Date: 2015-01-10 18:38+0000\n"
+"POT-Creation-Date: 2015-12-27 20:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE\n"
@@ -12,6 +16,18 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language: de\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+msgctxt "Addon Summary"
+msgid "Save watched Movies and TV Episodes independent from filenames"
+msgstr "Gesehen-Status von Filmen und Serien-Episoden unabhängig von Dateinamen speichern"
+
+msgctxt "Addon Description"
+msgid "\n		Export: Searches the XBMC-Database for watched files. Determine imdb-id and thetvdb-id to identify movies and TV-episodes. Then save the list to a new independent table.\n		Import: Set the watched state for each video file in xbmc.\n		Automatic background process without user interaction."
+msgstr "\n		Export: Durchsucht die XBMC-Datenbank nach gesehenen Filmen und ordnet den Dateien die eindeutigen Kennnummern von imdb und TheTVDB zu. Gesehene Filme und Episoden werden jeweils in einer eigenen Datenbank gespeichert.\n		Import: Der Gesehen-Status von Medien in XBMC wird aus der Gesehenen-Tabelle geholt.\n		Die Synchronisierung geschieht automatisch im Hintergrund ohne Benutzereingriff."
+
+msgctxt "Addon Disclaimer"
+msgid "This script does not regard the file format. A Movie watched in DVD quality will also set	the 1080p version as watched."
+msgstr "Dieses Script ignoriert das Dateiformat. Ein gesehener Film in DVD-Qualität wird auch in der BlueRay-Version als gesehen gekennzeichnet."
 
 msgctxt "#30001"
 msgid "Basic Settings"
@@ -73,6 +89,10 @@ msgctxt "#30022"
 msgid "follow user setting watched/unwatched"
 msgstr "Gesehen-Änderungen laufend überwachen"
 
+msgctxt "#30023"
+msgid "Dropbox Auth Code"
+msgstr "Dropbox Autorisierungs-Code"
+
 msgctxt "#30030"
 msgid "no update"
 msgstr "Keine Aktualisierung"
@@ -104,6 +124,10 @@ msgstr "Optionen für SQLite-Datei-Zugriff"
 msgctxt "#30044"
 msgid "Options for accessing MySQL-Server"
 msgstr "Optionen für MySQL-Server-Zugriff"
+
+msgctxt "#30045"
+msgid "Dropbox"
+msgstr "Dropbox"
 
 msgctxt "#30051"
 msgid "MySQL Server"
@@ -265,6 +289,10 @@ msgctxt "#32606"
 msgid "Writing the WL-database file %s"
 msgstr "Beim Schreiben der Gesehen-Datenbank %s"
 
+msgctxt "#32607"
+msgid "Unable to merge dropbox data"
+msgstr "Zusammenführung mit Dropbox"
+
 msgctxt "#32610"
 msgid "%d/%d: %s"
 msgstr "%d/%d: %s"
@@ -272,3 +300,39 @@ msgstr "%d/%d: %s"
 msgctxt "#32611"
 msgid "%d/%d: %s S%02dE%02d"
 msgstr "%d/%d: %s S%02dE%02d"
+
+msgctxt "#32702"
+msgid "Setup Dropbox"
+msgstr "Setup Dropbox"
+
+msgctxt "#32703"
+msgid "Dropbox Authorization Code"
+msgstr "Dropbox Authorization Code"
+
+msgctxt "#32704"
+msgid "Go to %s and"
+msgstr "Öffne %s und"
+
+msgctxt "#32705"
+msgid "prepare to enter your the authorization code"
+msgstr "bereite die Eingabe des Autorisierungs-Codes vor"
+
+msgctxt "#32706"
+msgid "Unable to authorize with dropbox"
+msgstr "Autorisierung mit Dropbox-Server nicht möglich"
+
+msgctxt "#32707"
+msgid "Dropbox successfully authorized"
+msgstr "Dropbox erfolgreich autorisiert"
+
+msgctxt "#32708"
+msgid "Dropbox Error"
+msgstr "Dropbox Fehler"
+
+msgctxt "#32709"
+msgid "Unable to upload"
+msgstr "Hochladen nicht möglich"
+
+msgctxt "#32710"
+msgid "Unable to download"
+msgstr "Herunterladen nicht möglich"

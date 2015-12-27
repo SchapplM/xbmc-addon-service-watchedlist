@@ -1,9 +1,13 @@
 # XBMC Media Center language file
+# Addon Name: WatchedList
+# Addon id: service.watchedlist
+# Addon version: 1.0.5
+# Addon Provider: schapplm
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC-Addons\n"
 "Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
-"POT-Creation-Date: 2015-01-10 18:38+0000\n"
+"POT-Creation-Date: 2015-12-27 20:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE\n"
@@ -12,6 +16,18 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language: en\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+msgctxt "Addon Summary"
+msgid "Save watched Movies and TV Episodes independent from filenames"
+msgstr ""
+
+msgctxt "Addon Description"
+msgid "\n		Export: Searches the XBMC-Database for watched files. Determine imdb-id and thetvdb-id to identify movies and TV-episodes. Then save the list to a new independent table.\n		Import: Set the watched state for each video file in xbmc.\n		Automatic background process without user interaction."
+msgstr ""
+
+msgctxt "Addon Disclaimer"
+msgid "This script does not regard the file format. A Movie watched in DVD quality will also set	the 1080p version as watched."
+msgstr ""
 
 #Notification headers
 
@@ -302,7 +318,7 @@ msgid "Writing the WL-database file %s"
 msgstr ""
 
 msgctxt "#32607"
-msgid "unable to merge dropbox data."
+msgid "Unable to merge dropbox data"
 msgstr ""
 
 #Progress Dialog
@@ -316,6 +332,9 @@ msgctxt "#32611"
 msgid "%d/%d: %s S%02dE%02d"
 msgstr ""
 
+#Dropbox related messages
+#empty strings from id 32612 to 32701
+
 msgctxt "#32702"
 msgid "Setup Dropbox"
 msgstr ""
@@ -325,7 +344,7 @@ msgid "Dropbox Authorization Code"
 msgstr ""
 
 msgctxt "#32704"
-msgid "Got to %s and"
+msgid "Go to %s and"
 msgstr ""
 
 msgctxt "#32705"
@@ -337,7 +356,7 @@ msgid "Unable to authorize with dropbox"
 msgstr ""
 
 msgctxt "#32707"
-msgid "Dropbox successfully authroized"
+msgid "Dropbox successfully authorized"
 msgstr ""
 
 msgctxt "#32708"

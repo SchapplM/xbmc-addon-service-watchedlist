@@ -49,12 +49,24 @@
 		<string id="32604">Aktualisieren der Gesehen-Datenbank</string>
 		<string id="32605">Aktualisieren der XBMC-Datenbank</string>
 		<string id="32606">Beim Schreiben der Gesehen-Datenbank %s</string>
-		
+		<string id="32607">Zusammenführung mit Dropbox</string>
+
 		<!-- Progress Dialog -->
 		<string id="32610">%d/%d: %s</string>
 		<string id="32611">%d/%d: %s S%02dE%02d</string>
 
-		
+    <!-- Dropbox related messages -->
+		<string id="32702">Setup Dropbox</string>
+		<string id="32703">Dropbox Authorization Code</string>
+		<string id="32704">Öffne %s und</string>
+		<string id="32705">bereite die Eingabe des Autorisierungs-Codes vor</string>
+		<string id="32706">Autorisierung mit Dropbox-Server nicht möglich</string>
+		<string id="32707">Dropbox erfolgreich autorisiert</string>
+		<string id="32708">Dropbox Fehler</string>
+		<string id="32709">Hochladen nicht möglich</string>
+		<string id="32710">Herunterladen nicht möglich</string>
+
+
 	<!-- Einstellungen-->
     <string id="30001">Grundeinstellungen</string>
 	<string id="30010">Debug-Modus</string>
@@ -70,6 +82,7 @@
 	<string id="30021">Automatisch mit XBMC starten</string>
 	<string id="30016">Fortschrittsanzeige</string>
 	<string id="30022">Gesehen-Änderungen laufend überwachen</string>
+	<string id="30023">Dropbox Autorisierungs-Code</string>
 	
 	<string id="30002">Datenbank</string>
 	<string id="30040">DB-Art</string>
@@ -77,6 +90,7 @@
 	<string id="30042">MySQL</string>
   <string id="30043">Optionen für SQLite-Datei-Zugriff</string>
   <string id="30044">Optionen für MySQL-Server-Zugriff</string>
+  <string id="30045">Dropbox</string>
 	<string id="30017">Eigene Datenbank-Datei</string>
 	<string id="30018">Pfad zur Datenbank-Datei</string>
 	<string id="30019">Dateiname (*.db)</string>
