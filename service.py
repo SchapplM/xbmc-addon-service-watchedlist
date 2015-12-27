@@ -338,9 +338,9 @@ class WatchedList:
                 if int(utils.getSetting("db_format")) == 2:
                     self.pullFromDropbox();
                 
-                # attach the dropbox database
-                if self.dropbox_path != None:
-                    self.sqlcursor.execute('attach "%s" as remote' % self.dropbox_path)
+                    # attach the dropbox database
+                    if self.dropbox_path != None:
+                        self.sqlcursor.execute('attach "%s" as remote' % self.dropbox_path)
             else:
                 # MySQL Database on a server
                 self.sqlcon = mysql.connector.connect(user=utils.getSetting("mysql_user"), password=utils.getSetting("mysql_pass"), database=utils.getSetting("mysql_db"), host=utils.getSetting("mysql_server"), port=utils.getSetting("mysql_port"))
