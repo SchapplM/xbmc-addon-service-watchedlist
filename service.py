@@ -1199,7 +1199,7 @@ class WatchedList:
         # ensure we are using dropbox
         if int(utils.getSetting("db_format")) != 2:
             utils.log(u'merge_database: db_format not set to dropbox. not merging remote database.')
-            return 1
+            return 0
 
         # attach the dropbox database
         if not self.dropbox_path:
