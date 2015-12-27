@@ -1297,7 +1297,7 @@ class WatchedList:
         try:
             client.file_delete(old_file)
         except:
-            utils.log(u'Dropbox error: Unable to delete previous old watched list')
+            utils.log(u'Dropbox error: Unable to delete previous old watched list (%s)' % old_file)
 
         # rename the previously uploaded watchlist to "oldWHATEVER"
         try:
@@ -1312,7 +1312,7 @@ class WatchedList:
             utils.log(u'Dropbox upload error: ' + str(e))
             utils.showNotification(utils.getString(32708), utils.getString(32709))
             return
-        utils.log(u'Dropbox update complete.')
+        utils.log(u'Dropbox upload complete: %s -> %s' % (self.dbpath, dest_file))
 
 
     def pullFromDropbox(self):
@@ -1322,7 +1322,7 @@ class WatchedList:
         if not (self.dbpath and dropbox_key):
             return
 
-        utils.log(u'Downloading from watched list from dropbox')
+        utils.log(u'Downloading WatchedList from dropbox')
 
         client = DropboxClient(dropbox_key)
 
@@ -1337,6 +1337,6 @@ class WatchedList:
             utils.showNotification(utils.getString(32708), utils.getString(32710))
             self.dropbox_path = ''
             return
-        utils.log(u'Dropbox database downloaded.')
+        utils.log(u'Dropbox database downloaded: %s -> %s' % (remote_file, self.dropbox_path))
 
         return None
