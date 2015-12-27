@@ -77,7 +77,11 @@ msgctxt "#30022"
 msgid "follow user setting watched/unwatched"
 msgstr ""
 
-#empty strings from id 30023 to 30029
+msgctxt "#30023"
+msgid "Dropbox Auth Code"
+msgstr ""
+
+#empty strings from id 30024 to 30029
 
 msgctxt "#30030"
 msgid "no update"
@@ -113,7 +117,11 @@ msgctxt "#30044"
 msgid "Options for accessing MySQL-Server"
 msgstr ""
 
-#empty strings from id 30045 to 30050
+msgctxt "#30045"
+msgid "Dropbox"
+msgstr ""
+
+#empty strings from id 30046 to 30050
 
 msgctxt "#30051"
 msgid "MySQL Server"
@@ -293,8 +301,12 @@ msgctxt "#32606"
 msgid "Writing the WL-database file %s"
 msgstr ""
 
+msgctxt "#32607"
+msgid "unable to merge dropbox data."
+msgstr ""
+
 #Progress Dialog
-#empty strings from id 32607 to 32609
+#empty strings from id 32608 to 32609
 
 msgctxt "#32610"
 msgid "%d/%d: %s"
@@ -302,4 +314,40 @@ msgstr ""
 
 msgctxt "#32611"
 msgid "%d/%d: %s S%02dE%02d"
+msgstr ""
+
+msgctxt "#32702"
+msgid "Setup Dropbox"
+msgstr ""
+
+msgctxt "#32703"
+msgid "Dropbox Authorization Code"
+msgstr ""
+
+msgctxt "#32704"
+msgid "Got to %s and"
+msgstr ""
+
+msgctxt "#32705"
+msgid "prepare to enter your the authorization code"
+msgstr ""
+
+msgctxt "#32706"
+msgid "Unable to authorize with dropbox"
+msgstr ""
+
+msgctxt "#32707"
+msgid "Dropbox successfully authroized"
+msgstr ""
+
+msgctxt "#32708"
+msgid "Dropbox Error"
+msgstr ""
+
+msgctxt "#32709"
+msgid "Unable to upload"
+msgstr ""
+
+msgctxt "#32710"
+msgid "Unable to download"
 msgstr ""
