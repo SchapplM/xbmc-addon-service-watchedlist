@@ -59,9 +59,17 @@ if utils.getSetting('dbbackup') == 'true':
     import datetime
     
 
+QUERY_MV_INSERT_SQLITE = 'INSERT OR IGNORE INTO movie_watched (idMovieImdb,playCount,lastChange,lastPlayed,title) VALUES (?, ?, ?, ?, ?)'
+QUERY_MV_INSERT_MYSQL = 'INSERT IGNORE INTO movie_watched (idMovieImdb,playCount,lastChange,lastPlayed,title) VALUES (%s, %s, FROM_UNIXTIME(%s), FROM_UNIXTIME(%s), %s)'
+QUERY_EP_INSERT_SQLITE = 'INSERT OR IGNORE INTO episode_watched (idShow,season,episode,playCount,lastChange,lastPlayed) VALUES (?, ?, ?, ?, ?, ?)'
+QUERY_EP_INSERT_MYSQL = 'INSERT IGNORE INTO episode_watched (idShow,season,episode,playCount,lastChange,lastPlayed) VALUES (%s, %s, %s, %s, FROM_UNIXTIME(%s), FROM_UNIXTIME(%s))'
 
-        
-# 
+QUERY_MV_UPDATE_SQLITE = 'UPDATE movie_watched SET playCount = ?, lastplayed = ?, lastChange = ? WHERE idMovieImdb LIKE ?'
+QUERY_MV_UPDATE_MYSQL = 'UPDATE movie_watched SET playCount = %s, lastplayed = FROM_UNIXTIME(%s), lastChange = FROM_UNIXTIME(%s) WHERE idMovieImdb LIKE %s'
+QUERY_EP_UPDATE_SQLITE = 'UPDATE episode_watched SET playCount = ?, lastPlayed = ?, lastChange = ? WHERE idShow LIKE ? AND season LIKE ? AND episode LIKE ?'
+QUERY_EP_UPDATE_MYSQL = 'UPDATE episode_watched SET playCount = %s, lastPlayed = FROM_UNIXTIME(%s), lastChange = FROM_UNIXTIME(%s) WHERE idShow LIKE %s AND season LIKE %s AND episode LIKE %s'
+
+
 class WatchedList:
     """
     Main class of the add-on
@@ -1130,15 +1138,15 @@ class WatchedList:
                 lastchange_new = int(time.time())
                 if modus == 'movie':
                     if int(utils.getSetting("db_format")) != 1: # sqlite3
-                        sql = 'UPDATE movie_watched SET playCount = ?, lastplayed = ?, lastChange = ? WHERE idMovieImdb LIKE ?'
+                        sql = QUERY_MV_UPDATE_SQLITE
                     else: # mysql
-                        sql = 'UPDATE movie_watched SET playCount = %s, lastplayed = FROM_UNIXTIME(%s), lastChange = FROM_UNIXTIME(%s) WHERE idMovieImdb LIKE %s'
+                        sql = QUERY_MV_UPDATE_MYSQL
                     values = list([playcount_xbmc, lastplayed_new, lastchange_new, imdbId])
                 else:
                     if int(utils.getSetting("db_format")) != 1: # sqlite3
-                        sql = 'UPDATE episode_watched SET playCount = ?, lastPlayed = ?, lastChange = ? WHERE idShow LIKE ? AND season LIKE ? AND episode LIKE ?'
+                        sql = QUERY_EP_UPDATE_SQLITE
                     else: # mysql
-                        sql = 'UPDATE episode_watched SET playCount = %s, lastPlayed = FROM_UNIXTIME(%s), lastChange = FROM_UNIXTIME(%s) WHERE idShow LIKE %s AND season LIKE %s AND episode LIKE %s'
+                        sql = QUERY_EP_UPDATE_MYSQL
                     values = list([playcount_xbmc, lastplayed_new, lastchange_new, imdbId, season, episode])
                 self.sqlcursor.execute(sql, values)
                 count_return[1] = 1
@@ -1159,15 +1167,15 @@ class WatchedList:
                 lastchange_new = int(time.time())
                 if modus == 'movie':
                     if int(utils.getSetting("db_format")) != 1: # sqlite3
-                        sql = 'INSERT INTO movie_watched (idMovieImdb,playCount,lastChange,lastPlayed,title) VALUES (?, ?, ?, ?, ?)'
+                        sql = QUERY_MV_INSERT_SQLITE
                     else: # mysql
-                        sql = 'INSERT INTO movie_watched (idMovieImdb,playCount,lastChange,lastPlayed,title) VALUES (%s, %s, FROM_UNIXTIME(%s), FROM_UNIXTIME(%s), %s)'
+                        sql = QUERY_MV_INSERT_MYSQL
                     values = list([imdbId, playcount_xbmc, lastchange_new, lastplayed_xbmc, name])
-                else:
+                else: # episode
                     if int(utils.getSetting("db_format")) != 1: # sqlite3
-                        sql = 'INSERT INTO episode_watched (idShow,season,episode,playCount,lastChange,lastPlayed) VALUES (?, ?, ?, ?, ?, ?)'
+                        sql = QUERY_EP_INSERT_SQLITE
                     else: # mysql
-                        sql = 'INSERT INTO episode_watched (idShow,season,episode,playCount,lastChange,lastPlayed) VALUES (%s, %s, %s, %s, FROM_UNIXTIME(%s), FROM_UNIXTIME(%s))'
+                        sql = QUERY_EP_INSERT_MYSQL
                     values = list([imdbId, season, episode, playcount_xbmc, lastchange_new, lastplayed_xbmc])
                 self.sqlcursor.execute(sql, values)
                 utils.log(u'wl_update_%s: new entry for wl database: "%s", lastChange="%s", lastPlayed="%s", playCount=%d' % (modus, name, utils.TimeStamptosqlDateTime(lastchange_new), utils.TimeStamptosqlDateTime(lastplayed_xbmc), playcount_xbmc))
@@ -1188,13 +1196,15 @@ class WatchedList:
         return count_return
 
     def merge_database(self):
-        """Merge the remote (eg: Dropbox) database into the local one, where the
-        playcount of a show or movie is greater.
+        """
+        Merge the remote (eg: Dropbox) database into the local one
+        The resulting merged database contains all watched movies and episodes of both databases
 
         Returns:
             return code:
-            0    successfully synched tv shows
+            0    successfully synched databases
             1    database access error
+            2    database loading error
         """
         # ensure we are using dropbox
         if int(utils.getSetting("db_format")) != 2:
@@ -1215,26 +1225,68 @@ class WatchedList:
             self.sqlcursor.execute('INSERT INTO tvshows (idShow, title) SELECT idShow,title \
                                     FROM remote.tvshows \
                                     WHERE idShow NOT IN (SELECT idShow FROM tvshows)')
-
-            # update the rows with newer episode data from dropbox
-            for row in self.sqlcursor.execute('SELECT y.playCount, y.lastChange, y.lastPlayed, y.idShow, y.season, y.episode \
-                                               FROM episode_watched x \
-                                               INNER JOIN remote.episode_watched y \
-                                               ON x.idShow=y.idShow AND x.season=y.season AND x.episode=y.episode \
-                                               WHERE y.playCount > x.playCount'):
-                self.sqlcursor.execute('UPDATE episode_watched \
-                                        SET playCount = ?, lastChange = ?, lastPlayed = ? \
-                                        WHERE idShow = ? AND season = ? AND episode = ?', row)
-
-            # update the rows with newer move data from dropbox
-            for row in self.sqlcursor.execute('SELECT y.playCount, y.lastChange, y.lastPlayed, y.idMovieImdb \
-                                               FROM movie_watched x \
-                                               INNER JOIN remote.movie_watched y \
-                                               ON x.idMovieImdb=y.idMovieImdb \
-                                               WHERE y.playCount > x.playCount'):
-                self.sqlcursor.execute('UPDATE movie_watched \
-                                        SET playCount = ?, lastChange = ?, lastPlayed = ? \
-                                        WHERE idMovieImdb = ?', row)
+            for modus in ['movie', 'episode']:
+                utils.log(u'wl_merge_%s: Start updating the local database' % modus)
+                if modus == 'movie':
+                    sql_joincmd_update =('SELECT y.playCount, y.lastPlayed, y.lastChange, y.idMovieImdb, y.title '
+                                         'FROM movie_watched x '
+                                         'INNER JOIN remote.movie_watched y '
+                                         'ON x.idMovieImdb=y.idMovieImdb ' 
+                                         'WHERE y.lastChange > x.lastChange')
+                                               
+                    sql_updatecmd = QUERY_MV_UPDATE_SQLITE
+                    sql_joincmd_insert =('SELECT x.idMovieImdb, x.playCount, x.lastChange, x.lastPlayed, x.title '
+                                         'FROM remote.movie_watched x '
+                                         'LEFT JOIN movie_watched y '
+                                         'ON x.idMovieImdb=y.idMovieImdb')
+                    sql_insertcmd = QUERY_MV_INSERT_SQLITE
+                else:
+                    sql_joincmd_update =('SELECT y.playCount, y.lastPlayed, y.lastChange, y.idShow, y.season, y.episode '
+                                         'FROM episode_watched x '
+                                         'INNER JOIN remote.episode_watched y '
+                                         'ON x.idShow=y.idShow AND x.season=y.season AND x.episode=y.episode '
+                                         'WHERE y.lastChange > x.lastChange')
+                    sql_updatecmd = QUERY_EP_UPDATE_SQLITE
+                    sql_joincmd_insert =('SELECT x.idShow, x.season, x.episode, x.playCount, x.lastChange, x.lastPlayed '
+                                         'FROM remote.episode_watched x '
+                                         'LEFT JOIN episode_watched y '
+                                         'ON x.idShow=y.idShow AND x.season=y.season AND x.episode=y.episode')
+                    sql_insertcmd = QUERY_EP_INSERT_SQLITE
+                # update the rows with newer movie/episode data from dropbox
+                for row in self.sqlcursor.execute(sql_joincmd_update):
+                    # update the local WL database
+                    self.sqlcursor.execute(sql_updatecmd, row)
+                    if modus == 'movie':
+                        name = "%s" % row[4]
+                        playCount = row[0]
+                        lastChange = row[2]
+                        lastPlayed = row[1]
+                    else:
+                        name = "%d S%dE%d" % (row[3], row[4], row[5])
+                        playCount = row[0]
+                        lastChange = row[2]
+                        lastPlayed = row[1]
+                    utils.log(u'wl_merge_%s: Updated entry for wl database from dropbox: '
+                                '"%s", lastChange="%s", lastPlayed="%s", playCount=%d' \
+                                % (modus, name, utils.TimeStamptosqlDateTime(lastChange), \
+                                   utils.TimeStamptosqlDateTime(lastPlayed), playCount))
+                # insert the rows with missing movie/episode data from dropbox
+                for row in self.sqlcursor.execute(sql_joincmd_insert):
+                    self.sqlcursor.execute(sql_insertcmd, row)
+                    if modus == 'movie':
+                        name = "%s" % row[4]
+                        playCount = row[1]
+                        lastChange = row[2]
+                        lastPlayed = row[3]
+                    else:
+                        name = "%d S%dE%d" % (row[0], row[1], row[2])
+                        playCount = row[3]
+                        lastChange = row[4]
+                        lastPlayed = row[5]
+                    utils.log(u'wl_merge_%s: New entry for wl database from dropbox: '
+                                '"%s", lastChange="%s", lastPlayed="%s", playCount=%d' \
+                                % (modus, name, utils.TimeStamptosqlDateTime(lastChange), \
+                                   utils.TimeStamptosqlDateTime(lastPlayed), playCount))
 
         except sqlite3.Error as e:
             try:
