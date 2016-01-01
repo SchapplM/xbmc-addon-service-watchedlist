@@ -191,9 +191,9 @@ class WatchedList:
 
             # check if player is running before doing the update. Only do this check for automatic start
             while xbmc.Player().isPlaying() == True and not manualstart:
-                if utils.sleepsafe(60*1000): return 1 # wait one minute until next check for active playback
+                if utils.sleepsafe(60): return 1 # wait one minute until next check for active playback
                 if xbmc.Player().isPlaying() == False:
-                    if utils.sleepsafe(180*1000): return 1 # wait 3 minutes so the dialogue does not pop up directly after the playback ends
+                    if utils.sleepsafe(180): return 1 # wait 3 minutes so the dialogue does not pop up directly after the playback ends
           
             # load the addon-database
             
