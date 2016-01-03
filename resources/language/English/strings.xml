@@ -64,7 +64,9 @@
 		<string id="32708">Dropbox Error</string>
 		<string id="32709">Unable to upload</string>
 		<string id="32710">Unable to download</string>
-
+	<string id="32711">Dropbox-Import (Movies)</string>
+	<string id="32712">Dropbox-Import (Episodes)</string>
+	
 	<!-- Settings Language Strings-->
   <string id="30001">Basic Settings</string>
 	<string id="30010">Debug mode</string>

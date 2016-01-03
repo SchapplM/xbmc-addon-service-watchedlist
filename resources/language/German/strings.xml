@@ -65,7 +65,8 @@
 		<string id="32708">Dropbox Fehler</string>
 		<string id="32709">Hochladen nicht möglich</string>
 		<string id="32710">Herunterladen nicht möglich</string>
-
+	<string id="32711">Dropbox-Import (Filme)</string>
+	<string id="32712">Dropbox-Import (Episoden)</string>
 
 	<!-- Einstellungen-->
     <string id="30001">Grundeinstellungen</string>
