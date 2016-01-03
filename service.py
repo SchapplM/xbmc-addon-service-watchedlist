@@ -1225,9 +1225,13 @@ class WatchedList:
             self.sqlcursor.execute('INSERT INTO tvshows (idShow, title) SELECT idShow,title \
                                     FROM remote.tvshows \
                                     WHERE idShow NOT IN (SELECT idShow FROM tvshows)')
+            count_insert = 0
+            count_update = 0
             for modus in ['movie', 'episode']:
-                utils.log(u'wl_merge_%s: Start updating the local database' % modus)
+                # Definitions of SQL queries
                 if modus == 'movie':
+                    # x: local database
+                    # y: remote (dropbox) database
                     sql_joincmd_update =('SELECT y.playCount, y.lastPlayed, y.lastChange, y.idMovieImdb, y.title '
                                          'FROM movie_watched x '
                                          'INNER JOIN remote.movie_watched y '
@@ -1252,7 +1256,9 @@ class WatchedList:
                                          'LEFT JOIN episode_watched y '
                                          'ON x.idShow=y.idShow AND x.season=y.season AND x.episode=y.episode')
                     sql_insertcmd = QUERY_EP_INSERT_SQLITE
+                
                 # update the rows with newer movie/episode data from dropbox
+                utils.log(u'wl_merge_%s: Start updating the local database with remote entries' % modus)
                 for row in self.sqlcursor.execute(sql_joincmd_update):
                     # update the local WL database
                     self.sqlcursor.execute(sql_updatecmd, row)
@@ -1270,7 +1276,9 @@ class WatchedList:
                                 '"%s", lastChange="%s", lastPlayed="%s", playCount=%d' \
                                 % (modus, name, utils.TimeStamptosqlDateTime(lastChange), \
                                    utils.TimeStamptosqlDateTime(lastPlayed), playCount))
+                    
                 # insert the rows with missing movie/episode data from dropbox
+                utils.log(u'wl_merge_%s: Start merging the remote in the local database' % modus)
                 for row in self.sqlcursor.execute(sql_joincmd_insert):
                     self.sqlcursor.execute(sql_insertcmd, row)
                     if modus == 'movie':
@@ -1287,7 +1295,17 @@ class WatchedList:
                                 '"%s", lastChange="%s", lastPlayed="%s", playCount=%d' \
                                 % (modus, name, utils.TimeStamptosqlDateTime(lastChange), \
                                    utils.TimeStamptosqlDateTime(lastPlayed), playCount))
-
+                    count_insert = count_insert + 1
+                # all updated rows are also inserted due to the LEFT JOINT sql command.
+                # these rows are ignored since the unique primary key is duplicate 
+                count_insert = count_insert - count_update
+                utils.showNotification(utils.getString(32405), name)
+                if modus == 'movie':
+                    strno = 32711
+                else:
+                    strno = 32712
+                utils.showNotification(utils.getString(strno), utils.getString(32301)%(count_insert, count_update))
+            
         except sqlite3.Error as e:
             try:
                 errstring = e.args[0] # TODO: Find out, why this does not work some times
@@ -1333,7 +1351,7 @@ class WatchedList:
 
     def pushToDropbox(self):
         dropbox_key = utils.getSetting('dropbox_apikey')
-
+        return
         #utils.showNotification(utils.getString(32204), utils.getString(32302)%(count_update))
         # feign success if there is no local db file
         if not (self.dbpath and dropbox_key):
