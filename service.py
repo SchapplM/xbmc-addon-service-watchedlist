@@ -93,7 +93,7 @@ class WatchedList:
         self.db_method = 'file' # either 'file' or 'mysql'
         
         # flag to remember copying the databasefile if requested
-        self.dbcopydone = False   
+        self.dbcopydone = False
         
         self.watch_user_changes_count = 0
         
@@ -102,6 +102,8 @@ class WatchedList:
                 
         self.dbpath = ''
         self.dbdirectory = ''
+        self.dropbox_path = None
+        self.downloaded_dropbox = False
 
     def runProgram(self):
         """Main function to call other functions
@@ -210,6 +212,7 @@ class WatchedList:
                 if utils.sleepsafe(60*1000): return 1 # wait one minute until next check for active playback
                 if xbmc.Player().isPlaying() == False:
                     if utils.sleepsafe(180*1000): return 1 # wait 3 minutes so the dialogue does not pop up directly after the playback ends
+            self.downloaded_dropbox = False
           
             # load the addon-database
             if self.load_db(True): # True: Manual start
@@ -225,11 +228,6 @@ class WatchedList:
                 utils.showNotification(utils.getString(32102), utils.getString(32602))
                 return 4
             
-            # attempt to merge the database from dropbox
-            if self.merge_dropbox():
-                utils.showNotification(utils.getString(32102), utils.getString(32607))
-                return 8
-            
             # get watched state from xbmc
             if self.get_watched_xbmc(0):
                 utils.showNotification(utils.getString(32102), utils.getString(32603))
@@ -238,6 +236,11 @@ class WatchedList:
             if self.sync_tvshows():
                 utils.showNotification(utils.getString(32102), utils.getString(32604))
                 return 5
+            
+            # attempt to merge the database from dropbox
+            if self.merge_dropbox():
+                utils.showNotification(utils.getString(32102), utils.getString(32607))
+                return 8
 
             # import from xbmc into addon database
             res = self.write_wl_wdata()
@@ -344,8 +347,11 @@ class WatchedList:
                 
                 # check for dropbox
                 if int(utils.getSetting("db_format")) == 2:
-                    self.pullFromDropbox();
-                
+                    # Download Dropbox database only once to reduce traffic.
+                    if not self.downloaded_dropbox:
+                        if self.pullFromDropbox():
+                            return
+                        self.downloaded_dropbox = True
                     # attach the dropbox database
                     if self.dropbox_path != None:
                         self.sqlcursor.execute('attach "%s" as remote' % self.dropbox_path)
@@ -635,7 +641,7 @@ class WatchedList:
         
  
     def sync_tvshows(self):
-        """Sync List of TV Shows between WL and XBMC Database
+        """Sync List of TV Shows from XBMC to WL Database
 
         Returns:
             return code:
@@ -1366,11 +1372,18 @@ class WatchedList:
 
 
     def pullFromDropbox(self):
+        """
+        Downloads the dropbox database
 
+        Returns:
+            return code:
+            0    successfully downloaded databases
+            1    database download error
+        """
         dropbox_key = utils.getSetting('dropbox_apikey')
 
         if not (self.dbpath and dropbox_key):
-            return
+            return 0
 
         utils.log(u'Downloading WatchedList from dropbox')
 
@@ -1386,7 +1399,7 @@ class WatchedList:
             utils.log(u'Dropbox download error: ' + str(e))
             utils.showNotification(utils.getString(32708), utils.getString(32710))
             self.dropbox_path = ''
-            return
+            return 1
         utils.log(u'Dropbox database downloaded: %s -> %s' % (remote_file, self.dropbox_path))
 
         return None
