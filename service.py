@@ -216,11 +216,6 @@ class WatchedList:
                 utils.showNotification(utils.getString(32102), utils.getString(32601))
                 return 3
 
-            # attempt to merge the database
-            if self.merge_database():
-                utils.showNotification(utils.getString(32102), utils.getString(32607))
-                return 8
-
             if self.sync_tvshows():
                 utils.showNotification(utils.getString(32102), utils.getString(32604))
                 return 5
@@ -229,6 +224,11 @@ class WatchedList:
             if self.get_watched_wl(0):
                 utils.showNotification(utils.getString(32102), utils.getString(32602))
                 return 4
+            
+            # attempt to merge the database from dropbox
+            if self.merge_dropbox():
+                utils.showNotification(utils.getString(32102), utils.getString(32607))
+                return 8
             
             # get watched state from xbmc
             if self.get_watched_xbmc(0):
@@ -403,11 +403,11 @@ class WatchedList:
             # Catch common mysql errors and show them to guide the user
             utils.log(u"Database error while opening mySQL DB %s [%s:%s@%s]. %s" % (utils.getSetting("mysql_db"), utils.getSetting("mysql_user"), utils.getSetting("mysql_pass"), utils.getSetting("mysql_db"), err), xbmc.LOGERROR)
             if err.errno == mysql.connector.errorcode.ER_DBACCESS_DENIED_ERROR:
-                utils.showNotification(utils.getString(32103), utils.getString(32210) % (utils.getSetting("mysql_user"), utils.getSetting("mysql_db"))) 
+                utils.showNotification(utils.getString(32108), utils.getString(32210) % (utils.getSetting("mysql_user"), utils.getSetting("mysql_db"))) 
             elif err.errno == mysql.connector.errorcode.ER_ACCESS_DENIED_ERROR:
-                utils.showNotification(utils.getString(32103), utils.getString(32208)) 
+                utils.showNotification(utils.getString(32108), utils.getString(32208)) 
             elif err.errno == mysql.connector.errorcode.ER_BAD_DB_ERROR:
-                utils.showNotification(utils.getString(32103), utils.getString(32209) % utils.getSetting("mysql_db") ) 
+                utils.showNotification(utils.getString(32108), utils.getString(32209) % utils.getSetting("mysql_db") ) 
             buggalo.addExtraData('db_connstatus', 'mysql error, closed')
             self.close_db()
             return 1
@@ -1195,7 +1195,7 @@ class WatchedList:
                 
         return count_return
 
-    def merge_database(self):
+    def merge_dropbox(self):
         """
         Merge the remote (eg: Dropbox) database into the local one
         The resulting merged database contains all watched movies and episodes of both databases
@@ -1227,85 +1227,63 @@ class WatchedList:
                                     WHERE idShow NOT IN (SELECT idShow FROM tvshows)')
             count_insert = 0
             count_update = 0
-            for modus in ['movie', 'episode']:
-                # Definitions of SQL queries
-                if modus == 'movie':
-                    # x: local database
-                    # y: remote (dropbox) database
-                    sql_joincmd_update =('SELECT y.playCount, y.lastPlayed, y.lastChange, y.idMovieImdb, y.title '
-                                         'FROM movie_watched x '
-                                         'INNER JOIN remote.movie_watched y '
-                                         'ON x.idMovieImdb=y.idMovieImdb ' 
-                                         'WHERE y.lastChange > x.lastChange')
-                                               
-                    sql_updatecmd = QUERY_MV_UPDATE_SQLITE
-                    sql_joincmd_insert =('SELECT x.idMovieImdb, x.playCount, x.lastChange, x.lastPlayed, x.title '
-                                         'FROM remote.movie_watched x '
-                                         'LEFT JOIN movie_watched y '
-                                         'ON x.idMovieImdb=y.idMovieImdb')
-                    sql_insertcmd = QUERY_MV_INSERT_SQLITE
+            for mediatype in ['movie', 'episode']:
+                # Definitions of SQL queries to get data from the dropbox database
+                if mediatype == 'movie':
+                    sql_select_dropbox =('SELECT x.idMovieImdb, x.playCount, x.lastChange, x.lastPlayed, x.title '
+                                         'FROM remote.movie_watched x ')
                 else:
-                    sql_joincmd_update =('SELECT y.playCount, y.lastPlayed, y.lastChange, y.idShow, y.season, y.episode '
-                                         'FROM episode_watched x '
-                                         'INNER JOIN remote.episode_watched y '
-                                         'ON x.idShow=y.idShow AND x.season=y.season AND x.episode=y.episode '
-                                         'WHERE y.lastChange > x.lastChange')
-                    sql_updatecmd = QUERY_EP_UPDATE_SQLITE
-                    sql_joincmd_insert =('SELECT x.idShow, x.season, x.episode, x.playCount, x.lastChange, x.lastPlayed '
-                                         'FROM remote.episode_watched x '
-                                         'LEFT JOIN episode_watched y '
-                                         'ON x.idShow=y.idShow AND x.season=y.season AND x.episode=y.episode')
-                    sql_insertcmd = QUERY_EP_INSERT_SQLITE
-                
-                # update the rows with newer movie/episode data from dropbox
-                utils.log(u'wl_merge_%s: Start updating the local database with remote entries' % modus)
-                for row in self.sqlcursor.execute(sql_joincmd_update):
-                    # update the local WL database
-                    self.sqlcursor.execute(sql_updatecmd, row)
-                    if modus == 'movie':
-                        name = "%s" % row[4]
-                        playCount = row[0]
-                        lastChange = row[2]
-                        lastPlayed = row[1]
-                    else:
-                        name = "%d S%dE%d" % (row[3], row[4], row[5])
-                        playCount = row[0]
-                        lastChange = row[2]
-                        lastPlayed = row[1]
-                    utils.log(u'wl_merge_%s: Updated entry for wl database from dropbox: '
-                                '"%s", lastChange="%s", lastPlayed="%s", playCount=%d' \
-                                % (modus, name, utils.TimeStamptosqlDateTime(lastChange), \
-                                   utils.TimeStamptosqlDateTime(lastPlayed), playCount))
-                    
-                # insert the rows with missing movie/episode data from dropbox
-                utils.log(u'wl_merge_%s: Start merging the remote in the local database' % modus)
-                for row in self.sqlcursor.execute(sql_joincmd_insert):
-                    self.sqlcursor.execute(sql_insertcmd, row)
-                    if modus == 'movie':
+                    sql_select_dropbox =('SELECT x.idShow, x.season, x.episode, x.playCount, x.lastChange, x.lastPlayed '
+                                         'FROM remote.episode_watched x ')
+                # number of string for heading of notifications
+                if mediatype == 'movie':
+                    strno = 32711
+                else:
+                    strno = 32712
+                utils.log(u'wl_merge_%s: Start merging the remote into the local database' % mediatype)
+                self.sqlcursor.execute(sql_select_dropbox)
+                # loop through all rows of the remote (dropbox) database and merge it into the local database with
+                # with the function for merging the xbmc database
+                if utils.getSetting("progressdialog") == 'true':
+                    DIALOG_PROGRESS = xbmcgui.DialogProgress()
+                    DIALOG_PROGRESS.create( utils.getString(strno) , utils.getString(32105))
+                rows = self.sqlcursor.fetchall()
+                list_length = len(rows)
+                for i in range(list_length):
+                    row = rows[i]
+                    if mediatype == 'movie':
                         name = "%s" % row[4]
                         playCount = row[1]
                         lastChange = row[2]
                         lastPlayed = row[3]
                     else:
-                        name = "%d S%dE%d" % (row[0], row[1], row[2])
+                        try:
+                            name = '%s S%02dE%02d' % (self.tvshownames[int(row[0])], int(row[1]), int(row[2]))
+                        except:
+                            name = 'tvdb-id %d S%02dE%02d' % (int(row[0]), int(row[1]), int(row[2]))
                         playCount = row[3]
                         lastChange = row[4]
                         lastPlayed = row[5]
-                    utils.log(u'wl_merge_%s: New entry for wl database from dropbox: '
-                                '"%s", lastChange="%s", lastPlayed="%s", playCount=%d' \
-                                % (modus, name, utils.TimeStamptosqlDateTime(lastChange), \
-                                   utils.TimeStamptosqlDateTime(lastPlayed), playCount))
-                    count_insert = count_insert + 1
-                # all updated rows are also inserted due to the LEFT JOINT sql command.
-                # these rows are ignored since the unique primary key is duplicate 
-                count_insert = count_insert - count_update
-                utils.showNotification(utils.getString(32405), name)
-                if modus == 'movie':
-                    strno = 32711
-                else:
-                    strno = 32712
+                        
+                    # handle the row from the dropbox database as if it came from the xbmc database and
+                    # store it in the local WL database (same function call)
+                    # row_xbmc_sim: 0imdbnumber, 1seasonnumber, 2episodenumber, 3lastPlayed, 4playCount, 5title, 6empty, 7movieid
+                    row_xbmc_sim = [0, 0, 0, lastPlayed, playCount, name, 0]
+                    if mediatype == 'movie':
+                        row_xbmc_sim[0] = row[0]
+                    else:
+                        row_xbmc_sim[0:2] = row[0:2]
+                    count = self.wl_update_media(mediatype, row_xbmc_sim, 0, 0)
+                    count_insert += count[0]; count_update += count[1];
+
+                    # check if update is canceled
+                    if utils.getSetting("progressdialog") == 'true' and DIALOG_PROGRESS.iscanceled():
+                        return 2
+                    if utils.getSetting("progressdialog") == 'true':
+                        DIALOG_PROGRESS.update(100*(i+1)/list_length, utils.getString(32105), utils.getString(32610) % (i+1, list_length, row_xbmc_sim[5]) )  
+
                 utils.showNotification(utils.getString(strno), utils.getString(32301)%(count_insert, count_update))
-            
+                if utils.getSetting("progressdialog") == 'true': DIALOG_PROGRESS.close()
         except sqlite3.Error as e:
             try:
                 errstring = e.args[0] # TODO: Find out, why this does not work some times
@@ -1314,11 +1292,13 @@ class WatchedList:
             utils.log(u'merge_database: SQLite Database error accessing the wl database: ''%s''' % errstring, xbmc.LOGERROR)
             self.close_db()
             # error could be that the database is locked (for tv show strings).
+            if utils.getSetting("progressdialog") == 'true': DIALOG_PROGRESS.close()
             return 1
         except:
             utils.log(u'merge_database: Error getting the wl database: ''%s''' % sys.exc_info()[2], xbmc.LOGERROR)
             self.close_db()
-            buggalo.onExceptionRaised()  
+            buggalo.onExceptionRaised()
+            if utils.getSetting("progressdialog") == 'true': DIALOG_PROGRESS.close()
             return 1   
         return 0 
 
