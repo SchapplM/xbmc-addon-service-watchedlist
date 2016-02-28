@@ -49,6 +49,7 @@
 		<string id="32605">Error updating xbmc-database</string>
 		<string id="32606">Writing the WL-database file %s</string>
 		<string id="32607">Unable to merge dropbox data</string>
+		<string id="32608">Python Image Library for QR code not available</string>
 
 		<!-- Progress Dialog -->
 		<string id="32610">%d/%d: %s</string>
