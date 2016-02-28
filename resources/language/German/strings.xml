@@ -3,7 +3,7 @@
 	<!-- Notification headers -->
 	<string id="32101">WatchedList</string>
 	<string id="32102">WatchedList: Fehler</string>
-	<string id="32103">Watchedlist: MySQL Fehler (WL DB)</string>
+	<string id="32108">Watchedlist: MySQL Fehler (WL DB)</string>
 	
 	<string id="32202">Gesehen-Datenbank (Filme)</string>
 	<string id="32203">Gesehen-Datenbank (Episoden)</string>
