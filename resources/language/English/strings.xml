@@ -3,8 +3,8 @@
 	<!-- Notification headers -->
 	<string id="32101">WatchedList</string>
 	<string id="32102">Watchedlist: Error</string>
-	<string id="32103">Watchedlist: MySQL Error (WL DB)</string>
-	
+	<string id="32108">Watchedlist: MySQL Error (WL DB)</string>
+
 	<string id="32202">Addon movie database</string>
 	<string id="32203">Addon episode database</string>
 	<string id="32204">xbmc-movie database</string>
