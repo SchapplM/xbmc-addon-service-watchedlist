@@ -50,6 +50,7 @@
 		<string id="32605">Aktualisieren der XBMC-Datenbank</string>
 		<string id="32606">Beim Schreiben der Gesehen-Datenbank %s</string>
 		<string id="32607">Zusammenführung mit Dropbox</string>
+		<string id="32608">Python Image Library für QR Code nicht verfügbar</string>
 
 		<!-- Progress Dialog -->
 		<string id="32610">%d/%d: %s</string>
