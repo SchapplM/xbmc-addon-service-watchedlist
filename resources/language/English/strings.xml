@@ -56,15 +56,9 @@
 		<string id="32611">%d/%d: %s S%02dE%02d</string>
 
     <!-- Dropbox related messages -->
-		<string id="32702">Setup Dropbox</string>
-		<string id="32703">Dropbox Authorization Code</string>
-		<string id="32704">Go to %s and</string>
-		<string id="32705">prepare to enter your the authorization code</string>
-		<string id="32706">Unable to authorize with dropbox</string>
-		<string id="32707">Dropbox successfully authorized</string>
-		<string id="32708">Dropbox Error</string>
-		<string id="32709">Unable to upload</string>
-		<string id="32710">Unable to download</string>
+	<string id="32708">Dropbox Error</string>
+	<string id="32709">Unable to upload</string>
+	<string id="32710">Unable to download</string>
 	<string id="32711">Dropbox-Import (Movies)</string>
 	<string id="32712">Dropbox-Import (Episodes)</string>
 	
