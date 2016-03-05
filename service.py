@@ -1309,36 +1309,6 @@ class WatchedList:
         return 0 
 
 
-    def authorizeDropbox(self):
-        fmt_str = utils.getString(32704)
-        flow = DropboxOAuth2FlowNoRedirect(DROPBOX_APP_KEY, DROPBOX_APP_SECRET)
-        authorize_url = flow.start()
-
-        # Show QR-Code Dropbox Authorization URL (source code from qr-code.py from service.linuxwhatelse.notify)
-        utils.show_qr_code(authorize_url, 'dropbox-auth-qr-code.png')
-        
-        # Show Dialog with Dropbox Authorization URL
-        # get the text to show the auth url (split on the url ? so it fits in the ok box
-        auth_url_fmt_str = fmt_str % (authorize_url)
-        chunks = auth_url_fmt_str.split('?') 
-        utils.log(u'Dropbox Message: %s' % auth_url_fmt_str, xbmc.LOGINFO)
-        dialog = xbmcgui.Dialog()
-        dialog.ok(utils.getString(32703), chunks[0] + '?', chunks[1],
-                  utils.getString(32705))
-
-        code = dialog.input(utils.getString(32703), type=xbmcgui.INPUT_ALPHANUM).strip()
-
-        try:
-            token, user_id = flow.finish(code)
-        except ErrorResponse, e:
-            dialog.ok(utils.getString(32702), utils.getString(32706), str(e))
-            utils.setSetting('dropbox_apikey', '');
-            return
-
-        utils.setSetting('dropbox_apikey', token)
-        utils.showNotification(utils.getString(32702), utils.getString(32707))
-
-
     def pushToDropbox(self):
         dropbox_key = utils.getSetting('dropbox_apikey')
         return

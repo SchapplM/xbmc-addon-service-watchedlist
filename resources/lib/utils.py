@@ -1,31 +1,14 @@
 """
 This file contains additional utility functions
 """
-
-import xbmc
-import xbmcvfs
-import xbmcaddon
+import xbmc, xbmcgui, xbmcvfs, xbmcaddon
 import os
 import time
 import sys
 import buggalo
 import re
 import random
-    
-# PIL needed for QR code generation (source code from qr-code.py from service.linuxwhatelse.notify)
-'''
-The QR-Code module used need the PIL (Python Image Library) to draw
-the image. On some platforms (like android) PIL isn't available so
-we check for the availability of this module and in case it is not
-available we show a notification informing the user about it
-'''
-try:
-	import PIL
-	PIL_AVAILABLE = True
-except ImportError:
-	PIL_AVAILABLE = False
-import qrcode    
-    
+
 __addon_id__= u'service.watchedlist'
 __Addon = xbmcaddon.Addon(__addon_id__)
 
@@ -258,22 +241,3 @@ def sleepsafe(waittime):
             return 0
         xbmc.sleep(1000) # wait 1 second until next check if xbmc terminates
     return 1 # shutdown requested
-
-def show_qr_code(qr_string, tmpfilename):
-    if PIL_AVAILABLE:
-        tmp_dir = os.path.join(data_dir()) # tmp_dir has to exist
-        tmp_file = os.path.join(tmp_dir, tmpfilename)
-        # Create the actual image and save it to our temp direcotry
-        qr = qrcode.main.QRCode(box_size=40, border=2)
-        qr_string = 'https://kodi.tv/'
-        qr.add_data(qr_string)
-        qr.make(fit=True)
-        img = qr.make_image()
-        img.save(tmp_file)
-        # Show the QR-Code in Kodi
-        xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Player.Open", "params": { "item": {"file":"' + tmp_file + '"} }, "id": 1}')
-        return 0
-    else:
-        # The PIL module isn't available so we inform the user about it
-        showNotification(getString(32102), getString(32608))
-        return 1
