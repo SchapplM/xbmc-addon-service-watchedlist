@@ -19,7 +19,7 @@ progressdialog
 db_format
     '0' = SQLite File
     '1' = MYSQL Server
-    '2' = SQLite File Synced To Dropbox
+drobox_enabled
 extdb
     'true', 'false': Use external database file
 dbpath
@@ -69,6 +69,42 @@ QUERY_MV_UPDATE_MYSQL = 'UPDATE movie_watched SET playCount = %s, lastplayed = F
 QUERY_EP_UPDATE_SQLITE = 'UPDATE episode_watched SET playCount = ?, lastPlayed = ?, lastChange = ? WHERE idShow LIKE ? AND season LIKE ? AND episode LIKE ?'
 QUERY_EP_UPDATE_MYSQL = 'UPDATE episode_watched SET playCount = %s, lastPlayed = FROM_UNIXTIME(%s), lastChange = FROM_UNIXTIME(%s) WHERE idShow LIKE %s AND season LIKE %s AND episode LIKE %s'
 
+# Queries to create tables for movies ("mv"), episodes ("ep") and series ("ss") for sqlite and mysql
+QUERY_CREATE_MV_SQLITE = "CREATE TABLE IF NOT EXISTS movie_watched (idMovieImdb INTEGER PRIMARY KEY,playCount INTEGER,lastChange INTEGER,lastPlayed INTEGER,title TEXT)"
+QUERY_CREATE_EP_SQLITE = "CREATE TABLE IF NOT EXISTS episode_watched (idShow INTEGER, season INTEGER, episode INTEGER, playCount INTEGER,lastChange INTEGER,lastPlayed INTEGER, PRIMARY KEY (idShow, season, episode))"
+QUERY_CREATE_SS_SQLITE = "CREATE TABLE IF NOT EXISTS tvshows (idShow INTEGER, title TEXT, PRIMARY KEY (idShow))"
+
+QUERY_CREATE_MV_MYSQL = ("CREATE TABLE IF NOT EXISTS `movie_watched` ("
+                      "`idMovieImdb` int unsigned NOT NULL,"
+                      "`playCount` tinyint unsigned DEFAULT NULL,"
+                      "`lastChange` timestamp NULL DEFAULT NULL,"
+                      "`lastPlayed` timestamp NULL DEFAULT NULL,"
+                      "`title` text,"
+                      "PRIMARY KEY (`idMovieImdb`)"
+                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8;")
+QUERY_CREATE_EP_MYSQL = ("CREATE TABLE IF NOT EXISTS `episode_watched` ("
+                      "`idShow` int unsigned NOT NULL DEFAULT '0',"
+                      "`season` smallint unsigned NOT NULL DEFAULT '0',"
+                      "`episode` smallint unsigned NOT NULL DEFAULT '0',"
+                      "`playCount` tinyint unsigned DEFAULT NULL,"
+                      "`lastChange` timestamp NULL DEFAULT NULL,"
+                      "`lastPlayed` timestamp NULL DEFAULT NULL,"
+                      "PRIMARY KEY (`idShow`,`season`,`episode`)"
+                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8;")
+QUERY_CREATE_SS_MYSQL = ("CREATE TABLE IF NOT EXISTS `tvshows` ("
+                      "`idShow` int unsigned NOT NULL,"
+                      "`title` text,"
+                      "PRIMARY KEY (`idShow`)"
+                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8;")
+
+QUERY_SELECT_MV_SQLITE = "SELECT idMovieImdb, lastPlayed, playCount, title, lastChange FROM movie_watched ORDER BY title"
+QUERY_SELECT_MV_MYSQL = "SELECT `idMovieImdb`, UNIX_TIMESTAMP(`lastPlayed`), `playCount`, `title`, UNIX_TIMESTAMP(`lastChange`) FROM `movie_watched` ORDER BY `title`"
+QUERY_SELECT_EP_SQLITE = "SELECT idShow, season, episode, lastPlayed, playCount, lastChange FROM episode_watched ORDER BY idShow, season, episode"
+QUERY_SELECT_EP_MYSQL = "SELECT `idShow`, `season`, `episode`, UNIX_TIMESTAMP(`lastPlayed`), `playCount`, UNIX_TIMESTAMP(`lastChange`) FROM `episode_watched` ORDER BY `idShow`, `season`, `episode`"
+
+# Queries for inserting tv series
+QUERY_INSERT_SS_SQLITE = "INSERT OR IGNORE INTO tvshows (idShow,title) VALUES (?, ?)"
+QUERY_INSERT_SS_MYSQL = "INSERT IGNORE INTO tvshows (idShow,title) VALUES (%s, %s)"
 
 class WatchedList:
     """
@@ -87,8 +123,10 @@ class WatchedList:
         self.tvshows = {} # dict: key=xbmcid, value=[imdbnumber, showname]
         self.tvshownames = {} #dict: key=imdbnumber, value=showname
         
-        self.sqlcon = 0
-        self.sqlcursor = 0
+        self.sqlcon_wl = 0
+        self.sqlcursor_wl = 0
+        self.sqlcon_db = 0
+        self.sqlcursor_db = 0
         
         self.db_method = 'file' # either 'file' or 'mysql'
         
@@ -130,7 +168,7 @@ class WatchedList:
                 return 0
 
             # load all databases
-            if self.sqlcursor == 0 or self.sqlcon == 0: 
+            if self.sqlcursor_wl == 0 or self.sqlcon_wl == 0: 
                 if self.load_db():
                     utils.showNotification(utils.getString(32102), utils.getString(32601))
                     return 3
@@ -238,7 +276,7 @@ class WatchedList:
                 return 5
             
             # attempt to merge the database from dropbox
-            if self.merge_dropbox():
+            if utils.getSetting("dropbox_enabled") == 'true' and self.merge_dropbox():
                 utils.showNotification(utils.getString(32102), utils.getString(32607))
                 return 8
 
@@ -265,7 +303,7 @@ class WatchedList:
             utils.log(u'runUpdate exited with success', xbmc.LOGDEBUG)
             
             # sync with dropbox
-            if utils.getSetting("db_format") == '2':
+            if utils.getSetting("dropbox_enabled") == 'true':
                 self.pushToDropbox()
             return 0
         except:
@@ -341,59 +379,39 @@ class WatchedList:
                 buggalo.addExtraData('dbpath', self.dbpath);
                 
                 
-                #connect to the database. create database if it does not exist
-                self.sqlcon = sqlite3.connect(self.dbpath);
-                self.sqlcursor = self.sqlcon.cursor()
+                # connect to the local wl database. create database if it does not exist
+                self.sqlcon_wl = sqlite3.connect(self.dbpath);
+                self.sqlcursor_wl = self.sqlcon_wl.cursor()
                 
                 # check for dropbox
-                if int(utils.getSetting("db_format")) == 2:
+                if utils.getSetting("dropbox_enabled") == 'true':
                     # Download Dropbox database only once to reduce traffic.
                     if not self.downloaded_dropbox:
                         if self.pullFromDropbox():
                             return
                         self.downloaded_dropbox = True
-                    # attach the dropbox database
+                    # connect to the dropbox wl database.
                     if self.dropbox_path != None:
-                        self.sqlcursor.execute('attach "%s" as remote' % self.dropbox_path)
+                        self.sqlcon_db = sqlite3.connect(self.dropbox_path);
+                        self.sqlcursor_db = self.sqlcon_db.cursor()
+                        # create tables in dropbox file, if they don't exist
+                        self.sqlcursor_db.execute(QUERY_CREATE_MV_SQLITE)
+                        self.sqlcursor_db.execute(QUERY_CREATE_EP_SQLITE)
+                        self.sqlcursor_db.execute(QUERY_CREATE_SS_SQLITE)
             else:
                 # MySQL Database on a server
-                self.sqlcon = mysql.connector.connect(user=utils.getSetting("mysql_user"), password=utils.getSetting("mysql_pass"), database=utils.getSetting("mysql_db"), host=utils.getSetting("mysql_server"), port=utils.getSetting("mysql_port"))
-                self.sqlcursor = self.sqlcon.cursor()
+                self.sqlcon_wl = mysql.connector.connect(user=utils.getSetting("mysql_user"), password=utils.getSetting("mysql_pass"), database=utils.getSetting("mysql_db"), host=utils.getSetting("mysql_server"), port=utils.getSetting("mysql_port"))
+                self.sqlcursor_wl = self.sqlcon_wl.cursor()
                 
             # create tables if they don't exist
             if int(utils.getSetting("db_format")) != 1: # sqlite file
-                sql = "CREATE TABLE IF NOT EXISTS movie_watched (idMovieImdb INTEGER PRIMARY KEY,playCount INTEGER,lastChange INTEGER,lastPlayed INTEGER,title TEXT)"
-                self.sqlcursor.execute(sql)
-                sql = "CREATE TABLE IF NOT EXISTS episode_watched (idShow INTEGER, season INTEGER, episode INTEGER, playCount INTEGER,lastChange INTEGER,lastPlayed INTEGER, PRIMARY KEY (idShow, season, episode))"
-                self.sqlcursor.execute(sql)
-                sql = "CREATE TABLE IF NOT EXISTS tvshows (idShow INTEGER, title TEXT, PRIMARY KEY (idShow))"
-                self.sqlcursor.execute(sql)
+                self.sqlcursor_wl.execute(QUERY_CREATE_MV_SQLITE)
+                self.sqlcursor_wl.execute(QUERY_CREATE_EP_SQLITE)
+                self.sqlcursor_wl.execute(QUERY_CREATE_SS_SQLITE)
             else: # mysql network database
-                sql = ("CREATE TABLE IF NOT EXISTS `movie_watched` ("
-                      "`idMovieImdb` int unsigned NOT NULL,"
-                      "`playCount` tinyint unsigned DEFAULT NULL,"
-                      "`lastChange` timestamp NULL DEFAULT NULL,"
-                      "`lastPlayed` timestamp NULL DEFAULT NULL,"
-                      "`title` text,"
-                      "PRIMARY KEY (`idMovieImdb`)"
-                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8;")
-                self.sqlcursor.execute(sql)
-                sql = ("CREATE TABLE IF NOT EXISTS `episode_watched` ("
-                      "`idShow` int unsigned NOT NULL DEFAULT '0',"
-                      "`season` smallint unsigned NOT NULL DEFAULT '0',"
-                      "`episode` smallint unsigned NOT NULL DEFAULT '0',"
-                      "`playCount` tinyint unsigned DEFAULT NULL,"
-                      "`lastChange` timestamp NULL DEFAULT NULL,"
-                      "`lastPlayed` timestamp NULL DEFAULT NULL,"
-                      "PRIMARY KEY (`idShow`,`season`,`episode`)"
-                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8;")
-                self.sqlcursor.execute(sql)
-                sql = ("CREATE TABLE IF NOT EXISTS `tvshows` ("
-                      "`idShow` int unsigned NOT NULL,"
-                      "`title` text,"
-                      "PRIMARY KEY (`idShow`)"
-                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8;")
-                self.sqlcursor.execute(sql)
+                self.sqlcursor_wl.execute(QUERY_CREATE_MV_MYSQL)
+                self.sqlcursor_wl.execute(QUERY_CREATE_EP_MYSQL)
+                self.sqlcursor_wl.execute(QUERY_CREATE_SS_MYSQL)
             
             buggalo.addExtraData('db_connstatus', 'connected')
         except sqlite3.Error as e:
@@ -425,7 +443,7 @@ class WatchedList:
             buggalo.onExceptionRaised()
             return 1     
         # only commit the changes if no error occured to ensure database persistence
-        self.sqlcon.commit()
+        self.sqlcon_wl.commit()
         return 0
 
 
@@ -439,10 +457,12 @@ class WatchedList:
             1    error
         """
         
-        if self.sqlcon:
-            self.sqlcon.close()
-        self.sqlcon = 0
-        
+        if self.sqlcon_wl:
+            self.sqlcon_wl.close()
+        self.sqlcon_wl = 0
+        if self.sqlcon_db:
+            self.sqlcon_db.close()
+        self.sqlcon_db = 0
         # copy the db file back to the shared directory, if needed
         if utils.getSetting("db_format") == '0' and self.dbfileaccess == 'copy':
             if xbmcvfs.exists(self.dbpath):
@@ -585,19 +605,20 @@ class WatchedList:
         """
 
         try:
-            buggalo.addExtraData('self_sqlcursor', self.sqlcursor); buggalo.addExtraData('self_sqlcon', self.sqlcon);
-            if self.sqlcursor == 0 or self.sqlcon == 0:
+            buggalo.addExtraData('self_sqlcursor', self.sqlcursor_wl); buggalo.addExtraData('self_sqlcon', self.sqlcon_wl);
+            if self.sqlcursor_wl == 0 or self.sqlcon_wl == 0:
                 if self.load_db():
                     return 2
+                
             # get watched movies from addon database
             self.watchedmovielist_wl = list([])
             if utils.getSetting("w_movies") == 'true':
                 utils.log(u'get_watched_wl: Get watched movies from WL database', xbmc.LOGDEBUG)
                 if int(utils.getSetting("db_format")) != 1: # SQLite3 File. Timestamp stored as integer
-                    self.sqlcursor.execute("SELECT idMovieImdb, lastPlayed, playCount, title, lastChange FROM movie_watched ORDER BY title") 
+                    self.sqlcursor_wl.execute(QUERY_SELECT_MV_SQLITE) 
                 else: # mySQL: Create integer timestamp with the request
-                    self.sqlcursor.execute("SELECT `idMovieImdb`, UNIX_TIMESTAMP(`lastPlayed`), `playCount`, `title`, UNIX_TIMESTAMP(`lastChange`) FROM `movie_watched` ORDER BY `title`") 
-                rows = self.sqlcursor.fetchall() 
+                    self.sqlcursor_wl.execute(QUERY_SELECT_MV_MYSQL) 
+                rows = self.sqlcursor_wl.fetchall() 
                 for row in rows:
                     self.watchedmovielist_wl.append(list([int(row[0]), 0, 0, int(row[1]), int(row[2]), row[3], int(row[4])])) # 0imdbnumber, 1empty, 2empty, 3lastPlayed, 4playCount, 5title, 6lastChange
 
@@ -606,11 +627,11 @@ class WatchedList:
             if utils.getSetting("w_episodes") == 'true':
                 utils.log(u'get_watched_wl: Get watched episodes from WL database', xbmc.LOGDEBUG)
                 if int(utils.getSetting("db_format")) != 1: # SQLite3 File. Timestamp stored as integer
-                    self.sqlcursor.execute("SELECT idShow, season, episode, lastPlayed, playCount, lastChange FROM episode_watched ORDER BY idShow, season, episode") 
+                    self.sqlcursor_wl.execute(QUERY_SELECT_EP_SQLITE) 
                 else: # mySQL: Create integer timestamp with the request
-                    self.sqlcursor.execute("SELECT `idShow`, `season`, `episode`, UNIX_TIMESTAMP(`lastPlayed`), `playCount`, UNIX_TIMESTAMP(`lastChange`) FROM `episode_watched` ORDER BY `idShow`, `season`, `episode`") 
+                    self.sqlcursor_wl.execute(QUERY_SELECT_EP_MYSQL) 
                 
-                rows = self.sqlcursor.fetchall() 
+                rows = self.sqlcursor_wl.fetchall() 
                 for row in rows:
                     try:
                         name = '%s S%02dE%02d' % (self.tvshownames[int(row[0])], int(row[1]), int(row[2]))
@@ -652,22 +673,21 @@ class WatchedList:
 
         try:
             utils.log(u'sync_tvshows: sync tvshows with wl database : %s' % sys.exc_info()[2], xbmc.LOGDEBUG)
-            if self.sqlcursor == 0 or self.sqlcon == 0:
+            if self.sqlcursor_wl == 0 or self.sqlcon_wl == 0:
                 if self.load_db():
                     return 2
             # write eventually new tv shows to wl database
             for xbmcid in self.tvshows:
-                if int(utils.getSetting("db_format")) != 1: # sqlite3
-                    sql = "INSERT OR IGNORE INTO tvshows (idShow,title) VALUES (?, ?)"
-                else: # mysql
-                    sql = "INSERT IGNORE INTO tvshows (idShow,title) VALUES (%s, %s)"
                 values = self.tvshows[xbmcid]
-                self.sqlcursor.execute(sql, values)
-            self.database_copy()    
-            self.sqlcon.commit()
+                if int(utils.getSetting("db_format")) != 1: # sqlite3
+                    self.sqlcursor_wl.execute(QUERY_INSERT_SS_SQLITE, values)
+                else: # mysql
+                    self.sqlcursor_wl.execute(QUERY_INSERT_SS_MYSQL, values)
+            self.database_copy()
+            self.sqlcon_wl.commit()
             # get all known tv shows from wl database
-            self.sqlcursor.execute("SELECT idShow, title FROM tvshows") 
-            rows = self.sqlcursor.fetchall() 
+            self.sqlcursor_wl.execute("SELECT idShow, title FROM tvshows") 
+            rows = self.sqlcursor_wl.fetchall() 
             for i in range(len(rows)):
                 self.tvshownames[int(rows[i][0])] = rows[i][1]
             self.close_db()
@@ -703,8 +723,8 @@ class WatchedList:
             2    database loading error
         """
         
-        buggalo.addExtraData('self_sqlcursor', self.sqlcursor); buggalo.addExtraData('self_sqlcon', self.sqlcon);
-        if self.sqlcursor == 0 or self.sqlcon == 0:
+        buggalo.addExtraData('self_sqlcursor', self.sqlcursor_wl); buggalo.addExtraData('self_sqlcon', self.sqlcon_wl);
+        if self.sqlcursor_wl == 0 or self.sqlcon_wl == 0:
             if self.load_db():
                 return 2
         for modus in ['movie', 'episode']:
@@ -767,7 +787,7 @@ class WatchedList:
             # only commit the changes if no error occured to ensure database persistence
             if count_insert > 0 or count_update > 0:
                 self.database_copy()
-                self.sqlcon.commit()
+                self.sqlcon_wl.commit()
             if modus == 'movie': strno = [32202, 32301]
             else: strno = [32203, 32301];
             utils.showNotification(utils.getString(strno[0]), utils.getString(strno[1])%(count_insert, count_update))
@@ -1075,13 +1095,13 @@ class WatchedList:
             list with 2 entries: ???
         """
 
-        buggalo.addExtraData('self_sqlcursor', self.sqlcursor); buggalo.addExtraData('self_sqlcon', self.sqlcon);
+        buggalo.addExtraData('self_sqlcursor', self.sqlcursor_wl); buggalo.addExtraData('self_sqlcon', self.sqlcon_wl);
         buggalo.addExtraData('len_self_watchedmovielist_wl', len(self.watchedmovielist_wl))
         buggalo.addExtraData('len_self_watchedepisodelist_wl', len(self.watchedepisodelist_wl))
         buggalo.addExtraData('len_self_tvshownames', len(self.tvshownames))
         buggalo.addExtraData('row_xbmc', row_xbmc)
         buggalo.addExtraData('saveanyway', saveanyway)
-        if self.sqlcursor == 0 or self.sqlcon == 0:
+        if self.sqlcursor_wl == 0 or self.sqlcon_wl == 0:
             if self.load_db():
                 return 2
         for modus in [mediatype]:
@@ -1097,7 +1117,7 @@ class WatchedList:
 
             count_return = list([0, 0])
             self.database_copy()
-            if self.sqlcursor == 0 or self.sqlcon == 0:
+            if self.sqlcursor_wl == 0 or self.sqlcon_wl == 0:
                 if self.load_db():
                     return count_return
             if not saveanyway and playcount_xbmc == 0:
@@ -1154,7 +1174,7 @@ class WatchedList:
                     else: # mysql
                         sql = QUERY_EP_UPDATE_MYSQL
                     values = list([playcount_xbmc, lastplayed_new, lastchange_new, imdbId, season, episode])
-                self.sqlcursor.execute(sql, values)
+                self.sqlcursor_wl.execute(sql, values)
                 count_return[1] = 1
                 # update the local mirror variable of the wl database: # 0imdbnumber, season, episode, 3lastPlayed, 4playCount, 5title, 6lastChange
                 if modus == 'movie':
@@ -1183,7 +1203,7 @@ class WatchedList:
                     else: # mysql
                         sql = QUERY_EP_INSERT_MYSQL
                     values = list([imdbId, season, episode, playcount_xbmc, lastchange_new, lastplayed_xbmc])
-                self.sqlcursor.execute(sql, values)
+                self.sqlcursor_wl.execute(sql, values)
                 utils.log(u'wl_update_%s: new entry for wl database: "%s", lastChange="%s", lastPlayed="%s", playCount=%d' % (modus, name, utils.TimeStamptosqlDateTime(lastchange_new), utils.TimeStamptosqlDateTime(lastplayed_xbmc), playcount_xbmc))
                 count_return[0] = 1
                 # update the local mirror variable of the wl database
@@ -1197,7 +1217,7 @@ class WatchedList:
                     else:
                         utils.showNotification(utils.getString(32405), name)
             if commit:
-                self.sqlcon.commit()  
+                self.sqlcon_wl.commit()  
                 
         return count_return
 
@@ -1212,64 +1232,53 @@ class WatchedList:
             1    database access error
             2    database loading error
         """
-        # ensure we are using dropbox
-        if int(utils.getSetting("db_format")) != 2:
-            utils.log(u'merge_database: db_format not set to dropbox. not merging remote database.')
-            return 0
 
-        # attach the dropbox database
         if not self.dropbox_path:
-            utils.log(u'merge_database: no dropbox path -- assuming download failed. not merging remote database.')
+            utils.log(u'merge_dropbox: no dropbox path -- assuming download failed. not merging remote database.')
             return 1
 
         try:
-            if self.sqlcursor == 0 or self.sqlcon == 0:
+            if self.sqlcursor_wl == 0 or self.sqlcon_wl == 0:
                 if self.load_db():
                     return 2
 
-            utils.log(u'merge_database: Inserting missing TV shows.')
-            self.sqlcursor.execute('INSERT INTO tvshows (idShow, title) SELECT idShow,title \
-                                    FROM remote.tvshows \
-                                    WHERE idShow NOT IN (SELECT idShow FROM tvshows)')
+            # utils.log(u'merge_dropbox: Inserting missing TV shows.')
+            # do not merge tvshows between dropbox and local wl database
             count_insert = 0
             count_update = 0
             for mediatype in ['movie', 'episode']:
-                # Definitions of SQL queries to get data from the dropbox database
-                if mediatype == 'movie':
-                    sql_select_dropbox =('SELECT x.idMovieImdb, x.playCount, x.lastChange, x.lastPlayed, x.title '
-                                         'FROM remote.movie_watched x ')
-                else:
-                    sql_select_dropbox =('SELECT x.idShow, x.season, x.episode, x.playCount, x.lastChange, x.lastPlayed '
-                                         'FROM remote.episode_watched x ')
-                # number of string for heading of notifications
+                # strno: number of string for heading of notifications
+                # sql_select_dropbox: Definitions of SQL queries to get data from the dropbox database
                 if mediatype == 'movie':
                     strno = 32711
+                    sql_select_dropbox = QUERY_SELECT_MV_SQLITE
                 else:
                     strno = 32712
+                    sql_select_dropbox = QUERY_SELECT_EP_SQLITE
                 utils.log(u'wl_merge_%s: Start merging the remote into the local database' % mediatype)
-                self.sqlcursor.execute(sql_select_dropbox)
+                self.sqlcursor_db.execute(sql_select_dropbox)
                 # loop through all rows of the remote (dropbox) database and merge it into the local database with
                 # with the function for merging the xbmc database
                 if utils.getSetting("progressdialog") == 'true':
                     DIALOG_PROGRESS = xbmcgui.DialogProgress()
                     DIALOG_PROGRESS.create( utils.getString(strno) , utils.getString(32105))
-                rows = self.sqlcursor.fetchall()
+                rows = self.sqlcursor_db.fetchall()
                 list_length = len(rows)
                 for i in range(list_length):
-                    row = rows[i]
+                    row = rows[i] # see definition of sql_select_dropbox for contents of `row`
                     if mediatype == 'movie':
-                        name = "%s" % row[4]
-                        playCount = row[1]
-                        lastChange = row[2]
-                        lastPlayed = row[3]
+                        name = "%s" % row[3]
+                        playCount = row[2]
+                        lastChange = row[4]
+                        lastPlayed = row[1]
                     else:
                         try:
                             name = '%s S%02dE%02d' % (self.tvshownames[int(row[0])], int(row[1]), int(row[2]))
                         except:
                             name = 'tvdb-id %d S%02dE%02d' % (int(row[0]), int(row[1]), int(row[2]))
-                        playCount = row[3]
-                        lastChange = row[4]
-                        lastPlayed = row[5]
+                        playCount = row[4]
+                        lastChange = row[5]
+                        lastPlayed = row[3]
                         
                     # handle the row from the dropbox database as if it came from the xbmc database and
                     # store it in the local WL database (same function call)
@@ -1295,13 +1304,13 @@ class WatchedList:
                 errstring = e.args[0] # TODO: Find out, why this does not work some times
             except:
                 errstring = ''
-            utils.log(u'merge_database: SQLite Database error accessing the wl database: ''%s''' % errstring, xbmc.LOGERROR)
+            utils.log(u'merge_dropbox: SQLite Database error accessing the wl database: ''%s''' % errstring, xbmc.LOGERROR)
             self.close_db()
             # error could be that the database is locked (for tv show strings).
             if utils.getSetting("progressdialog") == 'true': DIALOG_PROGRESS.close()
             return 1
         except:
-            utils.log(u'merge_database: Error getting the wl database: ''%s''' % sys.exc_info()[2], xbmc.LOGERROR)
+            utils.log(u'merge_dropbox: Error getting the wl database: ''%s''' % sys.exc_info()[2], xbmc.LOGERROR)
             self.close_db()
             buggalo.onExceptionRaised()
             if utils.getSetting("progressdialog") == 'true': DIALOG_PROGRESS.close()
@@ -1311,15 +1320,14 @@ class WatchedList:
 
     def pushToDropbox(self):
         dropbox_key = utils.getSetting('dropbox_apikey')
-        return
+        # return
         #utils.showNotification(utils.getString(32204), utils.getString(32302)%(count_update))
-        # feign success if there is no local db file
-        if not (self.dbpath and dropbox_key):
+        # feign success if there is no local dropbox database file
+        if not (self.dropbox_path and dropbox_key):
             return
 
-        db_file = os.path.basename(self.dbpath)
-        dest_file = '/' + db_file
-        old_file = '/old' + db_file
+        dest_file = '/' + 'watchedlist.db'
+        old_file = '/old' + 'watchedlist.db'
 
         client = DropboxClient(dropbox_key)
 
@@ -1335,14 +1343,15 @@ class WatchedList:
         except:
             utils.log(u'Dropbox error: Unable rename previous watched list')
 
-        f = open(self.dbpath, 'rb')
+        f = open(self.dropbox_path, 'rb')
         try:
             response = client.put_file(dest_file, f)
         except ErrorResponse, e:
             utils.log(u'Dropbox upload error: ' + str(e))
             utils.showNotification(utils.getString(32708), utils.getString(32709))
             return
-        utils.log(u'Dropbox upload complete: %s -> %s' % (self.dbpath, dest_file))
+        utils.showNotification(utils.getString(32713), utils.getString(32714))
+        utils.log(u'Dropbox upload complete: %s -> %s' % (self.dropbox_path, dest_file))
 
 
     def pullFromDropbox(self):
@@ -1363,17 +1372,43 @@ class WatchedList:
 
         client = DropboxClient(dropbox_key)
 
-        self.dropbox_path = os.path.join( self.dbdirectory , "dropbox.db" )
+        # save the dropbox database file in the user data directory (this is only a temporary file for upload and download)
+        self.dropbox_path = os.path.join( utils.data_dir() , "dropbox.db" )
+        dropbox_file_exists = False
+        
+        remote_file = '/' + 'watchedlist.db'
+        old_file = '/old' + 'watchedlist.db'
+        out = open(self.dropbox_path, 'wb')
+        # first: Try downloading the database file (if existent).
+        # if that fails, try restoring the backup file (if existent).
+        # if that also fails, the database will be rewritten (in other function)
         try:
-            remote_file = '/' + os.path.basename(self.dbpath)
-            out = open(self.dropbox_path, 'wb')
-            with client.get_file(remote_file) as f:
-                out.write(f.read())
-        except ErrorResponse, e:
-            utils.log(u'Dropbox download error: ' + str(e))
+            for tryno in range(2): # two tries for db file
+                try:
+                    with client.get_file(remote_file) as f:
+                        out.write(f.read())
+                        dropbox_file_exists = True
+                        break
+                except ErrorResponse, e:
+                    # file not available, e.g. deleted or first execution. 
+                    utils.log(u'Dropbox database download failed. %s.' % str(e))
+                if tryno == 1 and dropbox_file_exists == False:
+                    try:
+                        # no file was written. That means the dropbox file does not exist
+                        # Try restoring the backup file, if existent
+                        client.file_copy(old_file, remote_file)
+                    except ErrorResponse, e:
+                        # file not available, e.g. deleted or not existing 
+                        utils.log(u'Dropbox backup database download failed. %s.' % str(e))
+                        break
+        except: # catch this error, the dropbox mode will be disabled
+            utils.log(u'Dropbox download error: ' + str(sys.exc_info()))
             utils.showNotification(utils.getString(32708), utils.getString(32710))
             self.dropbox_path = ''
             return 1
-        utils.log(u'Dropbox database downloaded: %s -> %s' % (remote_file, self.dropbox_path))
-
-        return None
+        # check if file was written
+        if dropbox_file_exists:
+            utils.log(u'Dropbox database downloaded: %s -> %s' % (remote_file, self.dropbox_path))
+        else:
+            utils.log(u'Dropbox database download failed. No remote file available.')
+        return 0
