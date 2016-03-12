@@ -2,10 +2,6 @@
 This file is entry point for manual start via the programs menu
 """
 
-# work around bugalloo error when called for dropbox
-if len(sys.argv) == 2:
-    sys.argv.append('')
-
 import xbmcgui
 import resources.lib.utils as utils
 from service import WatchedList

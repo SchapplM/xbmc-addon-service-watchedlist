@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: XBMC-Addons\n"
 "Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
-"POT-Creation-Date: 2016-01-03 19:46+0000\n"
+"POT-Creation-Date: 2016-03-12 16:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE\n"
@@ -134,7 +134,7 @@ msgid "Options for accessing MySQL-Server"
 msgstr ""
 
 msgctxt "#30045"
-msgid "Dropbox"
+msgid "Dropbox synchronization"
 msgstr ""
 
 #empty strings from id 30046 to 30050
@@ -325,8 +325,12 @@ msgctxt "#32607"
 msgid "Unable to merge dropbox data"
 msgstr ""
 
+msgctxt "#32608"
+msgid "Python Image Library for QR code not available"
+msgstr ""
+
 #Progress Dialog
-#empty strings from id 32608 to 32609
+#empty string with id 32609
 
 msgctxt "#32610"
 msgid "%d/%d: %s"
@@ -337,31 +341,7 @@ msgid "%d/%d: %s S%02dE%02d"
 msgstr ""
 
 #Dropbox related messages
-#empty strings from id 32612 to 32701
-
-msgctxt "#32702"
-msgid "Setup Dropbox"
-msgstr ""
-
-msgctxt "#32703"
-msgid "Dropbox Authorization Code"
-msgstr ""
-
-msgctxt "#32704"
-msgid "Go to %s and"
-msgstr ""
-
-msgctxt "#32705"
-msgid "prepare to enter your the authorization code"
-msgstr ""
-
-msgctxt "#32706"
-msgid "Unable to authorize with dropbox"
-msgstr ""
-
-msgctxt "#32707"
-msgid "Dropbox successfully authorized"
-msgstr ""
+#empty strings from id 32612 to 32707
 
 msgctxt "#32708"
 msgid "Dropbox Error"
@@ -381,4 +361,12 @@ msgstr ""
 
 msgctxt "#32712"
 msgid "Dropbox-Import (Episodes)"
+msgstr ""
+
+msgctxt "#32713"
+msgid "Dropbox synchronization"
+msgstr ""
+
+msgctxt "#32714"
+msgid "Upload successfull"
 msgstr ""
