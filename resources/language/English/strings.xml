@@ -63,6 +63,7 @@
   <string id="32712">Dropbox-Import (Episodes)</string>
   <string id="32713">Dropbox synchronization</string>
   <string id="32714">Upload successfull</string>
+  <string id="32715">Empty authorization code in settings</string>
 
   <!-- Settings Language Strings-->
   <string id="30001">Basic Settings</string>

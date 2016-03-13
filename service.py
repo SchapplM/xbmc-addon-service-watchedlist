@@ -141,7 +141,7 @@ class WatchedList:
         self.dbpath = ''
         self.dbdirectory = ''
         self.dropbox_path = None
-        self.downloaded_dropbox = False
+        self.downloaded_dropbox_timestamp = 0
 
     def runProgram(self):
         """Main function to call other functions
@@ -250,7 +250,6 @@ class WatchedList:
                 if utils.sleepsafe(60*1000): return 1 # wait one minute until next check for active playback
                 if xbmc.Player().isPlaying() == False:
                     if utils.sleepsafe(180*1000): return 1 # wait 3 minutes so the dialogue does not pop up directly after the playback ends
-            self.downloaded_dropbox = False
           
             # load the addon-database
             if self.load_db(True): # True: Manual start
@@ -278,7 +277,8 @@ class WatchedList:
             # attempt to merge the database from dropbox
             if utils.getSetting("dropbox_enabled") == 'true' and self.merge_dropbox():
                 utils.showNotification(utils.getString(32102), utils.getString(32607))
-                return 8
+                # do not abort execution of the whole addon if dropbox fails (e.g. due to network issues)
+                # return 8
 
             # import from xbmc into addon database
             res = self.write_wl_wdata()
@@ -345,7 +345,7 @@ class WatchedList:
                         if not xbmcvfs.exists(self.dbdirectory): # do not use os.path.exists to access smb:// paths
                             if manualstart:
                                 utils.log(u'db path does not exist: %s' % self.dbdirectory, xbmc.LOGWARNING)
-                                return 1 # error
+                                return 1 # raise error on manual start if directory not accessible (we do not want to wait in that case)
                             else:
                                 utils.log(u'db path does not exist, wait %d minutes: %s' % (wait_minutes, self.dbdirectory), xbmc.LOGWARNING)
                                 
@@ -382,22 +382,6 @@ class WatchedList:
                 # connect to the local wl database. create database if it does not exist
                 self.sqlcon_wl = sqlite3.connect(self.dbpath);
                 self.sqlcursor_wl = self.sqlcon_wl.cursor()
-                
-                # check for dropbox
-                if utils.getSetting("dropbox_enabled") == 'true':
-                    # Download Dropbox database only once to reduce traffic.
-                    if not self.downloaded_dropbox:
-                        if self.pullFromDropbox():
-                            return
-                        self.downloaded_dropbox = True
-                    # connect to the dropbox wl database.
-                    if self.dropbox_path != None:
-                        self.sqlcon_db = sqlite3.connect(self.dropbox_path);
-                        self.sqlcursor_db = self.sqlcon_db.cursor()
-                        # create tables in dropbox file, if they don't exist
-                        self.sqlcursor_db.execute(QUERY_CREATE_MV_SQLITE)
-                        self.sqlcursor_db.execute(QUERY_CREATE_EP_SQLITE)
-                        self.sqlcursor_db.execute(QUERY_CREATE_SS_SQLITE)
             else:
                 # MySQL Database on a server
                 self.sqlcon_wl = mysql.connector.connect(user=utils.getSetting("mysql_user"), password=utils.getSetting("mysql_pass"), database=utils.getSetting("mysql_db"), host=utils.getSetting("mysql_server"), port=utils.getSetting("mysql_port"))
@@ -412,6 +396,22 @@ class WatchedList:
                 self.sqlcursor_wl.execute(QUERY_CREATE_MV_MYSQL)
                 self.sqlcursor_wl.execute(QUERY_CREATE_EP_MYSQL)
                 self.sqlcursor_wl.execute(QUERY_CREATE_SS_MYSQL)
+            
+            # check for dropbox
+            if utils.getSetting("dropbox_enabled") == 'true':
+                # Download Dropbox database only once a day to reduce traffic.
+                if time.time() > self.downloaded_dropbox_timestamp + 3600*24:
+                    if self.pullFromDropbox():
+                        return
+                    self.downloaded_dropbox_timestamp = time.time()
+                # connect to the dropbox wl database.
+                if self.dropbox_path != None:
+                    self.sqlcon_db = sqlite3.connect(self.dropbox_path);
+                    self.sqlcursor_db = self.sqlcon_db.cursor()
+                    # create tables in dropbox file, if they don't exist
+                    self.sqlcursor_db.execute(QUERY_CREATE_MV_SQLITE)
+                    self.sqlcursor_db.execute(QUERY_CREATE_EP_SQLITE)
+                    self.sqlcursor_db.execute(QUERY_CREATE_SS_SQLITE)
             
             buggalo.addExtraData('db_connstatus', 'connected')
         except sqlite3.Error as e:
@@ -1365,7 +1365,9 @@ class WatchedList:
         """
         dropbox_key = utils.getSetting('dropbox_apikey')
 
-        if not (self.dbpath and dropbox_key):
+        if not dropbox_key:
+            # no dropbox authorization key entered. Feature does not work.
+            utils.showNotification(utils.getString(32708), utils.getString(32715))
             return 0
 
         utils.log(u'Downloading WatchedList from dropbox')
