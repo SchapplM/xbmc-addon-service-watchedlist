@@ -33,7 +33,6 @@
   <string id="32106">Aktualisiere die XBMC-Datenbank ...</string>
   <string id="32107">Aktualisierung abgeschlossen.</string>
 
-
   <string id="32298">%d Filme, %d Episoden in WL.</string>
   <string id="32299">%d Filme, %d Episoden in XBMC-DB.</string>
   <string id="32301">%d neu gesehen. %d aktualisiert.</string>
@@ -64,6 +63,10 @@
   <string id="32713">Dropbox-Synchronisierung</string>
   <string id="32714">Hochladen erfolgreich</string>
   <string id="32715">Leerer Autorisierungscode in Einstellungen</string>
+  <string id="32716">Aktualisiere die Dropbox-Datenbank: ...</string>
+  <string id="32717">Dropbox-Datenbank aktualisiert. %d Einträge.</string>
+  <string id="32718">Dropbox-Export (Filme)</string>
+  <string id="32719">Dropbox-Export (Episoden)</string>
 
   <!-- Einstellungen-->
   <string id="30001">Grundeinstellungen</string>
