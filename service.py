@@ -776,7 +776,7 @@ class WatchedList:
                     DIALOG_PROGRESS.update(100*(i+1)/list_length, utils.getString(32105), utils.getString(32610) % (i+1, list_length, row_xbmc[5]) )  
 
                 try:
-                    count = self.wl_update_media(modus, row_xbmc, 0, 0)
+                    count = self.wl_update_media(modus, row_xbmc, 0, 0, 0)
                     count_insert += count[0]; count_update += count[1];
 
                 except sqlite3.Error as e:
@@ -1069,7 +1069,7 @@ class WatchedList:
                 lastplayed_new = row_xbmc[3]; playcount_new = row_xbmc[4]; mediaid = row_xbmc[7]
                 utils.log(u'watch_user_changes: %s "%s" changed playcount {%d -> %d} lastplayed {"%s" -> "%s"}. %sid=%d' % (modus, row_xbmc[5], playcount_old, playcount_new, utils.TimeStamptosqlDateTime(lastplayed_old), utils.TimeStamptosqlDateTime(lastplayed_new), modus, mediaid))
                 try:
-                    self.wl_update_media(modus, row_xbmc, 1, 1)
+                    self.wl_update_media(modus, row_xbmc, 1, 1, 0)
                 except sqlite3.Error as e:
                     try:
                         errstring = e.args[0] # TODO: Find out, why this does not work some times
@@ -1095,7 +1095,7 @@ class WatchedList:
                 self.close_db(1) # keep the db closed most of the time (no access problems)
         
 
-    def wl_update_media(self, mediatype, row_xbmc, saveanyway, commit):
+    def wl_update_media(self, mediatype, row_xbmc, saveanyway, commit, lastChange):
         """update the wl database for one movie/episode with the information in row_xbmc.
         
         Args:
@@ -1103,12 +1103,15 @@ class WatchedList:
             row_xbmc: One row of the xbmc media table self.watchedmovielist_xbmc.
             saveanyway: Skip checks whether not to save the changes
             commit: The db change is committed directly (slow with many movies, but safe)  
+            lastChange: Last change timestamp of the given data.
+                        If 0: Data from kodi.
+                        If >0: Data from other watchedlist database for merging
             
         Returns:
             return code:
             2    error loading database
             count_return:
-            list with 2 entries: ???
+            list with 2 entries: Number of new and updated entries
         """
 
         buggalo.addExtraData('self_sqlcursor', self.sqlcursor_wl); buggalo.addExtraData('self_sqlcon', self.sqlcon_wl);
@@ -1136,17 +1139,21 @@ class WatchedList:
         if self.sqlcursor_wl == 0 or self.sqlcon_wl == 0:
             if self.load_db():
                 return count_return
-        if not saveanyway and playcount_xbmc == 0:
+        if not saveanyway and playcount_xbmc == 0 and lastChange == 0:
             # playcount in xbmc-list is empty. Nothing to save
             if utils.getSetting("debug") == 'true':
                 # utils.log(u'wl_update_%s: not watched in xbmc: tt%d, %s' % (modus, imdbId, name), xbmc.LOGDEBUG)
                 pass
             return count_return
+        if lastChange == 0:
+            lastchange_new = int(time.time())
+        else: # data from WL database with given last change timestamp
+            lastchange_new = lastChange
         if mediatype == 'movie':
             j = [ii for ii, x in enumerate(self.watchedmovielist_wl) if x[0] == imdbId]
         if mediatype == 'episode':
             j = [ii for ii, x in enumerate(self.watchedepisodelist_wl) if x[0] == imdbId and x[1] == season and x[2] == episode]
-        if len(j) > 0:
+        if len(j) > 0: # j is the list of indexes of the occurences of the given row
             j = j[0] # there can only be one valid index j, since only one entry in wl per imdbId
             # the movie is already in the watched-list
             if mediatype == 'movie':
@@ -1158,26 +1165,23 @@ class WatchedList:
             lastchange_wl = row_wl[6]
             
             if not saveanyway:
-                # compare playcount and lastplayed
-                
                 # check if an update of the wl database is necessary (xbmc watched status newer)
-                if lastchange_wl > lastplayed_xbmc:
-                    return count_return# no update of WL-db. Return
-                
-                if playcount_wl >= playcount_xbmc and lastplayed_wl >= lastplayed_xbmc:
-                    if utils.getSetting("debug") == 'true':
-                        # utils.log(u'wl_update_movie: wl database up-to-date for movie tt%d, %s' % (imdbId, moviename), xbmc.LOGDEBUG)
-                        pass
+                if lastChange == 0: # information from xbmc: Criterion Playcount and lastplayed-timestamp
+                    if lastchange_wl > lastplayed_xbmc:
+                        return count_return# no update of WL-db. Return
+                    if playcount_wl >= playcount_xbmc and lastplayed_wl >= lastplayed_xbmc:
+                        return count_return # everything up-to-date
+                elif lastChange <= lastchange_wl: # information from watchedlist. Only criterion: lastChange-timestamp
                     return count_return
+                    
                 # check if the lastplayed-timestamp in xbmc is useful
-                if lastplayed_xbmc == 0:
+                if lastplayed_xbmc == 0 and lastChange == 0:
                     lastplayed_new = lastplayed_wl
                 else:
                     lastplayed_new = lastplayed_xbmc
             else:
                 lastplayed_new = lastplayed_xbmc
 
-            lastchange_new = int(time.time())
             if mediatype == 'movie':
                 if int(utils.getSetting("db_format")) != 1: # sqlite3
                     sql = QUERY_MV_UPDATE_SQLITE
@@ -1206,7 +1210,6 @@ class WatchedList:
         else:
             # the movie is not in the watched-list -> insert the movie
             # order: idMovieImdb,playCount,lastChange,lastPlayed,title
-            lastchange_new = int(time.time())
             if mediatype == 'movie':
                 if int(utils.getSetting("db_format")) != 1: # sqlite3
                     sql = QUERY_MV_INSERT_SQLITE
@@ -1304,7 +1307,7 @@ class WatchedList:
                         row_xbmc_sim[0] = row[0]
                     else:
                         row_xbmc_sim[0:3] = row[0:3]
-                    count = self.wl_update_media(mediatype, row_xbmc_sim, 0, 0)
+                    count = self.wl_update_media(mediatype, row_xbmc_sim, 0, 0, lastChange)
                     count_insert += count[0]; count_update += count[1];
 
                     # check if update is canceled
@@ -1441,7 +1444,7 @@ class WatchedList:
 
     def pushToDropbox(self):
         dropbox_key = utils.getSetting('dropbox_apikey')
-        return
+
         #utils.showNotification(utils.getString(32204), utils.getString(32302)%(count_update))
         # feign success if there is no local dropbox database file
         if not (self.dropbox_path and dropbox_key):
