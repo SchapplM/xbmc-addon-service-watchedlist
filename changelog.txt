@@ -1,5 +1,11 @@
+version 1.1.0 (02.04.2016)
+ * Added dropbox synchronization for the database
+
+version 1.0.5 (24.12.2015)
+ * Enabled IPv6 adresses for hostnames
+
 version 1.0.4 (16.05.2015)
- * fixed mysql timestamp bug
+ * Fixed mysql timestamp bug
 
 version 1.0.3 (11.01.2015)
  * Fixed wrong implementation of startup delay
@@ -50,4 +56,4 @@ version 0.8.0 (16.05.2013)
  * Added: Exceptions are catched with buggalo and bug reports are sent
  
 version 0.7.0 (11.05.2013)
- * initial release
+ * Initial release
