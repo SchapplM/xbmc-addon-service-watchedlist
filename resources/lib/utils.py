@@ -52,10 +52,10 @@ def showNotification(title,message, time=4000):
         message: has to be unicode
         time: Time that the message is beeing displayed
     """
-    _addoniconpath_ = os.path.join(addon_dir(),"icon.png")
+    _addoniconpath = os.path.join(addon_dir(),"icon.png")
     log(u'Notification. %s: %s' % (title, message) )
     if xbmc.Player().isPlaying() == False: # do not show the notification, if a video is being played.
-        xbmc.executebuiltin(encode('Notification("' + title + '","' + message + '",'+(str(time)).decode('utf-8')+',"' + _addoniconpath_ + '")'))
+        xbmcgui.Dialog().notification(title, message, _addoniconpath, time)
     if getSetting('debug') == 'true':
         xbmc.sleep(250) # time to read the message
         
