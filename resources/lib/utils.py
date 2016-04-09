@@ -235,9 +235,11 @@ def sleepsafe(waittime):
         0 waited the requested time
         1 shutdown detected within waiting time. Aborted waiting
     """
-    starttime = time.time()
-    while not xbmc.abortRequested:
-        if time.time() > starttime + waittime:
-            return 0
-        xbmc.sleep(1000) # wait 1 second until next check if xbmc terminates
-    return 1 # shutdown requested
+    monitor = xbmc.Monitor()
+    while not monitor.abortRequested():
+        # Sleep/wait
+        if monitor.waitForAbort(waittime):
+            # Abort was requested while waiting. We should exit
+            return 1 # shutdown requested
+        return 0 # waited successfully 
+    return 1 # abort requested before if-clause? 
