@@ -172,7 +172,7 @@ class WatchedList:
             delaytime = float(utils.getSetting("delay")) * 60 # in seconds
             utils.log(u'Delay time before execution: %d seconds' % delaytime, xbmc.LOGDEBUG)
             utils.showNotification(utils.getString(32101), utils.getString(32004)%float(utils.getSetting("delay")))
-            if utils.sleepsafe(delaytime):
+            if self.monitor.waitForAbort(delaytime):
                 return 0
 
             # load all databases
@@ -256,9 +256,9 @@ class WatchedList:
 
             # check if player is running before doing the update. Only do this check for automatic start
             while xbmc.Player().isPlaying() == True and not manualstart:
-                if utils.sleepsafe(60*1000): return 1 # wait one minute until next check for active playback
+                if self.monitor.waitForAbort(60*1000): return 1 # wait one minute until next check for active playback
                 if xbmc.Player().isPlaying() == False:
-                    if utils.sleepsafe(180*1000): return 1 # wait 3 minutes so the dialogue does not pop up directly after the playback ends
+                    if self.monitor.waitForAbort(180*1000): return 1 # wait 3 minutes so the dialogue does not pop up directly after the playback ends
           
             # load the addon-database
             if self.load_db(True): # True: Manual start
@@ -365,7 +365,7 @@ class WatchedList:
                             utils.showNotification(utils.getString(32102), utils.getString(32002) % self.dbdirectory )
                             # Wait "wait_minutes" minutes until next check for file path (necessary on network shares, that are offline)
                             wait_minutes += wait_minutes # increase waittime until next check
-                            if utils.sleepsafe(wait_minutes*60): return 2
+                            if self.monitor.waitForAbort(wait_minutes*60): return 2
                         else:
                             break # directory exists, continue below      
                     

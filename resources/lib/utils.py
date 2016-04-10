@@ -224,22 +224,3 @@ def fileaccessmode(path):
         else:
             # "normal" path
             return 'normal'
-
-def sleepsafe(waittime):
-    """"sleep waittime return if a shutdown is requested
-    
-    Args:
-        waittime: Time in [seconds] to wait
-        
-    Returns:
-        0 waited the requested time
-        1 shutdown detected within waiting time. Aborted waiting
-    """
-    monitor = xbmc.Monitor()
-    while not monitor.abortRequested():
-        # Sleep/wait
-        if monitor.waitForAbort(waittime):
-            # Abort was requested while waiting. We should exit
-            return 1 # shutdown requested
-        return 0 # waited successfully 
-    return 1 # abort requested before if-clause? 
