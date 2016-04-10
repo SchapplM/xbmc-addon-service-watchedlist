@@ -154,7 +154,7 @@ msgid "manually run the database update again?"
 msgstr "Datenbank-Aktualisierung nochmal starten?"
 
 msgctxt "#32002"
-msgid "db path does not exist: %s"
+msgid "DB path does not exist: %s"
 msgstr "DB-Pfad existiert nicht: %s"
 
 msgctxt "#32003"
@@ -234,7 +234,7 @@ msgid "%d movies and %d episodes read from WL."
 msgstr "%d Filme, %d Episoden in WL."
 
 msgctxt "#32299"
-msgid "%d movies and %d episodes read from Kodi-db."
+msgid "%d movies and %d episodes read from Kodi-DB."
 msgstr "%d Filme, %d Episoden in Kodi-DB."
 
 msgctxt "#32301"
@@ -258,7 +258,7 @@ msgid "Remember as newly watched (WL-DB)"
 msgstr "Merke als neu gesehen (WL-DB)"
 
 msgctxt "#32403"
-msgid "Remember as watched (updated) (WL-B)"
+msgid "Remember as watched (updated) (WL-DB)"
 msgstr "Merke als gesehen (aktualisiert) (WL-DB)"
 
 msgctxt "#32404"
@@ -296,10 +296,6 @@ msgstr "Beim Schreiben der Gesehen-Datenbank %s"
 msgctxt "#32607"
 msgid "Unable to merge dropbox data"
 msgstr "Zusammenführung mit Dropbox"
-
-msgctxt "#32608"
-msgid "Python Image Library for QR code not available"
-msgstr "Python Image Library für QR Code nicht verfügbar"
 
 msgctxt "#32610"
 msgid "%d/%d: %s"
