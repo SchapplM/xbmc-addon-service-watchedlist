@@ -86,16 +86,23 @@ def footprint():
     log(u'w_movies = %s' % getSetting('w_movies'), xbmc.LOGDEBUG)
     log(u'w_episodes = %s' % getSetting('w_episodes'), xbmc.LOGDEBUG)
     log(u'autostart = %s' % getSetting('autostart'), xbmc.LOGDEBUG)
-    log(u'periodic = %s' % getSetting('periodic'), xbmc.LOGDEBUG)
-    log(u'interval = %s' % getSetting('interval'), xbmc.LOGDEBUG)
     log(u'delay = %s' % getSetting('delay'), xbmc.LOGDEBUG)
+    log(u'starttype = %s' % getSetting('starttype'), xbmc.LOGDEBUG)
+    log(u'interval = %s' % getSetting('interval'), xbmc.LOGDEBUG)
+    log(u'watch_user = %s' % getSetting('watch_user'), xbmc.LOGDEBUG)
     log(u'progressdialog = %s' % getSetting('progressdialog'), xbmc.LOGDEBUG)
+    log(u'db_format = %s' % getSetting('db_format'), xbmc.LOGDEBUG)
     log(u'extdb = %s' % getSetting('extdb'), xbmc.LOGDEBUG)
     log(u'dbpath = %s' % getSetting('dbpath'), xbmc.LOGDEBUG)
     log(u'dbfilename = %s' % getSetting('dbfilename'), xbmc.LOGDEBUG)
     log(u'dbbackup = %s' % getSetting('dbbackup'), xbmc.LOGDEBUG)
-    
-# 
+    log(u'dropbox_enabled = %s' % getSetting('dropbox_enabled'), xbmc.LOGDEBUG)
+    log(u'dropbox_apikey = %s' % getSetting('dropbox_apikey'), xbmc.LOGDEBUG)
+    log(u'mysql_server = %s' % getSetting('mysql_server'), xbmc.LOGDEBUG)
+    log(u'mysql_port = %s' % getSetting('mysql_port'), xbmc.LOGDEBUG)
+    log(u'mysql_user = %s' % getSetting('mysql_user'), xbmc.LOGDEBUG)
+    log(u'mysql_pass = %s' % getSetting('mysql_pass'), xbmc.LOGDEBUG)
+
 def sqlDateTimeToTimeStamp(sqlDateTime):
     """Convert SQLite DateTime to Unix Timestamp
     
