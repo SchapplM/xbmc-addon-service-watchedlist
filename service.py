@@ -516,7 +516,7 @@ class WatchedList:
             if utils.getSetting("w_episodes") == 'true':
                 ############################################
                 # get imdb tv-show id from xbmc database
-                utils.log(u'get_watched_xbmc: Get all episodes from xbmc database', xbmc.LOGDEBUG)
+                utils.log(u'get_watched_xbmc: Get all TV shows from xbmc database', xbmc.LOGDEBUG)
                 json_response = utils.executeJSON({
                           "jsonrpc": "2.0", 
                           "method": "VideoLibrary.GetTVShows", 
