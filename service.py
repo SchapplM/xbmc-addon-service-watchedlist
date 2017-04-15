@@ -544,10 +544,12 @@ class WatchedList:
                                 # number in imdb-format
                                 tvshowId_imdb = int(res[0])
                         except:
-                            utils.log(u'get_watched_xbmc: tv show "%s" has no imdb-number in database. tvshowid=%d Try rescraping.' % (item['title'], tvshowId_xbmc), xbmc.LOGDEBUG)
-                            continue
+                            utils.log(u'get_watched_xbmc: tv show "%s" has no imdb-number in database. tvshowid=%d Try rescraping.' % (item['title'], tvshowId_xbmc), xbmc.LOGINFO)
+                            if not silent: utils.showNotification( utils.getString(32101), utils.getString(32297)%(item['title'], tvshowId_xbmc), xbmc.LOGINFO)
+                            tvshowId_imdb = int(0)
                         self.tvshows[tvshowId_xbmc] = list([tvshowId_imdb, item['title']])
-                        self.tvshownames[tvshowId_imdb] = item['title']
+                        if tvshowId_imdb > 0:
+                            self.tvshownames[tvshowId_imdb] = item['title']
 
             # Get all watched movies and episodes by unique id from xbmc-database via JSONRPC
             self.watchedmovielist_xbmc = list([])
@@ -601,7 +603,9 @@ class WatchedList:
                             except:
                                 utils.log(u'get_watched_xbmc: xbmc tv showid %d is not in table xbmc-tvshows. Skipping %s' % (item['tvshowid'], name), xbmc.LOGWARNING)
                                 continue
-
+                            if tvshowId_imdb == 0:
+                                utils.log(u'get_watched_xbmc: tvshow %d has no imdb-number. Skipping %s' % (item['tvshowid'], name), xbmc.LOGDEBUG)
+                                continue
                         lastplayed = utils.sqlDateTimeToTimeStamp(item['lastplayed']) # convert to integer-timestamp
                         playcount = int(item['playcount'])
                         # add data to the class-variables
@@ -707,6 +711,9 @@ class WatchedList:
             # write eventually new tv shows to wl database
             for xbmcid in self.tvshows:
                 values = self.tvshows[xbmcid]
+                if values[0] == 0:
+                    # no imdb-id saved for this tv show. Nothing to process.
+                    continue
                 if int(utils.getSetting("db_format")) != 1: # sqlite3
                     self.sqlcursor_wl.execute(QUERY_INSERT_SS_SQLITE, values)
                 else: # mysql

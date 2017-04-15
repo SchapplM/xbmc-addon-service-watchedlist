@@ -249,6 +249,10 @@ msgctxt "#32210"
 msgid "Access denied (user '%s', DB '%s')"
 msgstr "Zugriff verweigert (Benutzer '%s', DB '%s')"
 
+msgctxt "#32297"
+msgid "tvshow_has_no_imdbid"
+msgstr "TV-Show %s (ID %d) hat keine imdb-Nummer. Keine Verarbeitung mit WL möglich."
+
 msgctxt "#32298"
 msgid "%d movies and %d episodes read from WL."
 msgstr "%d Filme, %d Episoden in WL."
