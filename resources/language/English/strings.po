@@ -39,12 +39,6 @@ msgctxt "#30002"
 msgid "Database"
 msgstr ""
 
-#empty strings from id 30003 to 30009
-
-msgctxt "#30010"
-msgid "Debug mode"
-msgstr ""
-
 msgctxt "#30011"
 msgid "Update movies watched state"
 msgstr ""
@@ -97,7 +91,29 @@ msgctxt "#30023"
 msgid "Dropbox Auth Code"
 msgstr ""
 
-#empty strings from id 30024 to 30029
+msgctxt "#30024"
+msgid "verbosity"
+msgstr "Amount of User Information"
+
+msgctxt "#30025"
+msgid "loglevel_all"
+msgstr "All"
+
+msgctxt "#30026"
+msgid "loglevel_info"
+msgstr "Only Info"
+
+msgctxt "#30027"
+msgid "loglevel_warning"
+msgstr "Only Warning"
+
+msgctxt "#30028"
+msgid "loglevel_error"
+msgstr "Only Error"
+
+msgctxt "#30029"
+msgid "loglevel_suppress"
+msgstr "Suppress all"
 
 msgctxt "#30030"
 msgid "no update"
