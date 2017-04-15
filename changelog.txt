@@ -56,13 +56,13 @@ version 0.9.1 (24.06.2013)
 
 version 0.9.0 (09.06.2013)
  * Added: Check watched-states permanently and enable to set media as unwatched
- 
+
 version 0.8.1 (22.05.2013)
  * Fixed: Duplicate movies and tv episodes get marked as watched
 
 version 0.8.0 (16.05.2013)
  * Fixed: lastplayed-information is now also stored in the database (although it is sometimes missing in XBMC)
  * Added: Exceptions are catched with buggalo and bug reports are sent
- 
+
 version 0.7.0 (11.05.2013)
  * Initial release
