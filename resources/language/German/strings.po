@@ -37,10 +37,6 @@ msgctxt "#30002"
 msgid "Database"
 msgstr "Datenbank"
 
-msgctxt "#30010"
-msgid "Debug mode"
-msgstr "Debug-Modus"
-
 msgctxt "#30011"
 msgid "Update movies watched state"
 msgstr "Aktualisiere Gesehen-Status von Filmen"
@@ -92,6 +88,30 @@ msgstr "Gesehen-Änderungen laufend überwachen"
 msgctxt "#30023"
 msgid "Dropbox Auth Code"
 msgstr "Dropbox Autorisierungs-Code"
+
+msgctxt "#30024"
+msgid "verbosity"
+msgstr "Grad der Benutzerinformation"
+
+msgctxt "#30025"
+msgid "loglevel_all"
+msgstr "Alle"
+
+msgctxt "#30026"
+msgid "loglevel_info"
+msgstr "Nur Infos"
+
+msgctxt "#30027"
+msgid "loglevel_warning"
+msgstr "Nur Warnungen"
+
+msgctxt "#30028"
+msgid "loglevel_error"
+msgstr "Nur Fehler"
+
+msgctxt "#30029"
+msgid "loglevel_suppress"
+msgstr "Keine"
 
 msgctxt "#30030"
 msgid "no update"

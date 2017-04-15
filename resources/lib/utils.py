@@ -44,21 +44,28 @@ def log(message,loglevel=xbmc.LOGNOTICE):
     xbmc.log(encode(_addon_id + u": " + message), level=loglevel)
 
 
-def showNotification(title,message, time=4000):
+def showNotification(title,message,loglevel, time=4000):
     """Show Notification
 
     Args: 
         title: has to be unicode
         message: has to be unicode
+        loglevel: Log-level of the message (equivalent to xbmc.LOGDEBUG ... xbmc.LOGFATAL)
         time: Time that the message is beeing displayed
     """
+    # Check log level
+    if getSetting('verbosity') == '1' and loglevel < xbmc.LOGINFO:
+        return ""
+    elif getSetting('verbosity') == '2' and loglevel < xbmc.LOGWARNING:
+        return
+    elif getSetting('verbosity') == '3' and loglevel < xbmc.LOGERROR:
+        return
+    elif getSetting('verbosity') == '4':
+        return
     _addoniconpath = os.path.join(addon_dir(),"icon.png")
     log(u'Notification. %s: %s' % (title, message) )
     if xbmc.Player().isPlaying() == False: # do not show the notification, if a video is being played.
         xbmcgui.Dialog().notification(title, message, _addoniconpath, time)
-    if getSetting('debug') == 'true':
-        xbmc.sleep(250) # time to read the message
-        
 
 def setSetting(name,value):
     _Addon.setSetting(name,value)
@@ -82,7 +89,7 @@ def footprint():
     """Print settings to log file"""
     log(u'data_dir() = %s' % data_dir(), xbmc.LOGDEBUG)
     log(u'addon_dir() = %s' % addon_dir(), xbmc.LOGDEBUG)
-    log(u'debug = %s' % getSetting('debug'), xbmc.LOGDEBUG)
+    log(u'verbosity = %s' % getSetting('verbosity'), xbmc.LOGDEBUG)
     log(u'w_movies = %s' % getSetting('w_movies'), xbmc.LOGDEBUG)
     log(u'w_episodes = %s' % getSetting('w_episodes'), xbmc.LOGDEBUG)
     log(u'autostart = %s' % getSetting('autostart'), xbmc.LOGDEBUG)
@@ -160,7 +167,7 @@ def buggalo_extradata_settings():
     
     buggalo.addExtraData('data_dir', data_dir());
     buggalo.addExtraData('addon_dir', addon_dir());
-    buggalo.addExtraData('setting_debug', getSetting("debug"));
+    buggalo.addExtraData('setting_verbosity', getSetting("verbosity"));
     buggalo.addExtraData('setting_w_movies', getSetting("w_movies"));
     buggalo.addExtraData('setting_w_episodes', getSetting("w_episodes"));
     buggalo.addExtraData('setting_autostart', getSetting("autostart"));
