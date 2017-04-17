@@ -21,7 +21,7 @@
 		<setting id="extdb" type="bool" label="30017" default="false" enable="eq(-1,0)" />
 		<setting id="dbpath" type="folder" label="30018" default="" enable="eq(-1,true)+eq(-2,0)" />
 		<setting id="dbfilename" type="text" label="30019" default="watchedlist.db" enable="eq(-2,true)+eq(-3,0)" />
-		<setting id="dbbackup" type="bool" label="30020" default="false" enable="eq(-4,0)" />
+		<setting id="dbbackupcount" type="slider" label="30020" default="-1" range="-1,1,5" option="int"  enable="eq(-4,0)" />
 		<!-- Call the Dropbox Authorization script: Give the Dropbox app kex and the "secret" key. The script will write the authorization code to this field with the provided addon information -->
 		<setting id="dropbox_enabled" type="bool" label="30045" default="false" />
     <setting id="dropbox_apikey" type="action" label="30023" action="RunScript(script.module.dropbox, service.watchedlist, dropbox_apikey, bhd2v8hgsmqwcgt, t2cepoevjqyubnd)" enable="eq(-1,true)" />
