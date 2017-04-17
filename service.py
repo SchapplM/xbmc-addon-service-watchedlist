@@ -31,7 +31,7 @@ extdb
 dbpath
     String: Specify path to external database file
 dbfilename
-dbbackup
+dbbackupcount
 mysql_server
 mysql_port
 mysql_db
@@ -63,7 +63,7 @@ except:
     DROPBBOX_ENABLED = False
     if utils.getSetting("dropbox_enabled") == 'true':
         utils.showNotification(utils.getString(32708), utils.getString(32720), xbmc.LOGWARNING)
-if utils.getSetting('dbbackup') == 'true':
+if utils.getSetting('dbbackupcount') != '0':
     import zipfile
     import datetime
 
@@ -145,7 +145,7 @@ class WatchedList:
         self.db_method = 'file' # either 'file' or 'mysql'
 
         # flag to remember copying the databasefile if requested
-        self.dbcopydone = False
+        self.dbbackupdone = False
 
         self.watch_user_changes_count = 0
 
@@ -161,7 +161,9 @@ class WatchedList:
         self.monitor = xbmc.Monitor()
 
     def runProgram(self):
-        """Main function to call other functions
+        """
+        entry point for automatic start.
+        Main function to call other functions
         infinite loop for periodic database update
 
         Returns:
@@ -242,7 +244,8 @@ class WatchedList:
 
 
     def runUpdate(self, manualstart):
-        """entry point for manual start.
+        """
+        entry point for manual start.
         perform the update step by step
 
         Args:
@@ -258,6 +261,7 @@ class WatchedList:
             7    Error writing XBMC database
             8    Error merging dropbox database into local watched list
             9    Error merging local database into dropbox
+            10   Error performing database backup
         """
 
         try:
@@ -327,6 +331,11 @@ class WatchedList:
                     self.pushToDropbox()
                 else:
                     return 9
+
+            # delete old backup files of the database
+            # do this at the end for not destroying valuable backup in case something went wrong before
+            if self.database_backup_delete():
+                return 10
             return 0
         except:
             buggalo.onExceptionRaised()
@@ -718,7 +727,7 @@ class WatchedList:
                     self.sqlcursor_wl.execute(QUERY_INSERT_SS_SQLITE, values)
                 else: # mysql
                     self.sqlcursor_wl.execute(QUERY_INSERT_SS_MYSQL, values)
-            self.database_copy()
+            self.database_backup()
             self.sqlcon_wl.commit()
             # get all known tv shows from wl database
             self.sqlcursor_wl.execute("SELECT idShow, title FROM tvshows")
@@ -821,7 +830,7 @@ class WatchedList:
             if utils.getSetting("progressdialog") == 'true': DIALOG_PROGRESS.close()
             # only commit the changes if no error occured to ensure database persistence
             if count_insert > 0 or count_update > 0:
-                self.database_copy()
+                self.database_backup()
                 self.sqlcon_wl.commit()
             if modus == 'movie': strno = [32202, 32301]
             else: strno = [32203, 32301];
@@ -966,7 +975,7 @@ class WatchedList:
         return 0
 
 
-    def database_copy(self):
+    def database_backup(self):
         """create a copy of the database, in case something goes wrong (only if database file is used)
 
         Returns:
@@ -980,12 +989,12 @@ class WatchedList:
         if utils.getSetting("db_format") != '0':
             return 0 # no backup needed since we are using mysql database
 
-        if utils.getSetting('dbbackup') == 'false':
+        if utils.getSetting('dbbackupcount') == '0':
             return 0 # no backup requested in the addon settings
 
-        if not self.dbcopydone:
+        if not self.dbbackupdone:
             if not xbmcvfs.exists(self.dbpath):
-                utils.log(u'database_copy: directory %s does not exist. No backup possible.' % self.dbpath, xbmc.LOGERROR)
+                utils.log(u'database_backup: directory %s does not exist. No backup possible.' % self.dbpath, xbmc.LOGERROR)
                 return 1
             now = datetime.datetime.now()
             timestr = u'%04d%02d%02d_%02d%02d%02d' % (now.year, now.month, now.day, now.hour, now.minute, now.second)
@@ -993,21 +1002,46 @@ class WatchedList:
             zf = False
             try:
                 zf = zipfile.ZipFile(zipfilename, 'w')
-                zf.write(self.dbpath, compress_type=zipfile.ZIP_DEFLATED)
+                zf.write(self.dbpath, arcname='watchedlist.db', compress_type=zipfile.ZIP_DEFLATED)
                 zf.close()
-                self.dbcopydone = True
-                utils.log(u'database_copy: database backup copy created to %s' % zipfilename, xbmc.LOGINFO)
+                self.dbbackupdone = True
+                utils.log(u'database_backup: database backup copy created to %s' % zipfilename, xbmc.LOGINFO)
                 # copy the zip file with xbmc file system, if needed
                 if self.dbfileaccess == 'copy':
                     xbmcvfs.copy(zipfilename, os.path.join(self.dbdirectory_copy, utils.decode(timestr + u'-watchedlist.db.zip')))
                     xbmcvfs.delete(zipfilename)
-                return 0
             except:
                 if zf:
                     zf.close()
                 buggalo.addExtraData('zipfilename', zipfilename);
                 buggalo.onExceptionRaised()
                 return 2
+        return 0
+
+    def database_backup_delete(self):
+        if self.dbbackupdone == False:
+            return 0
+        # Limit number of backup files to the specified value
+        backupsize = int(utils.getSetting('dbbackupcount'))
+        if backupsize == -1:
+            return 0 # do not delete old backup files
+        dirs,files = xbmcvfs.listdir(self.dbdirectory)
+        # find database copy files among all files in that directory
+        files_match=[]
+        for i, f in enumerate(files):
+            if re.match('\d+_\d+-watchedlist\.db\.zip', f) != None: # match the filename string from database_backup()
+                files_match.append(f)
+        files_match = sorted(files_match, reverse=True)
+        # Iterate over backup files starting with newest. Delete oldest
+        for i, f in enumerate(files_match):
+            if i >= int( utils.getSetting('dbbackupcount') ):
+                # delete file
+                utils.log(u'database_backup: Delete old backup file %d/%d (%s)' % (i+1,len(files_match)+1,f), xbmc.LOGINFO)
+                try:
+                    xbmcvfs.delete(os.path.join(self.dbdirectory,f))
+                except:
+                    utils.log(u'database_backup: Error deleting old backup file %d (%s)' % (i,os.path.join(self.dbdirectory,f)), xbmc.LOGERROR)
+                    return 1
 
     def watch_user_changes(self, idletime_old, idletime):
         """check if the user made changes in the watched states. Especially setting movies as "not watched".
@@ -1149,7 +1183,7 @@ class WatchedList:
             episode = row_xbmc[2]
 
         count_return = list([0, 0])
-        self.database_copy()
+        self.database_backup()
         if self.sqlcursor_wl == 0 or self.sqlcon_wl == 0:
             if self.load_db():
                 return count_return

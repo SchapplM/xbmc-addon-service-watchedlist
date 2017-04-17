@@ -74,8 +74,8 @@ msgid "Database filename (SQLite Database, *.db)"
 msgstr "Dateiname (*.db)"
 
 msgctxt "#30020"
-msgid "Backup copy before accessing database file"
-msgstr "Sicherungskopie vor Datenbankzugriff"
+msgid "number_backup_copies"
+msgstr "Anzahl an Sicherungskopien (-1=unendlich)"
 
 msgctxt "#30021"
 msgid "Start with Kodi (autorun)"
