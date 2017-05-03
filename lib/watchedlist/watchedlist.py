@@ -51,8 +51,8 @@ import buggalo
 buggalo.GMAIL_RECIPIENT = "msahadl60@gmail.com"
 # buggalo.SUBMIT_URL = 'http://msahadl.ms.funpic.de/buggalo-web/submit.php'
 
+import utils
 
-import resources.lib.utils as utils
 try:
     from dropbox.client import DropboxClient, DropboxOAuth2FlowNoRedirect
     from dropbox.rest import ErrorResponse
