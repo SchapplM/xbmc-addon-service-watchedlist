@@ -54,8 +54,8 @@ buggalo.GMAIL_RECIPIENT = "msahadl60@gmail.com"
 import utils
 
 try:
-    from dropbox.client import DropboxClient, DropboxOAuth2FlowNoRedirect
-    from dropbox.rest import ErrorResponse
+    import dropbox
+    from dropbox.files import DownloadError, RelocationError
     DROPBOX_APP_KEY = 'bhd2v8hgsmqwcgt'
     DROPBOX_APP_SECRET = 't2cepoevjqyubnd'
     DROPBBOX_ENABLED = True
@@ -1568,23 +1568,23 @@ class WatchedList:
         dest_file = '/' + 'watchedlist.db'
         old_file = '/old' + 'watchedlist.db'
 
-        client = DropboxClient(dropbox_key)
+        client = dropbox.Dropbox(dropbox_key)
 
         # delete the old watched list. Failure here doesn't really matter
         try:
-            client.file_delete(old_file)
+            client.files_delete(old_file)
         except:
             utils.log(u'Dropbox error: Unable to delete previous old watched list (%s)' % old_file)
 
         # rename the previously uploaded watchlist to "oldWHATEVER"
         try:
-            client.file_move(dest_file, old_file)
+            client.files_move_v2(dest_file, old_file)
         except:
             utils.log(u'Dropbox error: Unable rename previous watched list')
 
         f = open(self.dropbox_path, 'rb')
         try:
-            response = client.put_file(dest_file, f)
+            response = client.client.files_upload(f.read(), dest_file)
         except ErrorResponse, e:
             utils.log(u'Dropbox upload error: ' + str(e))
             utils.showNotification(utils.getString(32708), utils.getString(32709), xbmc.LOGERROR)
@@ -1611,7 +1611,7 @@ class WatchedList:
 
         utils.log(u'Downloading WatchedList from dropbox')
 
-        client = DropboxClient(dropbox_key)
+        client = dropbox.Dropbox(dropbox_key)
 
         # save the dropbox database file in the user data directory (this is only a temporary file for upload and download)
         self.dropbox_path = os.path.join( utils.data_dir() , "dropbox.db" )
@@ -1619,26 +1619,23 @@ class WatchedList:
 
         remote_file = '/' + 'watchedlist.db'
         old_file = '/old' + 'watchedlist.db'
-        out = open(self.dropbox_path, 'wb')
         # first: Try downloading the database file (if existent).
         # if that fails, try restoring the backup file (if existent).
         # if that also fails, the database will be rewritten (in other function)
         try:
             for tryno in range(2): # two tries for db file
                 try:
-                    with client.get_file(remote_file) as f:
-                        out.write(f.read())
-                        dropbox_file_exists = True
-                        break
-                except ErrorResponse, e:
+                    client.files_download_to_file(self.dropbox_path, remote_file)
+                    dropbox_file_exists = True
+                except DownloadError, e:
                     # file not available, e.g. deleted or first execution.
                     utils.log(u'Dropbox database download failed. %s.' % str(e))
                 if tryno == 1 and dropbox_file_exists == False:
                     try:
                         # no file was written. That means the dropbox file does not exist
                         # Try restoring the backup file, if existent
-                        client.file_copy(old_file, remote_file)
-                    except ErrorResponse, e:
+                        client.files_copy(old_file, remote_file)
+                    except RelocationError, e:
                         # file not available, e.g. deleted or not existing
                         utils.log(u'Dropbox backup database download failed. %s.' % str(e))
                         break
