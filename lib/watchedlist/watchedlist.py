@@ -55,12 +55,12 @@ import utils
 
 try:
     import dropbox
-    from dropbox.files import DownloadError, RelocationError
+    from dropbox.exceptions import ApiError as DropboxApiError
     DROPBOX_APP_KEY = 'bhd2v8hgsmqwcgt'
     DROPBOX_APP_SECRET = 't2cepoevjqyubnd'
-    DROPBBOX_ENABLED = True
+    DROPBOX_ENABLED = True
 except:
-    DROPBBOX_ENABLED = False
+    DROPBOX_ENABLED = False
     if utils.getSetting("dropbox_enabled") == 'true':
         utils.showNotification(utils.getString(32708), utils.getString(32720), xbmc.LOGWARNING)
 if utils.getSetting('dbbackupcount') != '0':
@@ -317,7 +317,7 @@ class WatchedList:
                 return 5
 
             # attempt to merge the database from dropbox
-            if DROPBBOX_ENABLED and utils.getSetting("dropbox_enabled") == 'true' and self.merge_dropbox_local():
+            if DROPBOX_ENABLED and utils.getSetting("dropbox_enabled") == 'true' and self.merge_dropbox_local():
                 utils.showNotification(utils.getString(32102), utils.getString(32607), xbmc.LOGERROR)
                 # do not abort execution of the whole addon if dropbox fails (e.g. due to network issues)
                 # return 8
@@ -345,7 +345,7 @@ class WatchedList:
             utils.log(u'runUpdate exited with success', xbmc.LOGDEBUG)
 
             # sync with dropbox
-            if DROPBBOX_ENABLED and utils.getSetting("dropbox_enabled") == 'true':
+            if DROPBOX_ENABLED and utils.getSetting("dropbox_enabled") == 'true':
                 if self.merge_local_dropbox() == 0:
                     self.close_db(2) # save the database to file.
                     self.pushToDropbox()
@@ -449,7 +449,7 @@ class WatchedList:
                 self.sqlcursor_wl.execute(QUERY_CREATE_SS_MYSQL)
 
             # check for dropbox
-            if DROPBBOX_ENABLED and utils.getSetting("dropbox_enabled") == 'true':
+            if DROPBOX_ENABLED and utils.getSetting("dropbox_enabled") == 'true':
                 # Download Dropbox database only once a day to reduce traffic.
                 if time.time() > self.downloaded_dropbox_timestamp + 3600*24:
                     if self.pullFromDropbox():
@@ -1584,8 +1584,8 @@ class WatchedList:
 
         f = open(self.dropbox_path, 'rb')
         try:
-            response = client.client.files_upload(f.read(), dest_file)
-        except ErrorResponse, e:
+            response = client.files_upload(f.read(), dest_file)
+        except DropboxApiError, e:
             utils.log(u'Dropbox upload error: ' + str(e))
             utils.showNotification(utils.getString(32708), utils.getString(32709), xbmc.LOGERROR)
             return
@@ -1623,21 +1623,28 @@ class WatchedList:
         # if that fails, try restoring the backup file (if existent).
         # if that also fails, the database will be rewritten (in other function)
         try:
-            for tryno in range(2): # two tries for db file
+            trycount = 0
+            while trycount <= 4: # two tries for db file (trycount 1, 2), then try copying backup and download that (trycount 3,4)
+                trycount = trycount + 1
                 try:
                     client.files_download_to_file(self.dropbox_path, remote_file)
                     dropbox_file_exists = True
-                except DownloadError, e:
+                    break
+                except DropboxApiError, e:
                     # file not available, e.g. deleted or first execution.
                     utils.log(u'Dropbox database download failed. %s.' % str(e))
-                if tryno == 1 and dropbox_file_exists == False:
+                    time.sleep(0.5) # wait to avoid immediate re-try
+                    if e[1].is_path() and type(e[1].get_path()) == dropbox.files.LookupError:
+                        # Error reason: file does not exist
+                        trycount = trycount + 1 # do not try second time on downloading non-existing file
+                if trycount == 2 and dropbox_file_exists == False:
                     try:
-                        # no file was written. That means the dropbox file does not exist
+                        # No file was downloaded after second try. That means the dropbox file does not exist
                         # Try restoring the backup file, if existent
                         client.files_copy(old_file, remote_file)
-                    except RelocationError, e:
+                    except DropboxApiError, e: # files_copy raises RelocationError
                         # file not available, e.g. deleted or not existing
-                        utils.log(u'Dropbox backup database download failed. %s.' % str(e))
+                        utils.log(u'Dropbox restore database backup failed. %s.' % str(e))
                         break
         except: # catch this error, the dropbox mode will be disabled
             utils.log(u'Dropbox download error: ' + str(sys.exc_info()))
