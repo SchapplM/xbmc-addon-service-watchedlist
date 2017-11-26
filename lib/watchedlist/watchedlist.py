@@ -465,9 +465,9 @@ class WatchedList:
                     self.sqlcursor_db.execute(QUERY_CREATE_SS_SQLITE)
 
             buggalo.addExtraData('db_connstatus', 'connected')
-        except sqlite3.Error as e:
+        except sqlite3.Error as err:
             try:
-                errstring = e.args[0] # TODO: Find out, why this does not work some times
+                errstring = err.args[0] # TODO: Find out, why this does not work some times
             except:
                 errstring = ''
             utils.log(u"Database error while opening %s. '%s'" % (self.dbpath, errstring), xbmc.LOGERROR)
@@ -706,9 +706,9 @@ class WatchedList:
             if not silent: utils.showNotification(utils.getString(32101), utils.getString(32298)%(len(self.watchedmovielist_wl), len(self.watchedepisodelist_wl)), xbmc.LOGINFO)
             self.close_db(1)
             return 0
-        except sqlite3.Error as e:
+        except sqlite3.Error as err:
             try:
-                errstring = e.args[0] # TODO: Find out, why this does not work some times
+                errstring = err.args[0] # TODO: Find out, why this does not work some times
             except:
                 errstring = ''
             utils.log(u'get_watched_wl: SQLite Database error getting the wl database. %s' % errstring, xbmc.LOGERROR)
@@ -758,9 +758,9 @@ class WatchedList:
             for i in range(len(rows)):
                 self.tvshownames[int(rows[i][0])] = rows[i][1]
             self.close_db(1)
-        except sqlite3.Error as e:
+        except sqlite3.Error as err:
             try:
-                errstring = e.args[0] # TODO: Find out, why this does not work some times
+                errstring = err.args[0] # TODO: Find out, why this does not work some times
             except:
                 errstring = ''
             utils.log(u'sync_tvshows: SQLite Database error accessing the wl database: ''%s''' % errstring, xbmc.LOGERROR)
@@ -830,9 +830,9 @@ class WatchedList:
                     res = self._wl_update_media(modus, row_xbmc, 0, 0, 0)
                     count_insert += res['num_new']; count_update += res['num_update'];
 
-                except sqlite3.Error as e:
+                except sqlite3.Error as err:
                     try:
-                        errstring = e.args[0] # TODO: Find out, why this does not work some times
+                        errstring = err.args[0] # TODO: Find out, why this does not work some times
                     except:
                         errstring = ''
                     utils.log(u'write_wl_wdata: SQLite Database error ''%s'' while updating %s %s' % (errstring, modus, row_xbmc[5]), xbmc.LOGERROR)
@@ -1143,9 +1143,9 @@ class WatchedList:
                 utils.log(u'watch_user_changes: %s "%s" changed playcount {%d -> %d} lastplayed {"%s" -> "%s"}. %sid=%d' % (modus, row_xbmc[5], playcount_old, playcount_new, utils.TimeStamptosqlDateTime(lastplayed_old), utils.TimeStamptosqlDateTime(lastplayed_new), modus, mediaid))
                 try:
                     self._wl_update_media(modus, row_xbmc, 1, 1, 0)
-                except sqlite3.Error as e:
+                except sqlite3.Error as err:
                     try:
-                        errstring = e.args[0] # TODO: Find out, why this does not work some times
+                        errstring = err.args[0] # TODO: Find out, why this does not work some times
                     except:
                         errstring = ''
                     utils.log(u'write_wl_wdata: SQLite Database error (%s) while updating %s %s' % (errstring, modus, row_xbmc[5]))
@@ -1339,9 +1339,9 @@ class WatchedList:
         retval={'errcode':0, 'num_new':0, 'num_update':0}
         try:
             return self._wl_update_media(mediatype, row_xbmc, saveanyway, commit, lastChange)
-        except sqlite3.Error as e:
+        except sqlite3.Error as err:
             try:
-                errstring = e.args[0] # TODO: Find out, why this does not work some times
+                errstring = err.args[0] # TODO: Find out, why this does not work some times
             except:
                 errstring = ''
             utils.log(u'wl_update_media: SQLite Database error accessing the wl database: ''%s''' % errstring, xbmc.LOGERROR)
@@ -1433,9 +1433,9 @@ class WatchedList:
 
                 utils.showNotification(utils.getString(strno), utils.getString(32301)%(count_insert, count_update), xbmc.LOGINFO)
                 if utils.getSetting("progressdialog") == 'true': DIALOG_PROGRESS.close()
-        except sqlite3.Error as e:
+        except sqlite3.Error as err:
             try:
-                errstring = e.args[0] # TODO: Find out, why this does not work some times
+                errstring = err.args[0] # TODO: Find out, why this does not work some times
             except:
                 errstring = ''
             utils.log(u'merge_dropbox_local: SQLite Database error accessing the wl database: ''%s''' % errstring, xbmc.LOGERROR)
@@ -1534,9 +1534,9 @@ class WatchedList:
                         DIALOG_PROGRESS.update(100*(i+1)/list_length, utils.getString(strno), utils.getString(32610) % (i+1, list_length, name) )
                 utils.showNotification(utils.getString(strno), (utils.getString(32717))%list_length, xbmc.LOGINFO)
                 if utils.getSetting("progressdialog") == 'true': DIALOG_PROGRESS.close()
-        except sqlite3.Error as e:
+        except sqlite3.Error as err:
             try:
-                errstring = e.args[0] # TODO: Find out, why this does not work some times
+                errstring = err.args[0] # TODO: Find out, why this does not work some times
             except:
                 errstring = ''
             utils.log(u'merge_local_dropbox: SQLite Database error accessing the wl database: ''%s''' % errstring, xbmc.LOGERROR)
@@ -1585,8 +1585,8 @@ class WatchedList:
         f = open(self.dropbox_path, 'rb')
         try:
             response = client.files_upload(f.read(), dest_file)
-        except DropboxApiError, e:
-            utils.log(u'Dropbox upload error: ' + str(e))
+        except DropboxApiError as err:
+            utils.log(u'Dropbox upload error: ' + str(err))
             utils.showNotification(utils.getString(32708), utils.getString(32709), xbmc.LOGERROR)
             return
         utils.showNotification(utils.getString(32713), utils.getString(32714), xbmc.LOGINFO)
@@ -1630,11 +1630,11 @@ class WatchedList:
                     client.files_download_to_file(self.dropbox_path, remote_file)
                     dropbox_file_exists = True
                     break
-                except DropboxApiError, e:
+                except DropboxApiError as err:
                     # file not available, e.g. deleted or first execution.
-                    utils.log(u'Dropbox database download failed. %s.' % str(e))
+                    utils.log(u'Dropbox database download failed. %s.' % str(err))
                     time.sleep(0.5) # wait to avoid immediate re-try
-                    if e[1].is_path() and type(e[1].get_path()) == dropbox.files.LookupError:
+                    if err[1].is_path() and type(err[1].get_path()) == dropbox.files.LookupError:
                         # Error reason: file does not exist
                         trycount = trycount + 1 # do not try second time on downloading non-existing file
                 if trycount == 2 and dropbox_file_exists == False:
@@ -1642,9 +1642,9 @@ class WatchedList:
                         # No file was downloaded after second try. That means the dropbox file does not exist
                         # Try restoring the backup file, if existent
                         client.files_copy(old_file, remote_file)
-                    except DropboxApiError, e: # files_copy raises RelocationError
+                    except DropboxApiError as err: # files_copy raises RelocationError
                         # file not available, e.g. deleted or not existing
-                        utils.log(u'Dropbox restore database backup failed. %s.' % str(e))
+                        utils.log(u'Dropbox restore database backup failed. %s.' % str(err))
                         break
         except: # catch this error, the dropbox mode will be disabled
             utils.log(u'Dropbox download error: ' + str(sys.exc_info()))
