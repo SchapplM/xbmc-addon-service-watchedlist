@@ -1,3 +1,6 @@
+version 1.2.1 (26.11.2017)
+* Fixed Dropbox API: Change from v1 to v2
+
 version 1.2 (21.05.2017)
 * Added API and python module to use this addon in other addons
 * minor fixes
