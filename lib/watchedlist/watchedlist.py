@@ -394,7 +394,7 @@ class WatchedList:
                         self.dbfileaccess = utils.fileaccessmode(self.dbdirectory)
                         self.dbdirectory = utils.translateSMB(self.dbdirectory)
 
-                        self.dbpath = os.path.join( self.dbdirectory , utils.getSetting("dbfilename").decode('utf-8') )
+                        self.dbpath = os.path.join( self.dbdirectory , utils.getSetting("dbfilename") )
                         # xbmc.validatePath(self.dbdirectory) # does not work for smb
                         if not xbmcvfs.exists(self.dbdirectory): # do not use os.path.exists to access smb:// paths
                             if manualstart:
@@ -480,7 +480,7 @@ class WatchedList:
             return 1
         except mysql.connector.Error as err:
             # Catch common mysql errors and show them to guide the user
-            utils.log(u"Database error while opening mySQL DB %s [%s:%s@%s]. %s" % (utils.getSetting("mysql_db"), utils.getSetting("mysql_user"), utils.getSetting("mysql_pass"), utils.getSetting("mysql_db"), err.msg), xbmc.LOGERROR)
+            utils.log(u"Database error while opening mySQL DB %s [%s:%s@%s]. %s" % (utils.getSetting("mysql_db"), utils.getSetting("mysql_user"), utils.getSetting("mysql_pass"), utils.getSetting("mysql_db"), err.msg.decode('utf-8')), xbmc.LOGERROR)
             if err.errno == mysql.connector.errorcode.ER_DBACCESS_DENIED_ERROR:
                 utils.showNotification(utils.getString(32108), utils.getString(32210) % (utils.getSetting("mysql_user"), utils.getSetting("mysql_db")), xbmc.LOGERROR)
             elif err.errno == mysql.connector.errorcode.ER_ACCESS_DENIED_ERROR:
@@ -488,7 +488,7 @@ class WatchedList:
             elif err.errno == mysql.connector.errorcode.ER_BAD_DB_ERROR:
                 utils.showNotification(utils.getString(32108), utils.getString(32209) % utils.getSetting("mysql_db"), xbmc.LOGERROR)
             else:
-                utils.showNotification(utils.getString(32108), err.msg, xbmc.LOGERROR)
+                utils.showNotification(utils.getString(32108), err.msg.decode('utf-8'), xbmc.LOGERROR)
             buggalo.addExtraData('db_connstatus', 'mysql error, closed')
             self.close_db(3)
             return 1
@@ -1352,8 +1352,8 @@ class WatchedList:
             self.close_db(1)
             retval['errcode'] = 1
         except mysql.connector.Error as err:
-            utils.log(u"wl_update_media: MySQL Database error accessing the wl database: ''%s''" % (err.msg), xbmc.LOGERROR)
-            utils.showNotification(utils.getString(32108), err.msg, xbmc.LOGERROR)
+            utils.log(u"wl_update_media: MySQL Database error accessing the wl database: ''%s''" % (err.msg.decode('utf-8')), xbmc.LOGERROR)
+            utils.showNotification(utils.getString(32108), err.msg.decode('utf-8'), xbmc.LOGERROR)
             self.close_db(1)
             retval['errcode'] = 1
         return retval
