@@ -644,7 +644,13 @@ class WatchedList:
                             imdbId = int(res[0])
                         else: # episodes
                             tvshowId_xbmc = item['tvshowid']
-                            name = '%s S%02dE%02d' % (item['showtitle'], item['season'], item['episode'])
+                            try:
+                                tvshowName_xbmc = item['showtitle']
+                            except:
+                                # TODO: Something is wrong with the database or the json output since the field tvshowid is missing although requested. Check if this error still occurs and remove try-except
+                                utils.log(u'get_watched_xbmc: TV episode %d S%02dE%02d% has no associated showtitle. Skipping.' % (item['tvshowid'], item['season'], item['episode']), xbmc.LOGWARNING)
+                                continue
+                            name = '%s S%02dE%02d' % (tvshowName_xbmc, item['season'], item['episode'])
                             try:
                                 tvshowId_imdb = self.tvshows[tvshowId_xbmc][0]
                             except:
