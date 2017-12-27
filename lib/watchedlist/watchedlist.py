@@ -11,7 +11,7 @@ delay
     delay after startup in minutes: '0', '5', '10', ...
 starttype
     '0' = No autostart
-    '1' = One Execution after xbmc start
+    '1' = One Execution after Kodi start
     '2' = Periodic start of the addon
 interval
 watch_user
@@ -157,7 +157,7 @@ class WatchedList:
 
         self.watch_user_changes_count = 0
 
-        # normal access of files or access over the xbmc virtual file system (on unix)
+        # normal access of files or access over the Kodi virtual file system (on unix)
         self.dbfileaccess = 'normal'
 
         self.dbpath = ''
@@ -254,7 +254,7 @@ class WatchedList:
                     # check if user changes arrived
                     if utils.getSetting("watch_user") == 'true':
                         idletime_old = idletime
-                        idletime = xbmc.getGlobalIdleTime() # xbmc idletime in seconds
+                        idletime = xbmc.getGlobalIdleTime() # Kodi idletime in seconds
                         # check if user could have made changes and process these changes to the wl database
                         self.watch_user_changes(idletime_old, idletime)
                     # check if time for update arrived
@@ -289,9 +289,9 @@ class WatchedList:
             0    success
             3    Error opening database
             4    Error getting watched state from addon database
-            5    Error getting watched state from xbmc database
+            5    Error getting watched state from Kodi database
             6    Error writing WL Database
-            7    Error writing XBMC database
+            7    Error writing Kodi database
             8    Error merging dropbox database into local watched list
             9    Error merging local database into dropbox
             10   Error performing database backup
@@ -334,7 +334,7 @@ class WatchedList:
                 # do not abort execution of the whole addon if dropbox fails (e.g. due to network issues)
                 # return 8
 
-            # import from xbmc into addon database
+            # import from Kodi into addon database
             res = self.write_wl_wdata()
             if res == 2: # user exit
                 return 0
@@ -345,7 +345,7 @@ class WatchedList:
             # close the sqlite database (addon)
             self.close_db(1) # should be closed by the functions directly accessing the database
 
-            # export from addon database into xbmc database
+            # export from addon database into Kodi database
             res = self.write_xbmc_wdata((utils.getSetting("progressdialog") == 'true'), 2)
             if res == 2: # user exit
                 return 0
@@ -419,7 +419,7 @@ class WatchedList:
                         else:
                             break # directory exists, continue below
 
-                # on unix, smb-shares can not be accessed with sqlite3 --> copy the db with xbmc file system operations and work in mirror directory
+                # on unix, smb-shares can not be accessed with sqlite3 --> copy the db with Kodi file system operations and work in mirror directory
                 buggalo.addExtraData('dbfileaccess', self.dbfileaccess);
                 buggalo.addExtraData('dbdirectory', self.dbdirectory);
                 buggalo.addExtraData('dbpath', self.dbpath);
@@ -428,7 +428,7 @@ class WatchedList:
                     self.dbpath_copy = self.dbpath # path to db file as in the settings (but not accessable)
                     buggalo.addExtraData('dbdirectory_copy', self.dbdirectory_copy);
                     buggalo.addExtraData('dbpath_copy', self.dbpath_copy);
-                    # work in copy directory in the xbmc profile folder
+                    # work in copy directory in the Kodi profile folder
                     self.dbdirectory = os.path.join( xbmc.translatePath( utils.data_dir() ).decode('utf-8'), 'dbcopy')
                     if not xbmcvfs.exists(self.dbdirectory):
                         xbmcvfs.mkdir(self.dbdirectory)
@@ -549,7 +549,7 @@ class WatchedList:
 
 
     def get_watched_xbmc(self, silent):
-        """Get Watched States of XBMC Database
+        """Get Watched States of Kodi Database
 
         Args:
             silent: Do not show notifications if True
@@ -566,8 +566,8 @@ class WatchedList:
             # first tv shows with TheTVDB-ID, then tv episodes
             if utils.getSetting("w_episodes") == 'true':
                 ############################################
-                # get imdb tv-show id from xbmc database
-                utils.log(u'get_watched_xbmc: Get all TV shows from xbmc database', xbmc.LOGDEBUG)
+                # get imdb tv-show id from Kodi database
+                utils.log(u'get_watched_xbmc: Get all TV shows from Kodi database', xbmc.LOGDEBUG)
                 json_response = utils.executeJSON({
                           "jsonrpc": "2.0",
                           "method": "VideoLibrary.GetTVShows",
@@ -607,7 +607,7 @@ class WatchedList:
                     continue
                 if modus == 'episode' and utils.getSetting("w_episodes") != 'true':
                     continue
-                utils.log(u'get_watched_xbmc: Get all %ss from xbmc database' % modus, xbmc.LOGDEBUG)
+                utils.log(u'get_watched_xbmc: Get all %ss from Kodi database' % modus, xbmc.LOGDEBUG)
                 if modus == 'movie':
                     # use the JSON-RPC to access the xbmc-database.
                     json_response = utils.executeJSON({
@@ -648,7 +648,7 @@ class WatchedList:
                             try:
                                 tvshowId_imdb = self.tvshows[tvshowId_xbmc][0]
                             except:
-                                utils.log(u'get_watched_xbmc: xbmc tv showid %d is not in table xbmc-tvshows. Skipping %s' % (item['tvshowid'], name), xbmc.LOGWARNING)
+                                utils.log(u'get_watched_xbmc: Kodi tv showid %d is not in Kodi-table tvshows. Skipping %s' % (item['tvshowid'], name), xbmc.LOGWARNING)
                                 continue
                             if tvshowId_imdb == 0:
                                 utils.log(u'get_watched_xbmc: tvshow %d has no imdb-number. Skipping %s' % (item['tvshowid'], name), xbmc.LOGDEBUG)
@@ -666,7 +666,7 @@ class WatchedList:
                 return 4
             return 0
         except:
-            utils.log(u'get_watched_xbmc: error getting the xbmc database : %s' % sys.exc_info()[2], xbmc.LOGERROR)
+            utils.log(u'get_watched_xbmc: error getting the Kodi database : %s' % sys.exc_info()[2], xbmc.LOGERROR)
             self.close_db(3)
             buggalo.onExceptionRaised()
             return 1
@@ -747,7 +747,7 @@ class WatchedList:
 
 
     def sync_tvshows(self):
-        """Sync List of TV Shows from XBMC to WL Database
+        """Sync List of TV Shows from Kodi to WL Database
 
         Returns:
             return code:
@@ -807,7 +807,7 @@ class WatchedList:
 
 
     def write_wl_wdata(self):
-        """Go through all watched movies from xbmc and check whether they are up to date in the addon database
+        """Go through all watched movies from Kodi and check whether they are up to date in the addon database
 
         Returns:
             return code:
@@ -898,7 +898,7 @@ class WatchedList:
 
         Returns:
             return code:
-            0    successfully written XBMC database
+            0    successfully written Kodi database
             1    program exception
             2    cancel by user interaction
         """
@@ -910,7 +910,7 @@ class WatchedList:
             if modus == 'episode' and utils.getSetting("w_episodes") != 'true':
                 continue
 
-            utils.log(u'write_xbmc_wdata: Write watched %ss to xbmc database (pd=%d, noti=%d)' % (modus, progressdialogue, notifications), xbmc.LOGDEBUG)
+            utils.log(u'write_xbmc_wdata: Write watched %ss to Kodi database (pd=%d, noti=%d)' % (modus, progressdialogue, notifications), xbmc.LOGDEBUG)
             count_update = 0
             if progressdialogue:
                 DIALOG_PROGRESS = xbmcgui.DialogProgress()
@@ -963,11 +963,11 @@ class WatchedList:
                             # check if movie/episode is set as unwatched in the wl database
                             if playcount_wl != playcount_xbmc and lastchange_wl > lastplayed_xbmc:
                                 change_xbmc_db = True
-                            # compare playcount and lastplayed (update if xbmc data is older)
+                            # compare playcount and lastplayed (update if Kodi data is older)
                             if playcount_xbmc < playcount_wl or (lastplayed_xbmc < lastplayed_wl and playcount_wl > 0):
                                 change_xbmc_db = True
                             if not change_xbmc_db:
-                                # utils.log(u'write_xbmc_wdata: xbmc database up-to-date for tt%d, %s' % (imdbId, row_xbmc[2]), xbmc.LOGDEBUG)
+                                # utils.log(u'write_xbmc_wdata: Kodi database up-to-date for tt%d, %s' % (imdbId, row_xbmc[2]), xbmc.LOGDEBUG)
                                 continue
                             # check if the lastplayed-timestamp in wl is useful
                             if playcount_wl == 0:
@@ -989,7 +989,7 @@ class WatchedList:
                                       }
                             json_response = utils.executeJSON(jsondict)
                             if (json_response.has_key('result') and json_response['result'] == 'OK'):
-                                utils.log(u'write_xbmc_wdata: xbmc database updated for %s. playcount: {%d -> %d}, lastplayed: {"%s" -> "%s"} (%sid=%d)' % (name, playcount_xbmc, playcount_wl, utils.TimeStamptosqlDateTime(lastplayed_xbmc), utils.TimeStamptosqlDateTime(lastplayed_new), modus, mediaid), xbmc.LOGINFO)
+                                utils.log(u'write_xbmc_wdata: Kodi database updated for %s. playcount: {%d -> %d}, lastplayed: {"%s" -> "%s"} (%sid=%d)' % (name, playcount_xbmc, playcount_wl, utils.TimeStamptosqlDateTime(lastplayed_xbmc), utils.TimeStamptosqlDateTime(lastplayed_new), modus, mediaid), xbmc.LOGINFO)
                                 if playcount_wl == 0:
                                     if notifications > 0: utils.showNotification(utils.getString(32404), name, xbmc.LOGDEBUG)
                                 else:
@@ -1003,11 +1003,11 @@ class WatchedList:
                                     self.watchedepisodelist_xbmc[i][3] = lastplayed_new
                                     self.watchedepisodelist_xbmc[i][4] = playcount_wl
                             else:
-                                utils.log(u'write_xbmc_wdata: error updating xbmc database. %s. json_response=%s' % (name, str(json_response)), xbmc.LOGERROR)
+                                utils.log(u'write_xbmc_wdata: error updating Kodi database. %s. json_response=%s' % (name, str(json_response)), xbmc.LOGERROR)
 
                     else:
                         # the movie is in the watched-list but not in the xbmc-list -> no action
-                        # utils.log(u'write_xbmc_wdata: movie not in xbmc database: tt%d, %s' % (imdbId, row_xbmc[2]), xbmc.LOGDEBUG)
+                        # utils.log(u'write_xbmc_wdata: movie not in Kodi database: tt%d, %s' % (imdbId, row_xbmc[2]), xbmc.LOGDEBUG)
                         continue
                 except:
                     utils.log(u"write_xbmc_wdata: Error while updating %s %s: %s" % (modus, name, sys.exc_info()[2]), xbmc.LOGERROR)
@@ -1056,7 +1056,7 @@ class WatchedList:
                 zf.close()
                 self.dbbackupdone = True
                 utils.log(u'database_backup: database backup copy created to %s' % zipfilename, xbmc.LOGINFO)
-                # copy the zip file with xbmc file system, if needed
+                # copy the zip file with Kodi file system, if needed
                 if self.dbfileaccess == 'copy':
                     xbmcvfs.copy(zipfilename, os.path.join(self.dbdirectory_copy, utils.decode(timestr + u'-watchedlist.db.zip')))
                     xbmcvfs.delete(zipfilename)
@@ -1197,7 +1197,7 @@ class WatchedList:
                     self.close_db(1)
                     return 2
 
-            # update xbmc watched status, e.g. to set duplicate movies also as watched
+            # update Kodi watched status, e.g. to set duplicate movies also as watched
             if len(indices_changed) > 0:
                 self.write_xbmc_wdata(0, 1) # this changes self.watchedmovielist_xbmc
                 self.close_db(1) # keep the db closed most of the time (no access problems)
@@ -1211,7 +1211,7 @@ class WatchedList:
 
         Args:
             mediatype: 'episode' or 'movie'
-            row_xbmc: One row of the xbmc media table self.watchedmovielist_xbmc.
+            row_xbmc: One row of the Kodi media table self.watchedmovielist_xbmc.
             saveanyway: Skip checks whether not to save the changes
             commit: The db change is committed directly (slow with many movies, but safe)
             lastChange: Last change timestamp of the given data.
@@ -1287,7 +1287,7 @@ class WatchedList:
                 elif lastChange <= lastchange_wl: # information from watchedlist. Only criterion: lastChange-timestamp
                     return retval
 
-                # check if the lastplayed-timestamp in xbmc is useful
+                # check if the lastplayed-timestamp in Kodi is useful
                 if lastplayed_xbmc == 0 and lastChange == 0:
                     lastplayed_new = lastplayed_wl
                 else:
@@ -1357,7 +1357,7 @@ class WatchedList:
 
         Args:
             mediatype: 'episode' or 'movie'
-            row_xbmc: One row of the xbmc media table self.watchedmovielist_xbmc or self.watchedepisodelist_xbmc.
+            row_xbmc: One row of the Kodi media table self.watchedmovielist_xbmc or self.watchedepisodelist_xbmc.
                     List with [0imdbnumber, 1empty, 2empty, 3lastPlayed, 4playCount, 5title, 6empty, 7movieid]
                     or [0tvdbnumber, 1season, 2episode, 3lastplayed, 4playcount, 5name, 6empty, 7episodeid]
             saveanyway: Skip checks whether not to save the changes
@@ -1431,7 +1431,7 @@ class WatchedList:
                 utils.log(u'wl_merge_dropbox_local (%s): Start merging the remote into the local database' % mediatype)
                 self.sqlcursor_db.execute(sql_select_dropbox)
                 # loop through all rows of the remote (dropbox) database and merge it into the local database with
-                # with the function for merging the xbmc database
+                # with the function for merging the Kodi database
                 if utils.getSetting("progressdialog") == 'true':
                     DIALOG_PROGRESS = xbmcgui.DialogProgress()
                     DIALOG_PROGRESS.create( utils.getString(strno) , utils.getString(32105))
@@ -1454,7 +1454,7 @@ class WatchedList:
                         lastChange = row[5]
                         lastPlayed = row[3]
 
-                    # handle the row from the dropbox database as if it came from the xbmc database and
+                    # handle the row from the dropbox database as if it came from the Kodi database and
                     # store it in the local WL database (same function call)
                     # row_xbmc_sim: 0imdbnumber, 1seasonnumber, 2episodenumber, 3lastPlayed, 4playCount, 5title, 6empty, 7movieid
                     row_xbmc_sim = [0, 0, 0, lastPlayed, playCount, name, 0]
