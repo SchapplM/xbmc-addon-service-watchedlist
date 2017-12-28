@@ -429,8 +429,8 @@ class WatchedList:
                     buggalo.addExtraData('dbdirectory_copy', self.dbdirectory_copy);
                     buggalo.addExtraData('dbpath_copy', self.dbpath_copy);
                     # work in copy directory in the Kodi profile folder
-                    self.dbdirectory = os.path.join( xbmc.translatePath( utils.data_dir() ).decode('utf-8'), 'dbcopy')
-                    if not xbmcvfs.exists(self.dbdirectory):
+                    self.dbdirectory = os.path.join( xbmc.translatePath( utils.data_dir() ).decode('utf-8'), 'dbcopy' + os.sep)
+                    if not xbmcvfs.exists(self.dbdirectory): # directory has to end with '/' (os.sep)
                         xbmcvfs.mkdir(self.dbdirectory)
                         utils.log(u'created directory %s' % str(self.dbdirectory))
                     self.dbpath = os.path.join( self.dbdirectory , "watchedlist.db" )
@@ -590,7 +590,7 @@ class WatchedList:
                                 # number in imdb-format
                                 tvshowId_imdb = int(res[0])
                         except:
-                            utils.log(u'get_watched_xbmc: tv show "%s" has no imdb-number in database. tvshowid=%d Try rescraping.' % (item['title'], tvshowId_xbmc), xbmc.LOGINFO)
+                            utils.log(u'get_watched_xbmc: tv show "%s" has no imdb-number in database. tvshowid=%d. Try rescraping.' % (item['title'], tvshowId_xbmc), xbmc.LOGINFO)
                             if not silent: utils.showNotification( utils.getString(32101), utils.getString(32297)%(item['title'], tvshowId_xbmc), xbmc.LOGINFO)
                             tvshowId_imdb = int(0)
                         self.tvshows[tvshowId_xbmc] = list([tvshowId_imdb, item['title']])
@@ -639,25 +639,28 @@ class WatchedList:
                             res = re.compile('tt(\d+)').findall(item['imdbnumber'])
                             if len(res) == 0:
                                 # no imdb-number for this movie in database. Skip
-                                utils.log(u'get_watched_xbmc: Movie %s has no imdb-number in database. movieid=%d Try rescraping' % (name, int(item['movieid'])), xbmc.LOGDEBUG)
+                                utils.log(u'get_watched_xbmc: Movie %s has no imdb-number in database. movieid=%d. Try rescraping' % (name, int(item['movieid'])), xbmc.LOGINFO)
                                 continue
                             imdbId = int(res[0])
+                            if imdbId == 0:
+                                utils.log(u'get_watched_xbmc: Movie %s has no valid imdb-number in database (is Null). movieid=%d. Try rescraping' % (name, int(item['movieid'])), xbmc.LOGINFO)
+                                continue
                         else: # episodes
                             tvshowId_xbmc = item['tvshowid']
                             try:
                                 tvshowName_xbmc = item['showtitle']
                             except:
                                 # TODO: Something is wrong with the database or the json output since the field tvshowid is missing although requested. Check if this error still occurs and remove try-except
-                                utils.log(u'get_watched_xbmc: TV episode %d S%02dE%02d% has no associated showtitle. Skipping.' % (item['tvshowid'], item['season'], item['episode']), xbmc.LOGWARNING)
+                                utils.log(u'get_watched_xbmc: TV episode id %d (show %d, S%02dE%02d) has no associated showtitle. Skipping.' % (item['episodeid'], item['tvshowid'], item['season'], item['episode']), xbmc.LOGWARNING)
                                 continue
                             name = '%s S%02dE%02d' % (tvshowName_xbmc, item['season'], item['episode'])
                             try:
                                 tvshowId_imdb = self.tvshows[tvshowId_xbmc][0]
                             except:
-                                utils.log(u'get_watched_xbmc: Kodi tv showid %d is not in Kodi-table tvshows. Skipping %s' % (item['tvshowid'], name), xbmc.LOGWARNING)
+                                utils.log(u'get_watched_xbmc: Kodi tv showid %d is not in Kodi-table tvshows. Skipping episode id %d (%s)' % (item['tvshowid'], item['episodeid'], name), xbmc.LOGINFO)
                                 continue
                             if tvshowId_imdb == 0:
-                                utils.log(u'get_watched_xbmc: tvshow %d has no imdb-number. Skipping %s' % (item['tvshowid'], name), xbmc.LOGDEBUG)
+                                utils.log(u'get_watched_xbmc: tvshow %d has no imdb-number. Skipping episode id %d (%s)' % (item['tvshowid'], item['episodeid'], name), xbmc.LOGDEBUG)
                                 continue
                         lastplayed = utils.sqlDateTimeToTimeStamp(item['lastplayed']) # convert to integer-timestamp
                         playcount = int(item['playcount'])
@@ -665,7 +668,7 @@ class WatchedList:
                         if modus == 'movie':
                             self.watchedmovielist_xbmc.append(list([imdbId, 0, 0, lastplayed, playcount, name, 0, int(item['movieid'])]))# 0imdbnumber, 1empty, 2empty, 3lastPlayed, 4playCount, 5title, 6empty, 7movieid
                         else:
-                            self.watchedepisodelist_xbmc.append(list([tvshowId_imdb, int(item['season']), int(item['episode']), lastplayed, playcount, name, 0, int(item['episodeid'])]))
+                            self.watchedepisodelist_xbmc.append(list([tvshowId_imdb, int(item['season']), int(item['episode']), lastplayed, playcount, name, 0, int(item['episodeid'])])) # 0tvdbnumber, 1season, 2episode, 3lastplayed, 4playcount, 5name, 6empty, 7episodeid
             if not silent: utils.showNotification( utils.getString(32101), utils.getString(32299)%(len(self.watchedmovielist_xbmc), len(self.watchedepisodelist_xbmc)), xbmc.LOGINFO)
             if self.monitor.abortRequested():
                 self.close_db(3)
@@ -1081,7 +1084,14 @@ class WatchedList:
         backupsize = int(utils.getSetting('dbbackupcount'))
         if backupsize == -1:
             return 0 # do not delete old backup files
-        dirs,files = xbmcvfs.listdir(self.dbdirectory)
+        if self.dbfileaccess == 'copy':
+            # Database is on a network share. The backup is also copied to that location. Delete old backups there.
+            backupdir = self.dbdirectory_copy
+        else:
+            # Database and backups are in the default folders
+            backupdir = self.dbdirectory
+        
+        dirs,files = xbmcvfs.listdir(backupdir)
         # find database copy files among all files in that directory
         files_match=[]
         for i, f in enumerate(files):
@@ -1094,11 +1104,11 @@ class WatchedList:
             if self.monitor.abortRequested(): break
             if i >= int( utils.getSetting('dbbackupcount') ):
                 # delete file
-                utils.log(u'database_backup: Delete old backup file %d/%d (%s)' % (i+1,len(files_match)+1,f), xbmc.LOGINFO)
+                utils.log(u'database_backup_delete: Delete old backup file %d/%d (%s)' % (i+1,len(files_match),f), xbmc.LOGINFO)
                 try:
-                    xbmcvfs.delete(os.path.join(self.dbdirectory,f))
+                    xbmcvfs.delete(os.path.join(backupdir,f))
                 except:
-                    utils.log(u'database_backup: Error deleting old backup file %d (%s)' % (i,os.path.join(self.dbdirectory,f)), xbmc.LOGERROR)
+                    utils.log(u'database_backup_delete: Error deleting old backup file %d (%s)' % (i,os.path.join(backupdir,f)), xbmc.LOGERROR)
                     return 1
 
     def watch_user_changes(self, idletime_old, idletime):
@@ -1168,21 +1178,25 @@ class WatchedList:
                 lastplayed_old = list_old[i_o][3]
                 playcount_old = list_old[i_o][4]
 
-
                 if playcount_new != playcount_old or lastplayed_new != lastplayed_old:
                     if playcount_new == playcount_old and playcount_new == 0:
-                        continue # do not add lastplayed to database, when placount = 0
+                        continue # do not add lastplayed to database, when playcount = 0
                     # The user changed the playcount or lastplayed.
                     # update wl with new watched state
-                    indices_changed.append([i_n, i_o, row_xbmc])
+                    indices_changed.append([i_n, i_o])
 
             # go through all movies changed by the user
             for icx in indices_changed:
                 if self.monitor.abortRequested(): return 4
-                i_o = icx[1]; row_xbmc = icx[2]
+                i_o = icx[1];
                 i_n = icx[0];
-                lastplayed_old = list_old[i_o][3]; playcount_old = list_old[i_o][4];
-                lastplayed_new = row_xbmc[3]; playcount_new = row_xbmc[4]; mediaid = row_xbmc[7]
+                row_xbmc = list_new[i_n]
+                row_xbmc_old = list_old[i_o]
+                lastplayed_old = row_xbmc_old[3];
+                playcount_old = row_xbmc_old[4];
+                lastplayed_new = row_xbmc[3];
+                playcount_new = row_xbmc[4];
+                mediaid = row_xbmc[7]
                 utils.log(u'watch_user_changes: %s "%s" changed playcount {%d -> %d} lastplayed {"%s" -> "%s"}. %sid=%d' % (modus, row_xbmc[5], playcount_old, playcount_new, utils.TimeStamptosqlDateTime(lastplayed_old), utils.TimeStamptosqlDateTime(lastplayed_new), modus, mediaid))
                 try:
                     self._wl_update_media(modus, row_xbmc, 1, 1, 0)
@@ -1206,8 +1220,8 @@ class WatchedList:
             # update Kodi watched status, e.g. to set duplicate movies also as watched
             if len(indices_changed) > 0:
                 self.write_xbmc_wdata(0, 1) # this changes self.watchedmovielist_xbmc
-                self.close_db(1) # keep the db closed most of the time (no access problems)
-            return 1
+        self.close_db(1) # keep the db closed most of the time (no access problems)
+        return 1
 
 
     def _wl_update_media(self, mediatype, row_xbmc, saveanyway, commit, lastChange):
@@ -1532,7 +1546,6 @@ class WatchedList:
             self.sqlcursor_db.execute(QUERY_CLEAR_MV_SQLITE)
             self.sqlcursor_db.execute(QUERY_CLEAR_EP_SQLITE)
 
-
             for mediatype in ['movie', 'episode']:
                 # strno: number of string for heading of notifications
                 # sql_select_wl: Definitions of SQL queries to get data from the local database
@@ -1540,18 +1553,9 @@ class WatchedList:
                 if mediatype == 'movie':
                     strno = 32718
                     rows = self.watchedmovielist_wl # 0imdbnumber, 1empty, 2empty, 3lastPlayed, 4playCount, 5title, 6lastChange
-
-                    #if int(utils.getSetting("db_format")) != 1: # SQLite3 File.
-                    #    self.sqlcursor_wl.execute(QUERY_SELECT_MV_SQLITE)
-                    #else: # mySQL
-                    #    self.sqlcursor_wl.execute(QUERY_SELECT_MV_MYSQL)
                 else:
                     strno = 32719
                     rows = self.watchedepisodelist_wl # 0tvdbnumber, 1season, 2episode, 3lastplayed, 4playcount, 5empty, 6lastChange
-                    #if int(utils.getSetting("db_format")) != 1: # SQLite3 File.
-                    #    self.sqlcursor_wl.execute(QUERY_SELECT_EP_SQLITE)
-                    #else: # mySQL
-                    #    self.sqlcursor_wl.execute(QUERY_SELECT_EP_MYSQL)
 
                 # loop through all rows of the local database and merge it into the remote (dropbox) database
                 if utils.getSetting("progressdialog") == 'true':
