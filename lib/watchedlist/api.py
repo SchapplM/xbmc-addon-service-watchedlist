@@ -7,6 +7,7 @@ import time
 from watchedlist import WatchedList
 import utils
 
+
 def change_watched_movie(imdb_id, playCount=1, name=''):
     """
     Change the watched state of one movie in the WL database
@@ -23,9 +24,9 @@ def change_watched_movie(imdb_id, playCount=1, name=''):
     if len(name) == 0:
         name = 'tt%d' % imdb_id
     if playCount == 0:
-        lastPlayed=0
+        lastPlayed = 0
     else:
-        lastPlayed=int(time.time())
+        lastPlayed = int(time.time())
     row_xbmc = [imdb_id, 0, 0, lastPlayed, playCount, name, 0] # 0imdbnumber, 1empty, 2empty, 3lastPlayed, 4playCount, 5title, 6empty, 7movieid
     saveanyway = True
     commit = True
@@ -36,6 +37,7 @@ def change_watched_movie(imdb_id, playCount=1, name=''):
             return 1
         WL.wl_update_media('movie', row_xbmc, saveanyway, commit, lastChange)
     return 0
+
 
 def change_watched_episode(tvdb_id, season, episode, playCount=1, name=''):
     """
@@ -55,9 +57,9 @@ def change_watched_episode(tvdb_id, season, episode, playCount=1, name=''):
     if len(name) == 0:
         name = 'tvdb%d S%02dE%02d' % (tvdb_id, season, episode)
     if playCount == 0:
-        lastPlayed=0
+        lastPlayed = 0
     else:
-        lastPlayed=int(time.time())
+        lastPlayed = int(time.time())
     row_xbmc = [tvdb_id, season, episode, lastPlayed, playCount, name, 0] # 0imdbnumber, 1empty, 2empty, 3lastPlayed, 4playCount, 5title, 6empty, 7movieid
     saveanyway = True
     commit = True
@@ -68,6 +70,7 @@ def change_watched_episode(tvdb_id, season, episode, playCount=1, name=''):
             return 1
         WL.wl_update_media('episode', row_xbmc, saveanyway, commit, lastChange)
     return 0
+
 
 def change_watched_episodes(tvdb_id, seasons, episodes, playCount, names=[]):
     """
@@ -85,9 +88,9 @@ def change_watched_episodes(tvdb_id, seasons, episodes, playCount, names=[]):
     """
 
     if playCount == 0:
-        lastPlayed=0
+        lastPlayed = 0
     else:
-        lastPlayed=int(time.time())
+        lastPlayed = int(time.time())
     with WatchedList(True) as WL:
         if WL.get_watched_wl(1): # Read the WL database
             utils.showNotification(utils.getString(32102), utils.getString(32602), xbmc.LOGERROR)
