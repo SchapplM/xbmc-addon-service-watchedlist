@@ -1134,7 +1134,7 @@ class WatchedList:
             # Database and backups are in the default folders
             backupdir = self.dbdirectory
 
-        dirs, files = xbmcvfs.listdir(backupdir)
+        files = xbmcvfs.listdir(backupdir)[1]
         # find database copy files among all files in that directory
         files_match = []
         for i, f in enumerate(files):
@@ -1485,8 +1485,8 @@ class WatchedList:
                 if self.load_db():
                     return 2
 
-            # utils.log(u'merge_dropbox: Inserting missing TV shows.')
-            # do not merge tvshows between dropbox and local wl database
+            # do not merge tvshows between dropbox and local wl database.
+            # Only movies and episodes
             count_insert = 0
             count_update = 0
             for mediatype in ['movie', 'episode']:
@@ -1592,12 +1592,9 @@ class WatchedList:
                 if self.load_db():
                     return 2
 
-            # utils.log(u'merge_dropbox: Inserting missing TV shows.')
             # do not merge tvshows between dropbox and local wl database
-            count_insert = 0
-            count_update = 0
 
-            # clear dropbox database and just insert all rows from the local on
+            # clear dropbox database and just insert all rows from the local db
             self.sqlcursor_db.execute(QUERY_CLEAR_MV_SQLITE)
             self.sqlcursor_db.execute(QUERY_CLEAR_EP_SQLITE)
 
@@ -1616,7 +1613,6 @@ class WatchedList:
                 if utils.getSetting("progressdialog") == 'true':
                     DIALOG_PROGRESS = xbmcgui.DialogProgress()
                     DIALOG_PROGRESS.create(utils.getString(strno), utils.getString(32716))  # TODO
-                #rows = self.sqlcursor_wl.fetchall()
                 list_length = len(rows)
                 for i in range(list_length):
                     if self.monitor.abortRequested():
@@ -1639,7 +1635,6 @@ class WatchedList:
                     if utils.getSetting("progressdialog") == 'true' and DIALOG_PROGRESS.iscanceled():
                         return 2
                     if utils.getSetting("progressdialog") == 'true':
-
                         DIALOG_PROGRESS.update(100*(i+1)/list_length, utils.getString(strno), utils.getString(32610) % (i+1, list_length, name))
                 utils.showNotification(utils.getString(strno), (utils.getString(32717)) % list_length, xbmc.LOGINFO)
                 if utils.getSetting("progressdialog") == 'true':
@@ -1696,7 +1691,7 @@ class WatchedList:
 
         f = open(self.dropbox_path, 'rb')
         try:
-            response = client.files_upload(f.read(), dest_file)
+            client.files_upload(f.read(), dest_file)
         except DropboxApiError as err:
             utils.log(u'Dropbox upload error: ' + str(err))
             utils.showNotification(utils.getString(32708), utils.getString(32709), xbmc.LOGERROR)
