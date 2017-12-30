@@ -98,7 +98,7 @@ def change_watched_episodes(tvdb_id, seasons, episodes, playCount, names=[]):
         for i in range(len(seasons)):
             row_xbmc_i = [tvdb_id, seasons[i], episodes[i], lastPlayed, playCount, names[i], 0]  # 0imdbnumber, 1empty, 2empty, 3lastPlayed, 4playCount, 5title, 6empty, 7movieid
             saveanyway = True
-            if i == len(seasons)-1:
+            if i == len(seasons) - 1:
                 commit = True  # Only commit the last row to reduce file access to the database
             else:
                 commit = False

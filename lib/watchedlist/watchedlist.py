@@ -133,6 +133,7 @@ class WatchedList:
     """
     Main class of the add-on
     """
+
     def __init__(self, externalcall=False):
         """
         Initialize Class, default values for all class variables
@@ -214,7 +215,7 @@ class WatchedList:
             delaytime = float(utils.getSetting("delay")) * 60.0  # in seconds
             utils.log(u'Delay time before execution: %d seconds' % delaytime, xbmc.LOGDEBUG)
             utils.showNotification(utils.getString(32101), utils.getString(32004) % float(utils.getSetting("delay")), xbmc.LOGINFO)
-            if self.monitor.waitForAbort(1.0+delaytime):  # wait at least one second (zero waiting time waits infinitely)
+            if self.monitor.waitForAbort(1.0 + delaytime):  # wait at least one second (zero waiting time waits infinitely)
                 return 0
 
             # load all databases
@@ -250,12 +251,12 @@ class WatchedList:
                         sleeptime = float(utils.getSetting("interval")) * 3600  # wait interval until next startup in [seconds]
                         # wait and then update again
                         utils.log(u'wait %d seconds until next update' % sleeptime)
-                        utils.showNotification(utils.getString(32101), utils.getString(32003) % (sleeptime/3600), xbmc.LOGINFO)
+                        utils.showNotification(utils.getString(32101), utils.getString(32003) % (sleeptime / 3600), xbmc.LOGINFO)
                 else:  # no autostart, only watch user
                     sleeptime = 3600  # arbitrary time for infinite loop
 
                 # sleep the requested time and watch user changes
-                while 1:
+                while True:
                     if self.monitor.abortRequested():
                         return 4
                     # check if user changes arrived
@@ -307,10 +308,10 @@ class WatchedList:
             utils.buggalo_extradata_settings()
             # check if player is running before doing the update. Only do this check for automatic start
             while xbmc.Player().isPlaying() and not manualstart:
-                if self.monitor.waitForAbort(60*1000):
+                if self.monitor.waitForAbort(60 * 1000):
                     return 1  # wait one minute until next check for active playback
                 if not xbmc.Player().isPlaying():
-                    if self.monitor.waitForAbort(180*1000):
+                    if self.monitor.waitForAbort(180 * 1000):
                         return 1  # wait 3 minutes so the dialogue does not pop up directly after the playback ends
 
             # load the addon-database
@@ -423,7 +424,7 @@ class WatchedList:
                             utils.showNotification(utils.getString(32102), utils.getString(32002) % self.dbdirectory, xbmc.LOGWARNING)
                             # Wait "wait_minutes" minutes until next check for file path (necessary on network shares, that are offline)
                             wait_minutes += wait_minutes  # increase waittime until next check
-                            if self.monitor.waitForAbort(wait_minutes*60):
+                            if self.monitor.waitForAbort(wait_minutes * 60):
                                 return 2
                         else:
                             break  # directory exists, continue below
@@ -471,7 +472,7 @@ class WatchedList:
             # check for dropbox
             if DROPBOX_ENABLED and utils.getSetting("dropbox_enabled") == 'true':
                 # Download Dropbox database only once a day to reduce traffic.
-                if time.time() > self.downloaded_dropbox_timestamp + 3600*24:
+                if time.time() > self.downloaded_dropbox_timestamp + 3600 * 24:
                     if self.pullFromDropbox():
                         return
                     self.downloaded_dropbox_timestamp = time.time()
@@ -579,7 +580,7 @@ class WatchedList:
                     "params": {
                                "properties": ["title", "imdbnumber"],
                                "sort": {"order": "ascending", "method": "title"}
-                        },
+                    },
                     "id": 1})
                 if 'result' in json_response and json_response['result'] is not None and 'tvshows' in json_response['result']:
                     for item in json_response['result']['tvshows']:
@@ -626,18 +627,18 @@ class WatchedList:
                         "params": {
                                    "properties": ["title", "year", "imdbnumber", "lastplayed", "playcount"],
                                    "sort": {"order": "ascending", "method": "title"}
-                            },
+                        },
                         "id": 1
-                        })
+                    })
                 else:
                     json_response = utils.executeJSON({
                         "jsonrpc": "2.0",
                         "method": "VideoLibrary.GetEpisodes",
                         "params": {
                                    "properties": ["tvshowid", "season", "episode", "playcount", "showtitle", "lastplayed"]
-                            },
+                        },
                         "id": 1
-                        })
+                    })
                 if modus == 'movie':
                     searchkey = 'movies'
                 else:
@@ -884,7 +885,7 @@ class WatchedList:
                     row_xbmc = self.watchedepisodelist_xbmc[i]
 
                 if utils.getSetting("progressdialog") == 'true':
-                    DIALOG_PROGRESS.update(100*(i+1)/list_length, utils.getString(32105), utils.getString(32610) % (i+1, list_length, row_xbmc[5]))
+                    DIALOG_PROGRESS.update(100 * (i + 1) / list_length, utils.getString(32105), utils.getString(32610) % (i + 1, list_length, row_xbmc[5]))
 
                 try:
                     res = self._wl_update_media(modus, row_xbmc, 0, 0, 0)
@@ -980,7 +981,7 @@ class WatchedList:
                 name = row_wl[5]
 
                 if progressdialogue:
-                    DIALOG_PROGRESS.update(100*(j+1)/list_length, utils.getString(32106), utils.getString(32610) % (j+1, list_length, name))
+                    DIALOG_PROGRESS.update(100 * (j + 1) / list_length, utils.getString(32106), utils.getString(32610) % (j + 1, list_length, name))
                 try:
                     # search the unique movie/episode id in the xbmc-list
                     if modus == 'movie':
@@ -1032,7 +1033,7 @@ class WatchedList:
                                 "method": jsonmethod,
                                 "params": {idfieldname: mediaid, "playcount": playcount_wl, "lastplayed": utils.TimeStamptosqlDateTime(lastplayed_new)},
                                 "id": 1
-                                }
+                            }
                             json_response = utils.executeJSON(jsondict)
                             if 'result' in json_response and json_response['result'] == 'OK':
                                 utils.log(u'write_xbmc_wdata: Kodi database updated for %s. playcount: {%d -> %d}, lastplayed: {"%s" -> "%s"} (%sid=%d)' % (name, playcount_xbmc, playcount_wl, utils.TimeStamptosqlDateTime(lastplayed_xbmc), utils.TimeStamptosqlDateTime(lastplayed_new), modus, mediaid), xbmc.LOGINFO)
@@ -1149,7 +1150,7 @@ class WatchedList:
                 break
             if i >= int(utils.getSetting('dbbackupcount')):
                 # delete file
-                utils.log(u'database_backup_delete: Delete old backup file %d/%d (%s)' % (i+1, len(files_match), f), xbmc.LOGINFO)
+                utils.log(u'database_backup_delete: Delete old backup file %d/%d (%s)' % (i + 1, len(files_match), f), xbmc.LOGINFO)
                 try:
                     xbmcvfs.delete(os.path.join(backupdir, f))
                 except BaseException:
@@ -1185,7 +1186,7 @@ class WatchedList:
         old_watchedepisodelist_xbmc = self.watchedepisodelist_xbmc
         # get new state
         self.get_watched_xbmc(1)
-        #save exception information
+        # save exception information
         buggalo.addExtraData('len_old_watchedmovielist_xbmc', len(old_watchedmovielist_xbmc))
         buggalo.addExtraData('len_old_watchedepisodelist_xbmc', len(old_watchedepisodelist_xbmc))
         buggalo.addExtraData('len_self_watchedmovielist_xbmc', len(self.watchedmovielist_xbmc))
@@ -1541,7 +1542,7 @@ class WatchedList:
                     if utils.getSetting("progressdialog") == 'true' and DIALOG_PROGRESS.iscanceled():
                         return 2
                     if utils.getSetting("progressdialog") == 'true':
-                        DIALOG_PROGRESS.update(100*(i+1)/list_length, utils.getString(32105), utils.getString(32610) % (i+1, list_length, row_xbmc_sim[5]))
+                        DIALOG_PROGRESS.update(100 * (i + 1) / list_length, utils.getString(32105), utils.getString(32610) % (i + 1, list_length, row_xbmc_sim[5]))
 
                 utils.showNotification(utils.getString(strno), utils.getString(32301) % (count_insert, count_update), xbmc.LOGINFO)
                 if utils.getSetting("progressdialog") == 'true':
@@ -1635,7 +1636,7 @@ class WatchedList:
                     if utils.getSetting("progressdialog") == 'true' and DIALOG_PROGRESS.iscanceled():
                         return 2
                     if utils.getSetting("progressdialog") == 'true':
-                        DIALOG_PROGRESS.update(100*(i+1)/list_length, utils.getString(strno), utils.getString(32610) % (i+1, list_length, name))
+                        DIALOG_PROGRESS.update(100 * (i + 1) / list_length, utils.getString(strno), utils.getString(32610) % (i + 1, list_length, name))
                 utils.showNotification(utils.getString(strno), (utils.getString(32717)) % list_length, xbmc.LOGINFO)
                 if utils.getSetting("progressdialog") == 'true':
                     DIALOG_PROGRESS.close()
@@ -1742,7 +1743,7 @@ class WatchedList:
                     # file not available, e.g. deleted or first execution.
                     utils.log(u'Dropbox database download failed. %s.' % str(err))
                     time.sleep(0.5)  # wait to avoid immediate re-try
-                    if err[1].is_path() and type(err[1].get_path()) == dropbox.files.LookupError:
+                    if err[1].is_path() and isinstance(err[1].get_path(), dropbox.files.LookupError):
                         # Error reason: file does not exist
                         trycount = trycount + 1  # do not try second time on downloading non-existing file
                 if trycount == 2 and not dropbox_file_exists:
