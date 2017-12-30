@@ -137,9 +137,9 @@ def sqlDateTimeToTimeStamp(sqlDateTime):
             for i in range(5):
                 try:
                     return int(time.mktime(time.strptime(sqlDateTime, "%Y-%m-%d %H:%M:%S")))
-                except:
+                except BaseException:
                     xbmc.wait(random.randint(200, 500))
-        except:
+        except BaseException:
             return 0  # error, but timestamp=0 works in the addon
 
 
