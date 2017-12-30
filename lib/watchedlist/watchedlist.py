@@ -60,7 +60,7 @@ try:
     DROPBOX_APP_KEY = base64.b64decode("YmhkMnY4aGdzbXF3Y2d0")
     DROPBOX_APP_SECRET = base64.b64decode("dDJjZXBvZXZqcXl1Ym5k")
     DROPBOX_ENABLED = True
-except:
+except BaseException:
     DROPBOX_ENABLED = False
     if utils.getSetting("dropbox_enabled") == 'true':
         utils.showNotification(utils.getString(32708), utils.getString(32720), xbmc.LOGWARNING)
@@ -279,7 +279,7 @@ class WatchedList:
                     return 0  # the program may exit. No purpose for background process
 
             return 0
-        except:
+        except BaseException:
             buggalo.onExceptionRaised()
 
     def runUpdate(self, manualstart):
@@ -377,7 +377,7 @@ class WatchedList:
             if self.database_backup_delete():
                 return 10
             return 0
-        except:
+        except BaseException:
             buggalo.onExceptionRaised()
 
     def load_db(self, manualstart=False):
@@ -488,7 +488,7 @@ class WatchedList:
         except sqlite3.Error as err:
             try:
                 errstring = err.args[0]  # TODO: Find out, why this does not work some times
-            except:
+            except BaseException:
                 errstring = ''
             utils.log(u"Database error while opening %s. '%s'" % (self.dbpath, errstring), xbmc.LOGERROR)
             utils.showNotification(utils.getString(32109), errstring, xbmc.LOGERROR)
@@ -509,7 +509,7 @@ class WatchedList:
             buggalo.addExtraData('db_connstatus', 'mysql error, closed')
             self.close_db(3)
             return 1
-        except:
+        except BaseException:
             utils.log(u"Error while opening %s: %s" % (self.dbpath, sys.exc_info()[2]), xbmc.LOGERROR)
             self.close_db(3)
             buggalo.addExtraData('dbpath', self.dbpath)
@@ -596,7 +596,7 @@ class WatchedList:
                             else:
                                 # number in imdb-format
                                 tvshowId_imdb = int(res[0])
-                        except:
+                        except BaseException:
                             utils.log(u'get_watched_xbmc: tv show "%s" has no imdb-number in database. tvshowid=%d. Try rescraping.' % (item['title'], tvshowId_xbmc), xbmc.LOGINFO)
                             if not silent:
                                 utils.showNotification(utils.getString(32101), utils.getString(32297) % (item['title'], tvshowId_xbmc), xbmc.LOGINFO)
@@ -662,14 +662,14 @@ class WatchedList:
                             tvshowId_xbmc = item['tvshowid']
                             try:
                                 tvshowName_xbmc = item['showtitle']
-                            except:
+                            except BaseException:
                                 # TODO: Something is wrong with the database or the json output since the field tvshowid is missing although requested. Check if this error still occurs and remove try-except
                                 utils.log(u'get_watched_xbmc: TV episode id %d (show %d, S%02dE%02d) has no associated showtitle. Skipping.' % (item['episodeid'], item['tvshowid'], item['season'], item['episode']), xbmc.LOGWARNING)
                                 continue
                             name = '%s S%02dE%02d' % (tvshowName_xbmc, item['season'], item['episode'])
                             try:
                                 tvshowId_imdb = self.tvshows[tvshowId_xbmc][0]
-                            except:
+                            except BaseException:
                                 utils.log(u'get_watched_xbmc: Kodi tv showid %d is not in Kodi-table tvshows. Skipping episode id %d (%s)' % (item['tvshowid'], item['episodeid'], name), xbmc.LOGINFO)
                                 continue
                             if tvshowId_imdb == 0:
@@ -688,7 +688,7 @@ class WatchedList:
                 self.close_db(3)
                 return 4
             return 0
-        except:
+        except BaseException:
             utils.log(u'get_watched_xbmc: error getting the Kodi database : %s' % sys.exc_info()[2], xbmc.LOGERROR)
             self.close_db(3)
             buggalo.onExceptionRaised()
@@ -747,7 +747,7 @@ class WatchedList:
                         return 4
                     try:
                         name = '%s S%02dE%02d' % (self.tvshownames[int(row[0])], int(row[1]), int(row[2]))
-                    except:
+                    except BaseException:
                         name = 'tvdb-id %d S%02dE%02d' % (int(row[0]), int(row[1]), int(row[2]))
                     self.watchedepisodelist_wl.append(list([int(row[0]), int(row[1]), int(row[2]), int(row[3]), int(row[4]), name, int(row[5])]))  # 0tvdbnumber, 1season, 2episode, 3lastplayed, 4playcount, 5name, 6lastChange
 
@@ -758,7 +758,7 @@ class WatchedList:
         except sqlite3.Error as err:
             try:
                 errstring = err.args[0]  # TODO: Find out, why this does not work some times
-            except:
+            except BaseException:
                 errstring = ''
             utils.log(u'get_watched_wl: SQLite Database error getting the wl database. %s' % errstring, xbmc.LOGERROR)
             self.close_db(1)
@@ -767,7 +767,7 @@ class WatchedList:
         except mysql.connector.Error as err:
             utils.log(u'get_watched_wl: MySQL Database error getting the wl database. %s' % err, xbmc.LOGERROR)
             return 3
-        except:
+        except BaseException:
             utils.log(u'get_watched_wl: Error getting the wl database : %s' % sys.exc_info()[2], xbmc.LOGERROR)
             self.close_db(1)
             buggalo.onExceptionRaised()
@@ -817,7 +817,7 @@ class WatchedList:
         except sqlite3.Error as err:
             try:
                 errstring = err.args[0]  # TODO: Find out, why this does not work some times
-            except:
+            except BaseException:
                 errstring = ''
             utils.log(u'sync_tvshows: SQLite Database error accessing the wl database: ''%s''' % errstring, xbmc.LOGERROR)
             self.close_db(1)
@@ -827,7 +827,7 @@ class WatchedList:
             utils.log(u"sync_tvshows: MySQL Database error accessing the wl database: ''%s''" % (err), xbmc.LOGERROR)
             self.close_db(1)
             return 1
-        except:
+        except BaseException:
             utils.log(u'sync_tvshows: Error getting the wl database: ''%s''' % sys.exc_info()[2], xbmc.LOGERROR)
             self.close_db(1)
             buggalo.onExceptionRaised()
@@ -894,7 +894,7 @@ class WatchedList:
                 except sqlite3.Error as err:
                     try:
                         errstring = err.args[0]  # TODO: Find out, why this does not work some times
-                    except:
+                    except BaseException:
                         errstring = ''
                     utils.log(u'write_wl_wdata: SQLite Database error ''%s'' while updating %s %s' % (errstring, modus, row_xbmc[5]), xbmc.LOGERROR)
                     # error at this place is the result of duplicate movies, which produces a DUPLICATE PRIMARY KEY ERROR
@@ -903,7 +903,7 @@ class WatchedList:
                     utils.log(u'write_wl_wdata: MySQL Database error ''%s'' while updating %s %s' % (err, modus, row_xbmc[5]), xbmc.LOGERROR)
                     self.close_db(1)
                     return 1  # error while writing. Do not continue with episodes, if movies raised an exception
-                except:
+                except BaseException:
                     utils.log(u'write_wl_wdata: Error while updating %s %s: %s' % (modus, row_xbmc[5], sys.exc_info()[2]), xbmc.LOGERROR)
                     self.close_db(1)
                     if utils.getSetting("progressdialog") == 'true':
@@ -1057,7 +1057,7 @@ class WatchedList:
                         # the movie is in the watched-list but not in the xbmc-list -> no action
                         # utils.log(u'write_xbmc_wdata: movie not in Kodi database: tt%d, %s' % (imdbId, row_xbmc[2]), xbmc.LOGDEBUG)
                         continue
-                except:
+                except BaseException:
                     utils.log(u"write_xbmc_wdata: Error while updating %s %s: %s" % (modus, name, sys.exc_info()[2]), xbmc.LOGERROR)
                     if progressdialogue:
                         DIALOG_PROGRESS.close()
@@ -1112,7 +1112,7 @@ class WatchedList:
                 if self.dbfileaccess == 'copy':
                     xbmcvfs.copy(zipfilename, os.path.join(self.dbdirectory_copy, utils.decode(timestr + u'-watchedlist.db.zip')))
                     xbmcvfs.delete(zipfilename)
-            except:
+            except BaseException:
                 if zf:
                     zf.close()
                 buggalo.addExtraData('zipfilename', zipfilename)
@@ -1152,7 +1152,7 @@ class WatchedList:
                 utils.log(u'database_backup_delete: Delete old backup file %d/%d (%s)' % (i+1, len(files_match), f), xbmc.LOGINFO)
                 try:
                     xbmcvfs.delete(os.path.join(backupdir, f))
-                except:
+                except BaseException:
                     utils.log(u'database_backup_delete: Error deleting old backup file %d (%s)' % (i, os.path.join(backupdir, f)), xbmc.LOGERROR)
                     return 1
 
@@ -1253,7 +1253,7 @@ class WatchedList:
                 except sqlite3.Error as err:
                     try:
                         errstring = err.args[0]  # TODO: Find out, why this does not work some times
-                    except:
+                    except BaseException:
                         errstring = ''
                     utils.log(u'write_wl_wdata: SQLite Database error (%s) while updating %s %s' % (errstring, modus, row_xbmc[5]))
                     utils.showNotification(utils.getString(32102), utils.getString(32606) % ('(%s)' % errstring), xbmc.LOGERROR)
@@ -1450,7 +1450,7 @@ class WatchedList:
         except sqlite3.Error as err:
             try:
                 errstring = err.args[0]  # TODO: Find out, why this does not work some times
-            except:
+            except BaseException:
                 errstring = ''
             utils.log(u'wl_update_media: SQLite Database error accessing the wl database: ''%s''' % errstring, xbmc.LOGERROR)
             utils.showNotification(utils.getString(32109), errstring, xbmc.LOGERROR)
@@ -1519,7 +1519,7 @@ class WatchedList:
                     else:  # 0idShow, 1season, 2episode, 3lastPlayed, 4playCount, 5lastChange
                         try:
                             name = '%s S%02dE%02d' % (self.tvshownames[int(row[0])], int(row[1]), int(row[2]))
-                        except:
+                        except BaseException:
                             name = 'tvdb-id %d S%02dE%02d' % (int(row[0]), int(row[1]), int(row[2]))
                         playCount = row[4]
                         lastChange = row[5]
@@ -1551,7 +1551,7 @@ class WatchedList:
         except sqlite3.Error as err:
             try:
                 errstring = err.args[0]  # TODO: Find out, why this does not work some times
-            except:
+            except BaseException:
                 errstring = ''
             utils.log(u'merge_dropbox_local: SQLite Database error accessing the wl database: ''%s''' % errstring, xbmc.LOGERROR)
             self.close_db(3)
@@ -1559,7 +1559,7 @@ class WatchedList:
             if utils.getSetting("progressdialog") == 'true':
                 DIALOG_PROGRESS.close()
             return 1
-        except:
+        except BaseException:
             utils.log(u'merge_dropbox_local: Error getting the wl database: ''%s''' % sys.exc_info()[2], xbmc.LOGERROR)
             self.close_db(3)
             buggalo.onExceptionRaised()
@@ -1629,7 +1629,7 @@ class WatchedList:
                     else:
                         try:
                             name = '%s S%02dE%02d' % (self.tvshownames[int(row[0])], int(row[1]), int(row[2]))
-                        except:
+                        except BaseException:
                             name = 'tvdb-id %d S%02dE%02d' % (int(row[0]), int(row[1]), int(row[2]))
                         sql = QUERY_EP_INSERT_SQLITE  # idShow,season,episode,playCount,lastChange,lastPlayed
                         values = list([row[0], row[1], row[2], row[4], row[6], row[3]])
@@ -1649,7 +1649,7 @@ class WatchedList:
         except sqlite3.Error as err:
             try:
                 errstring = err.args[0]  # TODO: Find out, why this does not work some times
-            except:
+            except BaseException:
                 errstring = ''
             utils.log(u'merge_local_dropbox: SQLite Database error accessing the wl database: ''%s''' % errstring, xbmc.LOGERROR)
             self.close_db(3)
@@ -1657,7 +1657,7 @@ class WatchedList:
             if utils.getSetting("progressdialog") == 'true':
                 DIALOG_PROGRESS.close()
             return 1
-        except:
+        except BaseException:
             utils.log(u'merge_local_dropbox: Error getting the wl database: ''%s''' % sys.exc_info()[2], xbmc.LOGERROR)
             self.close_db(3)
             buggalo.onExceptionRaised()
@@ -1685,13 +1685,13 @@ class WatchedList:
         # delete the old watched list. Failure here doesn't really matter
         try:
             client.files_delete(old_file)
-        except:
+        except BaseException:
             utils.log(u'Dropbox error: Unable to delete previous old watched list (%s)' % old_file)
 
         # rename the previously uploaded watchlist to "oldWHATEVER"
         try:
             client.files_move_v2(dest_file, old_file)
-        except:
+        except BaseException:
             utils.log(u'Dropbox error: Unable rename previous watched list')
 
         f = open(self.dropbox_path, 'rb')
@@ -1759,7 +1759,7 @@ class WatchedList:
                         # file not available, e.g. deleted or not existing
                         utils.log(u'Dropbox restore database backup failed. %s.' % str(err))
                         break
-        except:  # catch this error, the dropbox mode will be disabled
+        except BaseException:  # catch this error, the dropbox mode will be disabled
             utils.log(u'Dropbox download error: ' + str(sys.exc_info()))
             utils.showNotification(utils.getString(32708), utils.getString(32710), xbmc.LOGERROR)
             self.dropbox_path = ''

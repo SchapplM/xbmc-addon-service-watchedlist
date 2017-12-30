@@ -20,7 +20,7 @@ if __remotedebug__:
                          "You must add org.python.pydev.debug.pysrc to your PYTHONPATH.")
         utils.showNotification('WatchedList Error', 'remote debug could not be imported.', xbmc.LOGERROR)
         sys.exit(1)
-    except:
+    except BaseException:
         utils.showNotification('WatchedList Error', 'remote debug in pydev is activated, but remote server not responding.', xbmc.LOGERROR)
         sys.exit(1)
 
