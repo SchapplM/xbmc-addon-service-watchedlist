@@ -590,7 +590,7 @@ class WatchedList:
                         tvshowId_xbmc = int(item['tvshowid'])
                         try:
                             # check if series number is in imdb-format (scraper=imdb?)
-                            res = re.compile('tt(\d+)').findall(item['imdbnumber'])
+                            res = re.compile(r'tt(\d+)').findall(item['imdbnumber'])
                             if not res:
                                 # number in thetvdb-format
                                 tvshowId_imdb = int(item['imdbnumber'])
@@ -650,7 +650,7 @@ class WatchedList:
                             break
                         if modus == 'movie':
                             name = item['title'] + ' (' + str(item['year']) + ')'
-                            res = re.compile('tt(\d+)').findall(item['imdbnumber'])
+                            res = re.compile(r'tt(\d+)').findall(item['imdbnumber'])
                             if not res:
                                 # no imdb-number for this movie in database. Skip
                                 utils.log(u'get_watched_xbmc: Movie %s has no imdb-number in database. movieid=%d. Try rescraping' % (name, int(item['movieid'])), xbmc.LOGINFO)
@@ -1141,7 +1141,7 @@ class WatchedList:
         for i, f in enumerate(files):
             if self.monitor.abortRequested():
                 break
-            if re.match('\d+_\d+-watchedlist\.db\.zip', f) is not None:  # match the filename string from database_backup()
+            if re.match(r'\d+_\d+-watchedlist\.db\.zip', f) is not None:  # match the filename string from database_backup()
                 files_match.append(f)
         files_match = sorted(files_match, reverse=True)
         # Iterate over backup files starting with newest. Delete oldest
