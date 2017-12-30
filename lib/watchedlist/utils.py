@@ -214,7 +214,7 @@ def translateSMB(path):
             return path
         else:
             # create smb path
-            return '\\\\'+res_smb[0][0]+'\\'+res_smb[0][1].replace('/', '\\')
+            return '\\\\' + res_smb[0][0] + '\\' + res_smb[0][1].replace('/', '\\')
     else:
         # linux os. Path with smb:// is correct, but can not be accessed with normal python file access
         return path
