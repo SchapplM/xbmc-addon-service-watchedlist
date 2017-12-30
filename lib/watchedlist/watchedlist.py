@@ -576,7 +576,7 @@ class WatchedList:
                                      "sort": { "order": "ascending", "method": "title" }
                                      },
                           "id": 1})
-                if json_response.has_key('result') and json_response['result'] != None and json_response['result'].has_key('tvshows'):
+                if 'result' in json_response and json_response['result'] != None and 'tvshows' in json_response['result']:
                     for item in json_response['result']['tvshows']:
                         if self.monitor.abortRequested(): self.close_db(3); return 4
                         tvshowId_xbmc = int(item['tvshowid'])
@@ -630,7 +630,7 @@ class WatchedList:
                               })
                 if modus == 'movie': searchkey = 'movies'
                 else: searchkey = 'episodes'
-                if json_response.has_key('result') and json_response['result'] != None and json_response['result'].has_key(searchkey):
+                if 'result' in json_response and json_response['result'] != None and searchkey in json_response['result']:
                     # go through all watched movies and save them in the class-variable self.watchedmovielist_xbmc
                     for item in json_response['result'][searchkey]:
                         if self.monitor.abortRequested(): break
@@ -997,7 +997,7 @@ class WatchedList:
                                       "id": 1
                                       }
                             json_response = utils.executeJSON(jsondict)
-                            if (json_response.has_key('result') and json_response['result'] == 'OK'):
+                            if 'result' in json_response and json_response['result'] == 'OK':
                                 utils.log(u'write_xbmc_wdata: Kodi database updated for %s. playcount: {%d -> %d}, lastplayed: {"%s" -> "%s"} (%sid=%d)' % (name, playcount_xbmc, playcount_wl, utils.TimeStamptosqlDateTime(lastplayed_xbmc), utils.TimeStamptosqlDateTime(lastplayed_new), modus, mediaid), xbmc.LOGINFO)
                                 if playcount_wl == 0:
                                     if notifications > 0: utils.showNotification(utils.getString(32404), name, xbmc.LOGDEBUG)
