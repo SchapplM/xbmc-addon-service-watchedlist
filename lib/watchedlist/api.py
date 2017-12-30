@@ -27,12 +27,12 @@ def change_watched_movie(imdb_id, playCount=1, name=''):
         lastPlayed = 0
     else:
         lastPlayed = int(time.time())
-    row_xbmc = [imdb_id, 0, 0, lastPlayed, playCount, name, 0] # 0imdbnumber, 1empty, 2empty, 3lastPlayed, 4playCount, 5title, 6empty, 7movieid
+    row_xbmc = [imdb_id, 0, 0, lastPlayed, playCount, name, 0]  # 0imdbnumber, 1empty, 2empty, 3lastPlayed, 4playCount, 5title, 6empty, 7movieid
     saveanyway = True
     commit = True
     lastChange = lastPlayed
     with WatchedList(True) as WL:
-        if WL.get_watched_wl(1): # Read the WL database
+        if WL.get_watched_wl(1):  # Read the WL database
             utils.showNotification(utils.getString(32102), utils.getString(32602), xbmc.LOGERROR)
             return 1
         WL.wl_update_media('movie', row_xbmc, saveanyway, commit, lastChange)
@@ -60,12 +60,12 @@ def change_watched_episode(tvdb_id, season, episode, playCount=1, name=''):
         lastPlayed = 0
     else:
         lastPlayed = int(time.time())
-    row_xbmc = [tvdb_id, season, episode, lastPlayed, playCount, name, 0] # 0imdbnumber, 1empty, 2empty, 3lastPlayed, 4playCount, 5title, 6empty, 7movieid
+    row_xbmc = [tvdb_id, season, episode, lastPlayed, playCount, name, 0]  # 0imdbnumber, 1empty, 2empty, 3lastPlayed, 4playCount, 5title, 6empty, 7movieid
     saveanyway = True
     commit = True
     lastChange = lastPlayed
     with WatchedList(True) as WL:
-        if WL.get_watched_wl(1): # Read the WL database
+        if WL.get_watched_wl(1):  # Read the WL database
             utils.showNotification(utils.getString(32102), utils.getString(32602), xbmc.LOGERROR)
             return 1
         WL.wl_update_media('episode', row_xbmc, saveanyway, commit, lastChange)
@@ -92,14 +92,14 @@ def change_watched_episodes(tvdb_id, seasons, episodes, playCount, names=[]):
     else:
         lastPlayed = int(time.time())
     with WatchedList(True) as WL:
-        if WL.get_watched_wl(1): # Read the WL database
+        if WL.get_watched_wl(1):  # Read the WL database
             utils.showNotification(utils.getString(32102), utils.getString(32602), xbmc.LOGERROR)
             return 1
         for i in range(len(seasons)):
-            row_xbmc_i = [tvdb_id, seasons[i], episodes[i], lastPlayed, playCount, names[i], 0] # 0imdbnumber, 1empty, 2empty, 3lastPlayed, 4playCount, 5title, 6empty, 7movieid
+            row_xbmc_i = [tvdb_id, seasons[i], episodes[i], lastPlayed, playCount, names[i], 0]  # 0imdbnumber, 1empty, 2empty, 3lastPlayed, 4playCount, 5title, 6empty, 7movieid
             saveanyway = True
             if i == len(seasons)-1:
-                commit = True # Only commit the last row to reduce file access to the database
+                commit = True  # Only commit the last row to reduce file access to the database
             else:
                 commit = False
             lastChange = lastPlayed
