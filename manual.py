@@ -1,6 +1,8 @@
 """
 This file is entry point for manual start via the programs menu
 """
+import sys
+
 import xbmc
 import xbmcgui
 

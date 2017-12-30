@@ -2,6 +2,8 @@
 This file is entry point for automatic start via Kodi
 """
 
+import sys
+
 import xbmc
 
 import lib.watchedlist.utils as utils

@@ -44,15 +44,15 @@ import os
 import re
 import time
 import sqlite3
-import mysql.connector
 import base64
 
 import xbmc
 import xbmcgui
 import xbmcvfs
+import mysql.connector
 import buggalo
 
-import utils
+import lib.watchedlist.utils as utils
 
 try:
     import dropbox
@@ -170,6 +170,8 @@ class WatchedList:
         self.dbdirectory = ''
         self.dropbox_path = None
         self.downloaded_dropbox_timestamp = 0
+        self.dbdirectory_copy = ''
+        self.dbpath_copy = ''
 
         # monitor for shutdown detection
         self.monitor = xbmc.Monitor()
@@ -578,8 +580,8 @@ class WatchedList:
                     "jsonrpc": "2.0",
                     "method": "VideoLibrary.GetTVShows",
                     "params": {
-                               "properties": ["title", "imdbnumber"],
-                               "sort": {"order": "ascending", "method": "title"}
+                        "properties": ["title", "imdbnumber"],
+                        "sort": {"order": "ascending", "method": "title"}
                     },
                     "id": 1})
                 if 'result' in json_response and json_response['result'] is not None and 'tvshows' in json_response['result']:
@@ -625,8 +627,8 @@ class WatchedList:
                         "jsonrpc": "2.0",
                         "method": "VideoLibrary.GetMovies",
                         "params": {
-                                   "properties": ["title", "year", "imdbnumber", "lastplayed", "playcount"],
-                                   "sort": {"order": "ascending", "method": "title"}
+                            "properties": ["title", "year", "imdbnumber", "lastplayed", "playcount"],
+                            "sort": {"order": "ascending", "method": "title"}
                         },
                         "id": 1
                     })
@@ -635,7 +637,7 @@ class WatchedList:
                         "jsonrpc": "2.0",
                         "method": "VideoLibrary.GetEpisodes",
                         "params": {
-                                   "properties": ["tvshowid", "season", "episode", "playcount", "showtitle", "lastplayed"]
+                            "properties": ["tvshowid", "season", "episode", "playcount", "showtitle", "lastplayed"]
                         },
                         "id": 1
                     })
@@ -810,10 +812,10 @@ class WatchedList:
             # get all known tv shows from wl database
             self.sqlcursor_wl.execute("SELECT idShow, title FROM tvshows")
             rows = self.sqlcursor_wl.fetchall()
-            for i in range(len(rows)):
+            for row_i in rows:
                 if self.monitor.abortRequested():
                     break
-                self.tvshownames[int(rows[i][0])] = rows[i][1]
+                self.tvshownames[int(row_i[0])] = row_i[1]
             self.close_db(1)
         except sqlite3.Error as err:
             try:
@@ -1102,11 +1104,10 @@ class WatchedList:
             now = datetime.datetime.now()
             timestr = u'%04d%02d%02d_%02d%02d%02d' % (now.year, now.month, now.day, now.hour, now.minute, now.second)
             zipfilename = os.path.join(self.dbdirectory, utils.decode(timestr + u'-watchedlist.db.zip'))
-            zf = False
             try:
-                zf = zipfile.ZipFile(zipfilename, 'w')
-                zf.write(self.dbpath, arcname='watchedlist.db', compress_type=zipfile.ZIP_DEFLATED)
-                zf.close()
+                with zipfile.ZipFile(zipfilename, 'w') as zf:
+                    zf.write(self.dbpath, arcname='watchedlist.db', compress_type=zipfile.ZIP_DEFLATED)
+                    zf.close()
                 self.dbbackupdone = True
                 utils.log(u'database_backup: database backup copy created to %s' % zipfilename, xbmc.LOGINFO)
                 # copy the zip file with Kodi file system, if needed
@@ -1114,8 +1115,6 @@ class WatchedList:
                     xbmcvfs.copy(zipfilename, os.path.join(self.dbdirectory_copy, utils.decode(timestr + u'-watchedlist.db.zip')))
                     xbmcvfs.delete(zipfilename)
             except BaseException:
-                if zf:
-                    zf.close()
                 buggalo.addExtraData('zipfilename', zipfilename)
                 buggalo.onExceptionRaised()
                 return 2
@@ -1129,7 +1128,7 @@ class WatchedList:
             0    no operation done or operation successful
             1    error deleting the backups
         """
-        
+
         if not self.dbbackupdone:
             return 0
         # Limit number of backup files to the specified value
@@ -1791,8 +1790,7 @@ class WatchedList:
         j = [ii for ii, x in enumerate(self.watchedmovielist_wl) if x[0] == imdbId]
         if not j:
             return [-1, 0, 0]
-        else:
-            return [self.watchedmovielist_wl[j[0]][x] for x in [4, 3, 6]]  # return 4playCount, 3lastPlayed, 6lastChange
+        return [self.watchedmovielist_wl[j[0]][x] for x in [4, 3, 6]]  # return 4playCount, 3lastPlayed, 6lastChange
 
     def get_episode_status(self, tvdbId, season, episode):
         """
@@ -1809,5 +1807,4 @@ class WatchedList:
         j = [ii for ii, x in enumerate(self.watchedepisodelist_wl) if x[0] == tvdbId and x[1] == season and x[2] == episode]
         if not j:
             return [-1, 0, 0]
-        else:
-            return [self.watchedepisodelist_wl[j[0]][x] for x in [4, 3, 6]]  # return 4playCount, 3lastPlayed, 6lastChange
+        return [self.watchedepisodelist_wl[j[0]][x] for x in [4, 3, 6]]  # return 4playCount, 3lastPlayed, 6lastChange
