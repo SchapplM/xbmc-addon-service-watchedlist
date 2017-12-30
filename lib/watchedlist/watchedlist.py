@@ -304,9 +304,9 @@ class WatchedList:
         try:
             utils.buggalo_extradata_settings()
             # check if player is running before doing the update. Only do this check for automatic start
-            while xbmc.Player().isPlaying() == True and not manualstart:
+            while xbmc.Player().isPlaying() and not manualstart:
                 if self.monitor.waitForAbort(60*1000): return 1 # wait one minute until next check for active playback
-                if xbmc.Player().isPlaying() == False:
+                if not xbmc.Player().isPlaying():
                     if self.monitor.waitForAbort(180*1000): return 1 # wait 3 minutes so the dialogue does not pop up directly after the playback ends
 
             # load the addon-database
@@ -471,7 +471,7 @@ class WatchedList:
                         return
                     self.downloaded_dropbox_timestamp = time.time()
                 # connect to the dropbox wl database.
-                if self.dropbox_path != None:
+                if self.dropbox_path is not None:
                     self.sqlcon_db = sqlite3.connect(self.dropbox_path)
                     self.sqlcursor_db = self.sqlcon_db.cursor()
                     # create tables in dropbox file, if they don't exist
@@ -576,7 +576,7 @@ class WatchedList:
                                      "sort": { "order": "ascending", "method": "title" }
                                      },
                           "id": 1})
-                if 'result' in json_response and json_response['result'] != None and 'tvshows' in json_response['result']:
+                if 'result' in json_response and json_response['result'] is not None and 'tvshows' in json_response['result']:
                     for item in json_response['result']['tvshows']:
                         if self.monitor.abortRequested(): self.close_db(3); return 4
                         tvshowId_xbmc = int(item['tvshowid'])
@@ -630,7 +630,7 @@ class WatchedList:
                               })
                 if modus == 'movie': searchkey = 'movies'
                 else: searchkey = 'episodes'
-                if 'result' in json_response and json_response['result'] != None and searchkey in json_response['result']:
+                if 'result' in json_response and json_response['result'] is not None and searchkey in json_response['result']:
                     # go through all watched movies and save them in the class-variable self.watchedmovielist_xbmc
                     for item in json_response['result'][searchkey]:
                         if self.monitor.abortRequested(): break
@@ -1072,7 +1072,7 @@ class WatchedList:
         return 0
 
     def database_backup_delete(self):
-        if self.dbbackupdone == False:
+        if not self.dbbackupdone:
             return 0
         # Limit number of backup files to the specified value
         backupsize = int(utils.getSetting('dbbackupcount'))
@@ -1090,7 +1090,7 @@ class WatchedList:
         files_match = []
         for i, f in enumerate(files):
             if self.monitor.abortRequested(): break
-            if re.match('\d+_\d+-watchedlist\.db\.zip', f) != None: # match the filename string from database_backup()
+            if re.match('\d+_\d+-watchedlist\.db\.zip', f) is not None: # match the filename string from database_backup()
                 files_match.append(f)
         files_match = sorted(files_match, reverse=True)
         # Iterate over backup files starting with newest. Delete oldest
@@ -1121,7 +1121,7 @@ class WatchedList:
             4    system exit (no error)
         """
 
-        if xbmc.Player().isPlaying() == True:
+        if xbmc.Player().isPlaying():
             return 0
         if idletime > idletime_old:
             # the idle time increased. No user interaction probably happened
@@ -1681,7 +1681,7 @@ class WatchedList:
                     if err[1].is_path() and type(err[1].get_path()) == dropbox.files.LookupError:
                         # Error reason: file does not exist
                         trycount = trycount + 1 # do not try second time on downloading non-existing file
-                if trycount == 2 and dropbox_file_exists == False:
+                if trycount == 2 and not dropbox_file_exists:
                     try:
                         # No file was downloaded after second try. That means the dropbox file does not exist
                         # Try restoring the backup file, if existent
