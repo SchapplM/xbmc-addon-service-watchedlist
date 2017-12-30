@@ -39,21 +39,17 @@ mysql_user
 mysql_pass
 """
 
-import xbmc, xbmcgui, xbmcaddon, xbmcvfs
+import sys
+import os
 import re
-import sys, os
-import unicodedata
 import time
 import sqlite3
 import mysql.connector
 
+import xbmc
+import xbmcgui
+import xbmcvfs
 import buggalo
-buggalo.EMAIL_CONFIG = {"recipient": "msahadl60@gmail.com",
-                        "sender": "Buggalo <kodiwatchedlist@gmail.com>",
-                        "server": "smtp.googlemail.com",
-                        "method": "ssl",
-                        "user": "kodiwatchedlist@gmail.com",
-                        "pass": "mcgxwujwzswnqmbh"}
 
 import utils
 
@@ -67,10 +63,17 @@ except:
     DROPBOX_ENABLED = False
     if utils.getSetting("dropbox_enabled") == 'true':
         utils.showNotification(utils.getString(32708), utils.getString(32720), xbmc.LOGWARNING)
+
 if utils.getSetting('dbbackupcount') != '0':
     import zipfile
     import datetime
 
+buggalo.EMAIL_CONFIG = {"recipient": "msahadl60@gmail.com",
+                        "sender": "Buggalo <kodiwatchedlist@gmail.com>",
+                        "server": "smtp.googlemail.com",
+                        "method": "ssl",
+                        "user": "kodiwatchedlist@gmail.com",
+                        "pass": "mcgxwujwzswnqmbh"}
 
 QUERY_MV_INSERT_SQLITE = 'INSERT OR IGNORE INTO movie_watched (idMovieImdb,playCount,lastChange,lastPlayed,title) VALUES (?, ?, ?, ?, ?)'
 QUERY_MV_INSERT_MYSQL = 'INSERT IGNORE INTO movie_watched (idMovieImdb,playCount,lastChange,lastPlayed,title) VALUES (%s, %s, FROM_UNIXTIME(%s), FROM_UNIXTIME(%s), %s)'
