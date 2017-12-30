@@ -574,13 +574,13 @@ class WatchedList:
                 # get imdb tv-show id from Kodi database
                 utils.log(u'get_watched_xbmc: Get all TV shows from Kodi database', xbmc.LOGDEBUG)
                 json_response = utils.executeJSON({
-                          "jsonrpc": "2.0",
-                          "method": "VideoLibrary.GetTVShows",
-                          "params": {
-                                     "properties": ["title", "imdbnumber"],
-                                     "sort": {"order": "ascending", "method": "title"}
-                                     },
-                          "id": 1})
+                    "jsonrpc": "2.0",
+                    "method": "VideoLibrary.GetTVShows",
+                    "params": {
+                               "properties": ["title", "imdbnumber"],
+                               "sort": {"order": "ascending", "method": "title"}
+                        },
+                    "id": 1})
                 if 'result' in json_response and json_response['result'] is not None and 'tvshows' in json_response['result']:
                     for item in json_response['result']['tvshows']:
                         if self.monitor.abortRequested():
@@ -621,23 +621,23 @@ class WatchedList:
                 if modus == 'movie':
                     # use the JSON-RPC to access the xbmc-database.
                     json_response = utils.executeJSON({
-                              "jsonrpc": "2.0",
-                              "method": "VideoLibrary.GetMovies",
-                              "params": {
-                                         "properties": ["title", "year", "imdbnumber", "lastplayed", "playcount"],
-                                         "sort": {"order": "ascending", "method": "title"}
-                                         },
-                              "id": 1
-                              })
+                        "jsonrpc": "2.0",
+                        "method": "VideoLibrary.GetMovies",
+                        "params": {
+                                   "properties": ["title", "year", "imdbnumber", "lastplayed", "playcount"],
+                                   "sort": {"order": "ascending", "method": "title"}
+                            },
+                        "id": 1
+                        })
                 else:
                     json_response = utils.executeJSON({
-                              "jsonrpc": "2.0",
-                              "method": "VideoLibrary.GetEpisodes",
-                              "params": {
-                                         "properties": ["tvshowid", "season", "episode", "playcount", "showtitle", "lastplayed"]
-                                         },
-                              "id": 1
-                              })
+                        "jsonrpc": "2.0",
+                        "method": "VideoLibrary.GetEpisodes",
+                        "params": {
+                                   "properties": ["tvshowid", "season", "episode", "playcount", "showtitle", "lastplayed"]
+                            },
+                        "id": 1
+                        })
                 if modus == 'movie':
                     searchkey = 'movies'
                 else:
@@ -1028,11 +1028,11 @@ class WatchedList:
                                 jsonmethod = "VideoLibrary.SetEpisodeDetails"
                                 idfieldname = "episodeid"
                             jsondict = {
-                                      "jsonrpc": "2.0",
-                                      "method": jsonmethod,
-                                      "params": {idfieldname: mediaid, "playcount": playcount_wl, "lastplayed": utils.TimeStamptosqlDateTime(lastplayed_new)},
-                                      "id": 1
-                                      }
+                                "jsonrpc": "2.0",
+                                "method": jsonmethod,
+                                "params": {idfieldname: mediaid, "playcount": playcount_wl, "lastplayed": utils.TimeStamptosqlDateTime(lastplayed_new)},
+                                "id": 1
+                                }
                             json_response = utils.executeJSON(jsondict)
                             if 'result' in json_response and json_response['result'] == 'OK':
                                 utils.log(u'write_xbmc_wdata: Kodi database updated for %s. playcount: {%d -> %d}, lastplayed: {"%s" -> "%s"} (%sid=%d)' % (name, playcount_xbmc, playcount_wl, utils.TimeStamptosqlDateTime(lastplayed_xbmc), utils.TimeStamptosqlDateTime(lastplayed_new), modus, mediaid), xbmc.LOGINFO)
