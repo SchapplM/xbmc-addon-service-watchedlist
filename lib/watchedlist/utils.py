@@ -1,14 +1,18 @@
 """
 This file contains additional utility functions
 """
-import xbmc, xbmcgui, xbmcvfs, xbmcaddon
 import os
 import time
 import sys
-import buggalo
 import re
 import random
 import json
+
+import xbmc
+import xbmcgui
+import xbmcvfs
+import xbmcaddon
+import buggalo
 
 _addon_id = u'service.watchedlist'
 _Addon = xbmcaddon.Addon(_addon_id)

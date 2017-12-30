@@ -2,9 +2,10 @@
 This file is entry point for automatic start via Kodi
 """
 
+import xbmc
+
 import lib.watchedlist.utils as utils
 from lib.watchedlist.watchedlist import WatchedList
-import xbmc
 
 __remotedebug__ = False
 # Append pydev remote debugger

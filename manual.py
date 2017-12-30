@@ -1,10 +1,12 @@
 """
 This file is entry point for manual start via the programs menu
 """
+import xbmc
+import xbmcgui
 
 import lib.watchedlist.utils as utils
 from lib.watchedlist.watchedlist import WatchedList
-import xbmc, xbmcgui
+
 
 __remotedebug__ = False
 # append pydev remote debugger
