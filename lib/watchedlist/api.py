@@ -2,10 +2,12 @@
 This file contains API functions for the usage of WatchedList with other Kodi addons
 """
 
-import xbmc
 import time
-from watchedlist import WatchedList
-import utils
+
+import xbmc
+
+from lib.watchedlist.watchedlist import WatchedList
+import lib.watchedlist.utils as utils
 
 
 def change_watched_movie(imdb_id, playCount=1, name=''):
@@ -21,7 +23,7 @@ def change_watched_movie(imdb_id, playCount=1, name=''):
     Error Code (0=No error)
     """
 
-    if len(name) == 0:
+    if not name:
         name = 'tt%d' % imdb_id
     if playCount == 0:
         lastPlayed = 0
@@ -54,7 +56,7 @@ def change_watched_episode(tvdb_id, season, episode, playCount=1, name=''):
     Error Code (0=No error)
     """
 
-    if len(name) == 0:
+    if not name:
         name = 'tvdb%d S%02dE%02d' % (tvdb_id, season, episode)
     if playCount == 0:
         lastPlayed = 0
@@ -72,7 +74,7 @@ def change_watched_episode(tvdb_id, season, episode, playCount=1, name=''):
     return 0
 
 
-def change_watched_episodes(tvdb_id, seasons, episodes, playCount, names=[]):
+def change_watched_episodes(tvdb_id, seasons, episodes, playCount, names):
     """
     Change the watched state of multiple episodes of one tv show in the WL database
 
@@ -81,7 +83,7 @@ def change_watched_episodes(tvdb_id, seasons, episodes, playCount, names=[]):
     seasons: Number of the seasons for the affected episodes (list of Integers)
     episodes: Number of the episodes within the seasons (list of Integers, same length as seasons list).
     playCount: Unsigned Integer
-    names: Names of the Episodes (optional, list of strings, same length as lists above)
+    names: Names of the Episodes (list of strings, same length as lists above)
 
     Returns:
     Error Code (0=No error)

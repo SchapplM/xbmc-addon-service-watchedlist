@@ -3,7 +3,6 @@ This file contains additional utility functions
 """
 import os
 import time
-import sys
 import re
 import random
 import json
@@ -45,14 +44,14 @@ def log(message, loglevel=xbmc.LOGNOTICE):
     xbmc.log(encode(_addon_id + u": " + message), level=loglevel)
 
 
-def showNotification(title, message, loglevel, time=4000):
+def showNotification(title, message, loglevel, showtime=4000):
     """Show Notification
 
     Args:
         title: has to be unicode
         message: has to be unicode
         loglevel: Log-level of the message (equivalent to xbmc.LOGDEBUG ... xbmc.LOGFATAL)
-        time: Time that the message is beeing displayed
+        showtime: Time that the message is beeing displayed
     """
     # Check log level
     if getSetting('verbosity') == '1' and loglevel < xbmc.LOGINFO:
@@ -65,8 +64,8 @@ def showNotification(title, message, loglevel, time=4000):
         return  # setting "None"
     _addoniconpath = os.path.join(addon_dir(), "icon.png")
     log(u'Notification. %s: %s' % (title, message))
-    if xbmc.Player().isPlaying() == False:  # do not show the notification, if a video is being played.
-        xbmcgui.Dialog().notification(title, message, _addoniconpath, time)
+    if not xbmc.Player().isPlaying():  # do not show the notification, if a video is being played.
+        xbmcgui.Dialog().notification(title, message, _addoniconpath, showtime)
 
 
 def setSetting(name, value):
@@ -154,8 +153,7 @@ def TimeStamptosqlDateTime(TimeStamp):
     """
     if TimeStamp == 0:
         return ""
-    else:
-        return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(TimeStamp))
+    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(TimeStamp))
 
 
 def executeJSON(request):
@@ -209,14 +207,13 @@ def translateSMB(path):
     """
     if os.sep == '\\':  # windows os
         res_smb = re.compile(r'smb://(\w+)/(.+)').findall(path)
-        if len(res_smb) == 0:
+        if not res_smb:
             # path is not smb://...
             return path
         else:
             # create smb path
             return '\\\\' + res_smb[0][0] + '\\' + res_smb[0][1].replace('/', '\\')
-    else:
-        # linux os. Path with smb:// is correct, but can not be accessed with normal python file access
+    else:  # linux os. Path with smb:// is correct, but can not be accessed with normal python file access
         return path
 
 
@@ -233,18 +230,17 @@ def fileaccessmode(path):
     res_smb = re.compile(r'smb://(\w+)/(.+)').findall(path)
     res_nw = re.compile(r'(\w+)://(.*?)').findall(path)
     if os.sep == '\\':  # windows os
-        if len(res_smb) != 0:
+        if not res_smb:
             # smb accessable in windows
             return 'normal'
-        elif len(res_nw) != 0:
+        elif res_nw:
             # path is ftp or nfs network
             return 'copy'
         else:
             # path is not smb://...
             return 'normal'
-    else:
-        # linux os.
-        if len(res_nw) != 0:
+    else:  # linux os.
+        if res_nw:
             # Path with smb:// or ftp:// is correct, but can not be accessed with normal python file access
             # use virtual file system
             return 'copy'
