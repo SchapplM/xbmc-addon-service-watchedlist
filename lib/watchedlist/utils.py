@@ -22,7 +22,7 @@ def data_dir():
     """"get user data directory of this addon.
     according to http://wiki.xbmc.org/index.php?title=Add-on_Rules#Requirements_for_scripts_and_plugins
     """
-    _datapath = xbmc.translatePath( _Addon.getAddonInfo('profile') ).decode('utf-8')
+    _datapath = xbmc.translatePath(_Addon.getAddonInfo('profile')).decode('utf-8')
     if not xbmcvfs.exists(_datapath):
         xbmcvfs.mkdir(_datapath)
     return _datapath
@@ -56,16 +56,16 @@ def showNotification(title, message, loglevel, time=4000):
     """
     # Check log level
     if getSetting('verbosity') == '1' and loglevel < xbmc.LOGINFO:
-        return # setting "only infos"
+        return  # setting "only infos"
     elif getSetting('verbosity') == '2' and loglevel < xbmc.LOGWARNING:
-        return # setting "only warnings"
+        return  # setting "only warnings"
     elif getSetting('verbosity') == '3' and loglevel < xbmc.LOGERROR:
-        return # setting "only errors"
+        return  # setting "only errors"
     elif getSetting('verbosity') == '4':
-        return # setting "None"
+        return  # setting "None"
     _addoniconpath = os.path.join(addon_dir(), "icon.png")
-    log(u'Notification. %s: %s' % (title, message) )
-    if xbmc.Player().isPlaying() == False: # do not show the notification, if a video is being played.
+    log(u'Notification. %s: %s' % (title, message))
+    if xbmc.Player().isPlaying() == False:  # do not show the notification, if a video is being played.
         xbmcgui.Dialog().notification(title, message, _addoniconpath, time)
 
 
@@ -129,7 +129,7 @@ def sqlDateTimeToTimeStamp(sqlDateTime):
     """
     # sqlDateTime is a string (only from SQLite db. Mysql returns object)
     if sqlDateTime == '':
-        return 0 # NULL timestamp
+        return 0  # NULL timestamp
     else:
         # the usage of strptime produces the error "Failed to import _strptime because the import lock is held by another thread."
         # to solve this, in case of error try again after random time
@@ -138,9 +138,9 @@ def sqlDateTimeToTimeStamp(sqlDateTime):
                 try:
                     return int(time.mktime(time.strptime(sqlDateTime, "%Y-%m-%d %H:%M:%S")))
                 except:
-                    xbmc.wait( random.randint(200, 500) )
+                    xbmc.wait(random.randint(200, 500))
         except:
-            return 0 # error, but timestamp=0 works in the addon
+            return 0  # error, but timestamp=0 works in the addon
 
 
 def TimeStamptosqlDateTime(TimeStamp):
@@ -164,7 +164,7 @@ def executeJSON(request):
     Args:
         request: Dictionary with JSON-RPC Commands
     """
-    rpccmd = json.dumps(request) # create string from dict
+    rpccmd = json.dumps(request)  # create string from dict
     json_query = xbmc.executeJSONRPC(rpccmd)
     json_query = unicode(json_query, 'utf-8', errors='ignore')
     json_response = json.loads(json_query)
@@ -207,7 +207,7 @@ def translateSMB(path):
     Returns:
         path: Path to File in Windows notation
     """
-    if os.sep == '\\': # windows os
+    if os.sep == '\\':  # windows os
         res_smb = re.compile('smb://(\w+)/(.+)').findall(path)
         if len(res_smb) == 0:
             # path is not smb://...
@@ -232,7 +232,7 @@ def fileaccessmode(path):
 
     res_smb = re.compile('smb://(\w+)/(.+)').findall(path)
     res_nw = re.compile('(\w+)://(.*?)').findall(path)
-    if os.sep == '\\': # windows os
+    if os.sep == '\\':  # windows os
         if len(res_smb) != 0:
             # smb accessable in windows
             return 'normal'
