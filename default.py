@@ -17,7 +17,7 @@ if __remotedebug__:
         pydevd.settrace('localhost', port=60678, stdoutToServer=True, stderrToServer=True)
     except ImportError:
         sys.stderr.write("Error: " +
-            "You must add org.python.pydev.debug.pysrc to your PYTHONPATH.")
+                         "You must add org.python.pydev.debug.pysrc to your PYTHONPATH.")
         utils.showNotification('WatchedList Error', 'remote debug could not be imported.', xbmc.LOGERROR)
         sys.exit(1)
     except:

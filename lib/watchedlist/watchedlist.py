@@ -92,27 +92,27 @@ QUERY_CREATE_EP_SQLITE = "CREATE TABLE IF NOT EXISTS episode_watched (idShow INT
 QUERY_CREATE_SS_SQLITE = "CREATE TABLE IF NOT EXISTS tvshows (idShow INTEGER, title TEXT, PRIMARY KEY (idShow))"
 
 QUERY_CREATE_MV_MYSQL = ("CREATE TABLE IF NOT EXISTS `movie_watched` ("
-                      "`idMovieImdb` int unsigned NOT NULL,"
-                      "`playCount` tinyint unsigned DEFAULT NULL,"
-                      "`lastChange` timestamp NULL DEFAULT NULL,"
-                      "`lastPlayed` timestamp NULL DEFAULT NULL,"
-                      "`title` text,"
-                      "PRIMARY KEY (`idMovieImdb`)"
-                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8;")
+                         "`idMovieImdb` int unsigned NOT NULL,"
+                         "`playCount` tinyint unsigned DEFAULT NULL,"
+                         "`lastChange` timestamp NULL DEFAULT NULL,"
+                         "`lastPlayed` timestamp NULL DEFAULT NULL,"
+                         "`title` text,"
+                         "PRIMARY KEY (`idMovieImdb`)"
+                         ") ENGINE=InnoDB DEFAULT CHARSET=utf8;")
 QUERY_CREATE_EP_MYSQL = ("CREATE TABLE IF NOT EXISTS `episode_watched` ("
-                      "`idShow` int unsigned NOT NULL DEFAULT '0',"
-                      "`season` smallint unsigned NOT NULL DEFAULT '0',"
-                      "`episode` smallint unsigned NOT NULL DEFAULT '0',"
-                      "`playCount` tinyint unsigned DEFAULT NULL,"
-                      "`lastChange` timestamp NULL DEFAULT NULL,"
-                      "`lastPlayed` timestamp NULL DEFAULT NULL,"
-                      "PRIMARY KEY (`idShow`,`season`,`episode`)"
-                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8;")
+                         "`idShow` int unsigned NOT NULL DEFAULT '0',"
+                         "`season` smallint unsigned NOT NULL DEFAULT '0',"
+                         "`episode` smallint unsigned NOT NULL DEFAULT '0',"
+                         "`playCount` tinyint unsigned DEFAULT NULL,"
+                         "`lastChange` timestamp NULL DEFAULT NULL,"
+                         "`lastPlayed` timestamp NULL DEFAULT NULL,"
+                         "PRIMARY KEY (`idShow`,`season`,`episode`)"
+                         ") ENGINE=InnoDB DEFAULT CHARSET=utf8;")
 QUERY_CREATE_SS_MYSQL = ("CREATE TABLE IF NOT EXISTS `tvshows` ("
-                      "`idShow` int unsigned NOT NULL,"
-                      "`title` text,"
-                      "PRIMARY KEY (`idShow`)"
-                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8;")
+                         "`idShow` int unsigned NOT NULL,"
+                         "`title` text,"
+                         "PRIMARY KEY (`idShow`)"
+                         ") ENGINE=InnoDB DEFAULT CHARSET=utf8;")
 
 # Queries for clearing data from the tables
 QUERY_CLEAR_MV_SQLITE = "DELETE FROM movie_watched;"
