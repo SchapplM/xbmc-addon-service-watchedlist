@@ -208,7 +208,7 @@ def translateSMB(path):
         path: Path to File in Windows notation
     """
     if os.sep == '\\':  # windows os
-        res_smb = re.compile('smb://(\w+)/(.+)').findall(path)
+        res_smb = re.compile(r'smb://(\w+)/(.+)').findall(path)
         if len(res_smb) == 0:
             # path is not smb://...
             return path
@@ -230,8 +230,8 @@ def fileaccessmode(path):
         copy_mode: Mode of file access: 'copy' or 'normal'
     """
 
-    res_smb = re.compile('smb://(\w+)/(.+)').findall(path)
-    res_nw = re.compile('(\w+)://(.*?)').findall(path)
+    res_smb = re.compile(r'smb://(\w+)/(.+)').findall(path)
+    res_nw = re.compile(r'(\w+)://(.*?)').findall(path)
     if os.sep == '\\':  # windows os
         if len(res_smb) != 0:
             # smb accessable in windows
