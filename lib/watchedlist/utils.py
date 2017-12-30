@@ -13,6 +13,7 @@ import json
 _addon_id = u'service.watchedlist'
 _Addon = xbmcaddon.Addon(_addon_id)
 
+
 def data_dir():
     """"get user data directory of this addon.
     according to http://wiki.xbmc.org/index.php?title=Add-on_Rules#Requirements_for_scripts_and_plugins
@@ -22,13 +23,15 @@ def data_dir():
         xbmcvfs.mkdir(_datapath)
     return _datapath
 
+
 def addon_dir():
     """"get source directory of this addon.
     according to http://wiki.xbmc.org/index.php?title=Add-on_Rules#Requirements_for_scripts_and_plugins
     """
     return _Addon.getAddonInfo('path').decode('utf-8')
 
-def log(message,loglevel=xbmc.LOGNOTICE):
+
+def log(message, loglevel=xbmc.LOGNOTICE):
     """"save message to xbmc.log.
 
     Args:
@@ -38,7 +41,7 @@ def log(message,loglevel=xbmc.LOGNOTICE):
     xbmc.log(encode(_addon_id + u": " + message), level=loglevel)
 
 
-def showNotification(title,message,loglevel, time=4000):
+def showNotification(title, message, loglevel, time=4000):
     """Show Notification
 
     Args:
@@ -56,26 +59,31 @@ def showNotification(title,message,loglevel, time=4000):
         return # setting "only errors"
     elif getSetting('verbosity') == '4':
         return # setting "None"
-    _addoniconpath = os.path.join(addon_dir(),"icon.png")
+    _addoniconpath = os.path.join(addon_dir(), "icon.png")
     log(u'Notification. %s: %s' % (title, message) )
     if xbmc.Player().isPlaying() == False: # do not show the notification, if a video is being played.
         xbmcgui.Dialog().notification(title, message, _addoniconpath, time)
 
-def setSetting(name,value):
-    _Addon.setSetting(name,value)
+
+def setSetting(name, value):
+    _Addon.setSetting(name, value)
+
 
 def getSetting(name):
     # The returned value from getSetting is not unicode, only string
     # This function returns unicode
     return _Addon.getSetting(name).decode('utf-8')
 
+
 def getString(string_id):
     # return a localized string from resources/language/*.po
     # The returned string is unicode
     return _Addon.getLocalizedString(string_id)
 
+
 def encode(string):
-    return string.encode('UTF-8','replace')
+    return string.encode('UTF-8', 'replace')
+
 
 def decode(string):
     return string.decode('UTF-8')
@@ -106,6 +114,7 @@ def footprint():
     log(u'mysql_user = %s' % getSetting('mysql_user'), xbmc.LOGDEBUG)
     log(u'mysql_pass = %s' % getSetting('mysql_pass'), xbmc.LOGDEBUG)
 
+
 def sqlDateTimeToTimeStamp(sqlDateTime):
     """Convert SQLite DateTime to Unix Timestamp
 
@@ -123,11 +132,12 @@ def sqlDateTimeToTimeStamp(sqlDateTime):
         try:
             for i in range(5):
                 try:
-                    return int(time.mktime(time.strptime(sqlDateTime,"%Y-%m-%d %H:%M:%S")))
+                    return int(time.mktime(time.strptime(sqlDateTime, "%Y-%m-%d %H:%M:%S")))
                 except:
                     xbmc.wait( random.randint(200, 500) )
         except:
             return 0 # error, but timestamp=0 works in the addon
+
 
 def TimeStamptosqlDateTime(TimeStamp):
     """Convert Unix Timestamp to SQLite DateTime
@@ -141,7 +151,8 @@ def TimeStamptosqlDateTime(TimeStamp):
     if TimeStamp == 0:
         return ""
     else:
-        return time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(TimeStamp))
+        return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(TimeStamp))
+
 
 def executeJSON(request):
     """Execute JSON-RPC Command
@@ -154,32 +165,33 @@ def executeJSON(request):
     json_query = unicode(json_query, 'utf-8', errors='ignore')
     json_response = json.loads(json_query)
     # in case of exception this will be sent
-    buggalo.addExtraData('len(json_query)',len(json_query));
-    buggalo.addExtraData('len(json_response)', len(json_response));
+    buggalo.addExtraData('len(json_query)', len(json_query))
+    buggalo.addExtraData('len(json_response)', len(json_response))
     return json_response
+
 
 def buggalo_extradata_settings():
     """"add extradata to buggalo"""
 
-    buggalo.addExtraData('data_dir', data_dir());
-    buggalo.addExtraData('addon_dir', addon_dir());
-    buggalo.addExtraData('setting_verbosity', getSetting("verbosity"));
-    buggalo.addExtraData('setting_w_movies', getSetting("w_movies"));
-    buggalo.addExtraData('setting_w_episodes', getSetting("w_episodes"));
-    buggalo.addExtraData('setting_autostart', getSetting("autostart"));
-    buggalo.addExtraData('setting_delay', getSetting("delay"));
-    buggalo.addExtraData('setting_starttype', getSetting("starttype"));
-    buggalo.addExtraData('setting_interval', getSetting("interval"));
-    buggalo.addExtraData('setting_progressdialog', getSetting("progressdialog"));
-    buggalo.addExtraData('setting_watch_user', getSetting("watch_user"));
-    buggalo.addExtraData('setting_extdb', getSetting("extdb"));
-    buggalo.addExtraData('setting_dbpath', getSetting("dbpath"));
-    buggalo.addExtraData('setting_dbfilename', getSetting("dbfilename"));
-    buggalo.addExtraData('setting_dbbackup', getSetting("dbbackup"));
-    buggalo.addExtraData('setting_db_format', getSetting("db_format"));
-    buggalo.addExtraData('setting_mysql_server', getSetting("mysql_server"));
-    buggalo.addExtraData('setting_mysql_port', getSetting("mysql_port"));
-    buggalo.addExtraData('setting_mysql_db', getSetting("mysql_db"));
+    buggalo.addExtraData('data_dir', data_dir())
+    buggalo.addExtraData('addon_dir', addon_dir())
+    buggalo.addExtraData('setting_verbosity', getSetting("verbosity"))
+    buggalo.addExtraData('setting_w_movies', getSetting("w_movies"))
+    buggalo.addExtraData('setting_w_episodes', getSetting("w_episodes"))
+    buggalo.addExtraData('setting_autostart', getSetting("autostart"))
+    buggalo.addExtraData('setting_delay', getSetting("delay"))
+    buggalo.addExtraData('setting_starttype', getSetting("starttype"))
+    buggalo.addExtraData('setting_interval', getSetting("interval"))
+    buggalo.addExtraData('setting_progressdialog', getSetting("progressdialog"))
+    buggalo.addExtraData('setting_watch_user', getSetting("watch_user"))
+    buggalo.addExtraData('setting_extdb', getSetting("extdb"))
+    buggalo.addExtraData('setting_dbpath', getSetting("dbpath"))
+    buggalo.addExtraData('setting_dbfilename', getSetting("dbfilename"))
+    buggalo.addExtraData('setting_dbbackup', getSetting("dbbackup"))
+    buggalo.addExtraData('setting_db_format', getSetting("db_format"))
+    buggalo.addExtraData('setting_mysql_server', getSetting("mysql_server"))
+    buggalo.addExtraData('setting_mysql_port', getSetting("mysql_port"))
+    buggalo.addExtraData('setting_mysql_db', getSetting("mysql_db"))
 
 
 def translateSMB(path):
@@ -202,6 +214,7 @@ def translateSMB(path):
     else:
         # linux os. Path with smb:// is correct, but can not be accessed with normal python file access
         return path
+
 
 def fileaccessmode(path):
     """"determine file access mode in case of smb share no direct access possible

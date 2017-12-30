@@ -48,12 +48,12 @@ import sqlite3
 import mysql.connector
 
 import buggalo
-buggalo.EMAIL_CONFIG = {"recipient":"msahadl60@gmail.com", 
-                        "sender":"Buggalo <kodiwatchedlist@gmail.com>",
-                        "server":"smtp.googlemail.com",
-                        "method":"ssl",
-                        "user":"kodiwatchedlist@gmail.com",
-                        "pass":"mcgxwujwzswnqmbh"}
+buggalo.EMAIL_CONFIG = {"recipient": "msahadl60@gmail.com",
+                        "sender": "Buggalo <kodiwatchedlist@gmail.com>",
+                        "server": "smtp.googlemail.com",
+                        "method": "ssl",
+                        "user": "kodiwatchedlist@gmail.com",
+                        "pass": "mcgxwujwzswnqmbh"}
 
 import utils
 
@@ -124,6 +124,7 @@ QUERY_SELECT_EP_MYSQL = "SELECT `idShow`, `season`, `episode`, UNIX_TIMESTAMP(`l
 QUERY_INSERT_SS_SQLITE = "INSERT OR IGNORE INTO tvshows (idShow,title) VALUES (?, ?)"
 QUERY_INSERT_SS_MYSQL = "INSERT IGNORE INTO tvshows (idShow,title) VALUES (%s, %s)"
 
+
 class WatchedList:
     """
     Main class of the add-on
@@ -131,7 +132,7 @@ class WatchedList:
     def __init__(self, externalcall=False):
         """
         Initialize Class, default values for all class variables
-        
+
         Args:
         externalcall: Flag if the class was created for use with another Addon (via the API).
         In this case some features will be deactivated for speed purpose
@@ -208,7 +209,7 @@ class WatchedList:
             # wait the delay time after startup
             delaytime = float(utils.getSetting("delay")) * 60.0 # in seconds
             utils.log(u'Delay time before execution: %d seconds' % delaytime, xbmc.LOGDEBUG)
-            utils.showNotification(utils.getString(32101), utils.getString(32004)%float(utils.getSetting("delay")), xbmc.LOGINFO)
+            utils.showNotification(utils.getString(32101), utils.getString(32004) % float(utils.getSetting("delay")), xbmc.LOGINFO)
             if self.monitor.waitForAbort(1.0+delaytime): # wait at least one second (zero waiting time waits infinitely)
                 return 0
 
@@ -217,7 +218,7 @@ class WatchedList:
                 if self.load_db():
                     utils.showNotification(utils.getString(32102), utils.getString(32601), xbmc.LOGERROR)
                     return 3
-            if len(self.tvshownames) == 0: 
+            if len(self.tvshownames) == 0:
                 if self.sync_tvshows():
                     return 2
             if len(self.watchedmovielist_wl) == 0:
@@ -244,7 +245,7 @@ class WatchedList:
                         sleeptime = float(utils.getSetting("interval")) * 3600 # wait interval until next startup in [seconds]
                         # wait and then update again
                         utils.log(u'wait %d seconds until next update' % sleeptime)
-                        utils.showNotification(utils.getString(32101), utils.getString(32003)%(sleeptime/3600), xbmc.LOGINFO)
+                        utils.showNotification(utils.getString(32101), utils.getString(32003) % (sleeptime/3600), xbmc.LOGINFO)
                 else: # no autostart, only watch user
                     sleeptime = 3600 # arbitrary time for infinite loop
 
@@ -274,7 +275,6 @@ class WatchedList:
             return 0
         except:
             buggalo.onExceptionRaised()
-
 
     def runUpdate(self, manualstart):
         """
@@ -392,8 +392,8 @@ class WatchedList:
                 if utils.getSetting("extdb") == 'false':
                     # use the default file
                     self.dbdirectory = xbmc.translatePath( utils.data_dir() ).decode('utf-8')
-                    buggalo.addExtraData('dbdirectory', self.dbdirectory);
-                    self.dbpath = os.path.join( self.dbdirectory , "watchedlist.db" )
+                    buggalo.addExtraData('dbdirectory', self.dbdirectory)
+                    self.dbpath = os.path.join( self.dbdirectory, "watchedlist.db" )
                 else:
                     wait_minutes = 1 # retry waittime if db path does not exist/ is offline
 
@@ -403,7 +403,7 @@ class WatchedList:
                         self.dbfileaccess = utils.fileaccessmode(self.dbdirectory)
                         self.dbdirectory = utils.translateSMB(self.dbdirectory)
 
-                        self.dbpath = os.path.join( self.dbdirectory , utils.getSetting("dbfilename") )
+                        self.dbpath = os.path.join( self.dbdirectory, utils.getSetting("dbfilename") )
                         # xbmc.validatePath(self.dbdirectory) # does not work for smb
                         if not xbmcvfs.exists(self.dbdirectory): # do not use os.path.exists to access smb:// paths
                             if manualstart:
@@ -420,30 +420,29 @@ class WatchedList:
                             break # directory exists, continue below
 
                 # on unix, smb-shares can not be accessed with sqlite3 --> copy the db with Kodi file system operations and work in mirror directory
-                buggalo.addExtraData('dbfileaccess', self.dbfileaccess);
-                buggalo.addExtraData('dbdirectory', self.dbdirectory);
-                buggalo.addExtraData('dbpath', self.dbpath);
+                buggalo.addExtraData('dbfileaccess', self.dbfileaccess)
+                buggalo.addExtraData('dbdirectory', self.dbdirectory)
+                buggalo.addExtraData('dbpath', self.dbpath)
                 if self.dbfileaccess == 'copy':
                     self.dbdirectory_copy = self.dbdirectory
                     self.dbpath_copy = self.dbpath # path to db file as in the settings (but not accessable)
-                    buggalo.addExtraData('dbdirectory_copy', self.dbdirectory_copy);
-                    buggalo.addExtraData('dbpath_copy', self.dbpath_copy);
+                    buggalo.addExtraData('dbdirectory_copy', self.dbdirectory_copy)
+                    buggalo.addExtraData('dbpath_copy', self.dbpath_copy)
                     # work in copy directory in the Kodi profile folder
                     self.dbdirectory = os.path.join( xbmc.translatePath( utils.data_dir() ).decode('utf-8'), 'dbcopy' + os.sep)
                     if not xbmcvfs.exists(self.dbdirectory): # directory has to end with '/' (os.sep)
                         xbmcvfs.mkdir(self.dbdirectory)
                         utils.log(u'created directory %s' % str(self.dbdirectory))
-                    self.dbpath = os.path.join( self.dbdirectory , "watchedlist.db" )
+                    self.dbpath = os.path.join( self.dbdirectory, "watchedlist.db" )
                     if xbmcvfs.exists(self.dbpath_copy):
                         success = xbmcvfs.copy(self.dbpath_copy, self.dbpath) # copy the external db file to local mirror directory
                         utils.log(u'copied db file %s -> %s. Success: %d' % (self.dbpath_copy, self.dbpath, success), xbmc.LOGDEBUG)
 
-                buggalo.addExtraData('dbdirectory', self.dbdirectory);
-                buggalo.addExtraData('dbpath', self.dbpath);
-
+                buggalo.addExtraData('dbdirectory', self.dbdirectory)
+                buggalo.addExtraData('dbpath', self.dbpath)
 
                 # connect to the local wl database. create database if it does not exist
-                self.sqlcon_wl = sqlite3.connect(self.dbpath);
+                self.sqlcon_wl = sqlite3.connect(self.dbpath)
                 self.sqlcursor_wl = self.sqlcon_wl.cursor()
             else:
                 # MySQL Database on a server
@@ -469,7 +468,7 @@ class WatchedList:
                     self.downloaded_dropbox_timestamp = time.time()
                 # connect to the dropbox wl database.
                 if self.dropbox_path != None:
-                    self.sqlcon_db = sqlite3.connect(self.dropbox_path);
+                    self.sqlcon_db = sqlite3.connect(self.dropbox_path)
                     self.sqlcursor_db = self.sqlcon_db.cursor()
                     # create tables in dropbox file, if they don't exist
                     self.sqlcursor_db.execute(QUERY_CREATE_MV_SQLITE)
@@ -512,8 +511,6 @@ class WatchedList:
         self.sqlcon_wl.commit()
         return 0
 
-
-
     def close_db(self, flag):
         """Close WL database
         Argument:
@@ -546,7 +543,6 @@ class WatchedList:
             self.sqlcon_db = 0
         return 0
         # cursor is not changed -> error
-
 
     def get_watched_xbmc(self, silent):
         """Get Watched States of Kodi Database
@@ -591,7 +587,7 @@ class WatchedList:
                                 tvshowId_imdb = int(res[0])
                         except:
                             utils.log(u'get_watched_xbmc: tv show "%s" has no imdb-number in database. tvshowid=%d. Try rescraping.' % (item['title'], tvshowId_xbmc), xbmc.LOGINFO)
-                            if not silent: utils.showNotification( utils.getString(32101), utils.getString(32297)%(item['title'], tvshowId_xbmc), xbmc.LOGINFO)
+                            if not silent: utils.showNotification( utils.getString(32101), utils.getString(32297) % (item['title'], tvshowId_xbmc), xbmc.LOGINFO)
                             tvshowId_imdb = int(0)
                         self.tvshows[tvshowId_xbmc] = list([tvshowId_imdb, item['title']])
                         if tvshowId_imdb > 0:
@@ -602,7 +598,7 @@ class WatchedList:
             self.watchedepisodelist_xbmc = list([])
             for modus in ['movie', 'episode']:
                 if self.monitor.abortRequested(): self.close_db(3); return 4
-                buggalo.addExtraData('modus', modus);
+                buggalo.addExtraData('modus', modus)
                 if modus == 'movie' and utils.getSetting("w_movies") != 'true':
                     continue
                 if modus == 'episode' and utils.getSetting("w_episodes") != 'true':
@@ -669,7 +665,7 @@ class WatchedList:
                             self.watchedmovielist_xbmc.append(list([imdbId, 0, 0, lastplayed, playcount, name, 0, int(item['movieid'])]))# 0imdbnumber, 1empty, 2empty, 3lastPlayed, 4playCount, 5title, 6empty, 7movieid
                         else:
                             self.watchedepisodelist_xbmc.append(list([tvshowId_imdb, int(item['season']), int(item['episode']), lastplayed, playcount, name, 0, int(item['episodeid'])])) # 0tvdbnumber, 1season, 2episode, 3lastplayed, 4playcount, 5name, 6empty, 7episodeid
-            if not silent: utils.showNotification( utils.getString(32101), utils.getString(32299)%(len(self.watchedmovielist_xbmc), len(self.watchedepisodelist_xbmc)), xbmc.LOGINFO)
+            if not silent: utils.showNotification( utils.getString(32101), utils.getString(32299) % (len(self.watchedmovielist_xbmc), len(self.watchedepisodelist_xbmc)), xbmc.LOGINFO)
             if self.monitor.abortRequested():
                 self.close_db(3)
                 return 4
@@ -679,7 +675,6 @@ class WatchedList:
             self.close_db(3)
             buggalo.onExceptionRaised()
             return 1
-
 
     def get_watched_wl(self, silent):
         """Get Watched States of WL Database
@@ -697,7 +692,7 @@ class WatchedList:
         """
 
         try:
-            buggalo.addExtraData('self_sqlcursor', self.sqlcursor_wl); buggalo.addExtraData('self_sqlcon', self.sqlcon_wl);
+            buggalo.addExtraData('self_sqlcursor', self.sqlcursor_wl); buggalo.addExtraData('self_sqlcon', self.sqlcon_wl)
             if self.sqlcursor_wl == 0 or self.sqlcon_wl == 0:
                 if self.load_db():
                     return 2
@@ -733,7 +728,7 @@ class WatchedList:
                         name = 'tvdb-id %d S%02dE%02d' % (int(row[0]), int(row[1]), int(row[2]))
                     self.watchedepisodelist_wl.append(list([int(row[0]), int(row[1]), int(row[2]), int(row[3]), int(row[4]), name, int(row[5])]))# 0tvdbnumber, 1season, 2episode, 3lastplayed, 4playcount, 5name, 6lastChange
 
-            if not silent: utils.showNotification(utils.getString(32101), utils.getString(32298)%(len(self.watchedmovielist_wl), len(self.watchedepisodelist_wl)), xbmc.LOGINFO)
+            if not silent: utils.showNotification(utils.getString(32101), utils.getString(32298) % (len(self.watchedmovielist_wl), len(self.watchedepisodelist_wl)), xbmc.LOGINFO)
             self.close_db(1)
             return 0
         except sqlite3.Error as err:
@@ -753,7 +748,6 @@ class WatchedList:
             self.close_db(1)
             buggalo.onExceptionRaised()
             return 1
-
 
     def sync_tvshows(self):
         """Sync List of TV Shows from Kodi to WL Database
@@ -813,8 +807,6 @@ class WatchedList:
         if self.monitor.abortRequested(): return 4
         return 0
 
-
-
     def write_wl_wdata(self):
         """Go through all watched movies from Kodi and check whether they are up to date in the addon database
 
@@ -825,12 +817,12 @@ class WatchedList:
             2    database loading error
         """
 
-        buggalo.addExtraData('self_sqlcursor', self.sqlcursor_wl); buggalo.addExtraData('self_sqlcon', self.sqlcon_wl);
+        buggalo.addExtraData('self_sqlcursor', self.sqlcursor_wl); buggalo.addExtraData('self_sqlcon', self.sqlcon_wl)
         if self.sqlcursor_wl == 0 or self.sqlcon_wl == 0:
             if self.load_db():
                 return 2
         for modus in ['movie', 'episode']:
-            buggalo.addExtraData('modus', modus);
+            buggalo.addExtraData('modus', modus)
             if modus == 'movie' and utils.getSetting("w_movies") != 'true':
                 continue
             if modus == 'episode' and utils.getSetting("w_episodes") != 'true':
@@ -840,7 +832,7 @@ class WatchedList:
             count_update = 0
             if utils.getSetting("progressdialog") == 'true':
                 DIALOG_PROGRESS = xbmcgui.DialogProgress()
-                DIALOG_PROGRESS.create( utils.getString(32101) , utils.getString(32105))
+                DIALOG_PROGRESS.create( utils.getString(32101), utils.getString(32105))
             if modus == 'movie':
                 list_length = len(self.watchedmovielist_xbmc)
             else:
@@ -850,8 +842,8 @@ class WatchedList:
                 if self.monitor.abortRequested(): break # this loop can take some time in debug mode and prevents Kodi to exit
                 if utils.getSetting("progressdialog") == 'true' and DIALOG_PROGRESS.iscanceled():
                     if modus == 'movie': strno = 32202
-                    else: strno = 32203;
-                    utils.showNotification(utils.getString(strno), utils.getString(32301)%(count_insert, count_update), xbmc.LOGINFO)
+                    else: strno = 32203
+                    utils.showNotification(utils.getString(strno), utils.getString(32301) % (count_insert, count_update), xbmc.LOGINFO)
                     return 2
                 if modus == 'movie':
                     row_xbmc = self.watchedmovielist_xbmc[i]
@@ -863,7 +855,7 @@ class WatchedList:
 
                 try:
                     res = self._wl_update_media(modus, row_xbmc, 0, 0, 0)
-                    count_insert += res['num_new']; count_update += res['num_update'];
+                    count_insert += res['num_new']; count_update += res['num_update']
 
                 except sqlite3.Error as err:
                     try:
@@ -881,7 +873,7 @@ class WatchedList:
                     utils.log(u'write_wl_wdata: Error while updating %s %s: %s' % (modus, row_xbmc[5], sys.exc_info()[2]), xbmc.LOGERROR)
                     self.close_db(1)
                     if utils.getSetting("progressdialog") == 'true': DIALOG_PROGRESS.close()
-                    buggalo.addExtraData('count_update', count_update); buggalo.addExtraData('count_insert', count_insert);
+                    buggalo.addExtraData('count_update', count_update); buggalo.addExtraData('count_insert', count_insert)
                     buggalo.onExceptionRaised()
                     return 1
             if utils.getSetting("progressdialog") == 'true': DIALOG_PROGRESS.close()
@@ -891,11 +883,10 @@ class WatchedList:
                 self.database_backup()
                 self.sqlcon_wl.commit()
             if modus == 'movie': strno = [32202, 32301]
-            else: strno = [32203, 32301];
-            utils.showNotification(utils.getString(strno[0]), utils.getString(strno[1])%(count_insert, count_update), xbmc.LOGINFO)
+            else: strno = [32203, 32301]
+            utils.showNotification(utils.getString(strno[0]), utils.getString(strno[1]) % (count_insert, count_update), xbmc.LOGINFO)
         self.close_db(1)
         return 0
-
 
     def write_xbmc_wdata(self, progressdialogue, notifications):
         """Go through all watched movies/episodes from the wl-database and check,
@@ -913,7 +904,7 @@ class WatchedList:
         """
 
         for modus in ['movie', 'episode']:
-            buggalo.addExtraData('modus', modus);
+            buggalo.addExtraData('modus', modus)
             if modus == 'movie' and utils.getSetting("w_movies") != 'true':
                 continue
             if modus == 'episode' and utils.getSetting("w_episodes") != 'true':
@@ -934,7 +925,7 @@ class WatchedList:
             for j in range(list_length):
                 if self.monitor.abortRequested(): break # this loop can take some time in debug mode and prevents Kodi to exit
                 if progressdialogue and DIALOG_PROGRESS.iscanceled():
-                    if notifications > 0: utils.showNotification(utils.getString(32204), utils.getString(32302)%(count_update), xbmc.LOGINFO)
+                    if notifications > 0: utils.showNotification(utils.getString(32204), utils.getString(32302) % (count_update), xbmc.LOGINFO)
                     return 2
                 # get media-specific list items
                 if modus == 'movie':
@@ -944,7 +935,7 @@ class WatchedList:
                     season = row_wl[1]
                     episode = row_wl[2]
                 imdbId = row_wl[0]
-                name =  row_wl[5]
+                name = row_wl[5]
 
                 if progressdialogue:
                     DIALOG_PROGRESS.update(100*(j+1)/list_length, utils.getString(32106), utils.getString(32610) % (j+1, list_length, name) )
@@ -1021,7 +1012,7 @@ class WatchedList:
                 except:
                     utils.log(u"write_xbmc_wdata: Error while updating %s %s: %s" % (modus, name, sys.exc_info()[2]), xbmc.LOGERROR)
                     if progressdialogue: DIALOG_PROGRESS.close()
-                    buggalo.addExtraData('count_update', count_update);
+                    buggalo.addExtraData('count_update', count_update)
                     buggalo.onExceptionRaised()
                     return 1
 
@@ -1029,10 +1020,9 @@ class WatchedList:
             if self.monitor.abortRequested(): break # break the outer loop (movie/episode if exit requested)
             if notifications > 1:
                 if modus == 'movie': strno = [32204, 32302]
-                else: strno = [32205, 32303];
-                utils.showNotification(utils.getString(strno[0]), utils.getString(strno[1])%(count_update), xbmc.LOGINFO)
+                else: strno = [32205, 32303]
+                utils.showNotification(utils.getString(strno[0]), utils.getString(strno[1]) % (count_update), xbmc.LOGINFO)
         return 0
-
 
     def database_backup(self):
         """create a copy of the database, in case something goes wrong (only if database file is used)
@@ -1072,7 +1062,7 @@ class WatchedList:
             except:
                 if zf:
                     zf.close()
-                buggalo.addExtraData('zipfilename', zipfilename);
+                buggalo.addExtraData('zipfilename', zipfilename)
                 buggalo.onExceptionRaised()
                 return 2
         return 0
@@ -1090,10 +1080,10 @@ class WatchedList:
         else:
             # Database and backups are in the default folders
             backupdir = self.dbdirectory
-        
-        dirs,files = xbmcvfs.listdir(backupdir)
+
+        dirs, files = xbmcvfs.listdir(backupdir)
         # find database copy files among all files in that directory
-        files_match=[]
+        files_match = []
         for i, f in enumerate(files):
             if self.monitor.abortRequested(): break
             if re.match('\d+_\d+-watchedlist\.db\.zip', f) != None: # match the filename string from database_backup()
@@ -1104,11 +1094,11 @@ class WatchedList:
             if self.monitor.abortRequested(): break
             if i >= int( utils.getSetting('dbbackupcount') ):
                 # delete file
-                utils.log(u'database_backup_delete: Delete old backup file %d/%d (%s)' % (i+1,len(files_match),f), xbmc.LOGINFO)
+                utils.log(u'database_backup_delete: Delete old backup file %d/%d (%s)' % (i+1, len(files_match), f), xbmc.LOGINFO)
                 try:
-                    xbmcvfs.delete(os.path.join(backupdir,f))
+                    xbmcvfs.delete(os.path.join(backupdir, f))
                 except:
-                    utils.log(u'database_backup_delete: Error deleting old backup file %d (%s)' % (i,os.path.join(backupdir,f)), xbmc.LOGERROR)
+                    utils.log(u'database_backup_delete: Error deleting old backup file %d (%s)' % (i, os.path.join(backupdir, f)), xbmc.LOGERROR)
                     return 1
 
     def watch_user_changes(self, idletime_old, idletime):
@@ -1150,7 +1140,7 @@ class WatchedList:
         # compare states of movies/episodes
         for modus in ['movie', 'episode']:
             if self.monitor.abortRequested(): return 4
-            buggalo.addExtraData('modus', modus);
+            buggalo.addExtraData('modus', modus)
             if modus == 'movie' and utils.getSetting("w_movies") != 'true':
                 continue
             if modus == 'episode' and utils.getSetting("w_episodes") != 'true':
@@ -1188,14 +1178,14 @@ class WatchedList:
             # go through all movies changed by the user
             for icx in indices_changed:
                 if self.monitor.abortRequested(): return 4
-                i_o = icx[1];
-                i_n = icx[0];
+                i_o = icx[1]
+                i_n = icx[0]
                 row_xbmc = list_new[i_n]
                 row_xbmc_old = list_old[i_o]
-                lastplayed_old = row_xbmc_old[3];
-                playcount_old = row_xbmc_old[4];
-                lastplayed_new = row_xbmc[3];
-                playcount_new = row_xbmc[4];
+                lastplayed_old = row_xbmc_old[3]
+                playcount_old = row_xbmc_old[4]
+                lastplayed_new = row_xbmc[3]
+                playcount_new = row_xbmc[4]
                 mediaid = row_xbmc[7]
                 utils.log(u'watch_user_changes: %s "%s" changed playcount {%d -> %d} lastplayed {"%s" -> "%s"}. %sid=%d' % (modus, row_xbmc[5], playcount_old, playcount_new, utils.TimeStamptosqlDateTime(lastplayed_old), utils.TimeStamptosqlDateTime(lastplayed_new), modus, mediaid))
                 try:
@@ -1223,7 +1213,6 @@ class WatchedList:
         self.close_db(1) # keep the db closed most of the time (no access problems)
         return 1
 
-
     def _wl_update_media(self, mediatype, row_xbmc, saveanyway, commit, lastChange):
         """update the wl database for one movie/episode with the information in row_xbmc.
 
@@ -1245,8 +1234,8 @@ class WatchedList:
             num_new, num_update:
                 Number of new and updated entries
         """
-        retval={'errcode':0, 'num_new':0, 'num_update':0}
-        buggalo.addExtraData('self_sqlcursor', self.sqlcursor_wl); buggalo.addExtraData('self_sqlcon', self.sqlcon_wl);
+        retval = {'errcode': 0, 'num_new': 0, 'num_update': 0}
+        buggalo.addExtraData('self_sqlcursor', self.sqlcursor_wl); buggalo.addExtraData('self_sqlcon', self.sqlcon_wl)
         buggalo.addExtraData('len_self_watchedmovielist_wl', len(self.watchedmovielist_wl))
         buggalo.addExtraData('len_self_watchedepisodelist_wl', len(self.watchedepisodelist_wl))
         buggalo.addExtraData('len_self_tvshownames', len(self.tvshownames))
@@ -1394,7 +1383,7 @@ class WatchedList:
             num_new, num_update:
                 Number of new and updated entries
         """
-        retval={'errcode':0, 'num_new':0, 'num_update':0}
+        retval = {'errcode': 0, 'num_new': 0, 'num_update': 0}
         try:
             return self._wl_update_media(mediatype, row_xbmc, saveanyway, commit, lastChange)
         except sqlite3.Error as err:
@@ -1454,7 +1443,7 @@ class WatchedList:
                 # with the function for merging the Kodi database
                 if utils.getSetting("progressdialog") == 'true':
                     DIALOG_PROGRESS = xbmcgui.DialogProgress()
-                    DIALOG_PROGRESS.create( utils.getString(strno) , utils.getString(32105))
+                    DIALOG_PROGRESS.create( utils.getString(strno), utils.getString(32105))
                 rows = self.sqlcursor_db.fetchall()
                 list_length = len(rows)
                 for i in range(list_length):
@@ -1483,7 +1472,7 @@ class WatchedList:
                     else:
                         row_xbmc_sim[0:3] = row[0:3]
                     res = self._wl_update_media(mediatype, row_xbmc_sim, 0, 0, lastChange)
-                    count_insert += res['num_new']; count_update += res['num_update'];
+                    count_insert += res['num_new']; count_update += res['num_update']
 
                     # check if update is canceled
                     if utils.getSetting("progressdialog") == 'true' and DIALOG_PROGRESS.iscanceled():
@@ -1491,7 +1480,7 @@ class WatchedList:
                     if utils.getSetting("progressdialog") == 'true':
                         DIALOG_PROGRESS.update(100*(i+1)/list_length, utils.getString(32105), utils.getString(32610) % (i+1, list_length, row_xbmc_sim[5]) )
 
-                utils.showNotification(utils.getString(strno), utils.getString(32301)%(count_insert, count_update), xbmc.LOGINFO)
+                utils.showNotification(utils.getString(strno), utils.getString(32301) % (count_insert, count_update), xbmc.LOGINFO)
                 if utils.getSetting("progressdialog") == 'true': DIALOG_PROGRESS.close()
                 if self.monitor.abortRequested(): return 4
         except sqlite3.Error as err:
@@ -1513,7 +1502,6 @@ class WatchedList:
         # commit all changes: This saves the database file physically
         self.sqlcon_wl.commit()
         return 0
-
 
     def merge_local_dropbox(self):
         """
@@ -1560,7 +1548,7 @@ class WatchedList:
                 # loop through all rows of the local database and merge it into the remote (dropbox) database
                 if utils.getSetting("progressdialog") == 'true':
                     DIALOG_PROGRESS = xbmcgui.DialogProgress()
-                    DIALOG_PROGRESS.create( utils.getString(strno) , utils.getString(32716)) # TODO
+                    DIALOG_PROGRESS.create( utils.getString(strno), utils.getString(32716)) # TODO
                 #rows = self.sqlcursor_wl.fetchall()
                 list_length = len(rows)
                 for i in range(list_length):
@@ -1585,7 +1573,7 @@ class WatchedList:
                     if utils.getSetting("progressdialog") == 'true':
 
                         DIALOG_PROGRESS.update(100*(i+1)/list_length, utils.getString(strno), utils.getString(32610) % (i+1, list_length, name) )
-                utils.showNotification(utils.getString(strno), (utils.getString(32717))%list_length, xbmc.LOGINFO)
+                utils.showNotification(utils.getString(strno), (utils.getString(32717)) % list_length, xbmc.LOGINFO)
                 if utils.getSetting("progressdialog") == 'true': DIALOG_PROGRESS.close()
                 if self.monitor.abortRequested(): return 4 # no further database operations
         except sqlite3.Error as err:
@@ -1608,8 +1596,6 @@ class WatchedList:
         self.sqlcon_db.commit()
         self.close_db(2) # close dropbox database
         return 0
-
-
 
     def pushToDropbox(self):
         dropbox_key = utils.getSetting('dropbox_apikey')
@@ -1646,7 +1632,6 @@ class WatchedList:
         utils.showNotification(utils.getString(32713), utils.getString(32714), xbmc.LOGINFO)
         utils.log(u'Dropbox upload complete: %s -> %s' % (self.dropbox_path, dest_file))
 
-
     def pullFromDropbox(self):
         """
         Downloads the dropbox database
@@ -1668,7 +1653,7 @@ class WatchedList:
         client = dropbox.Dropbox(dropbox_key)
 
         # save the dropbox database file in the user data directory (this is only a temporary file for upload and download)
-        self.dropbox_path = os.path.join( utils.data_dir() , "dropbox.db" )
+        self.dropbox_path = os.path.join( utils.data_dir(), "dropbox.db" )
         dropbox_file_exists = False
 
         remote_file = '/' + 'watchedlist.db'
@@ -1727,9 +1712,9 @@ class WatchedList:
         """
         j = [ii for ii, x in enumerate(self.watchedmovielist_wl) if x[0] == imdbId]
         if len(j) == 0:
-            return [-1,0,0]
+            return [-1, 0, 0]
         else:
-            return [self.watchedmovielist_wl[j[0]][x] for x in [4,3,6]] # return 4playCount, 3lastPlayed, 6lastChange
+            return [self.watchedmovielist_wl[j[0]][x] for x in [4, 3, 6]] # return 4playCount, 3lastPlayed, 6lastChange
 
     def get_episode_status(self, tvdbId, season, episode):
         """
@@ -1745,6 +1730,6 @@ class WatchedList:
         """
         j = [ii for ii, x in enumerate(self.watchedepisodelist_wl) if x[0] == tvdbId and x[1] == season and x[2] == episode]
         if len(j) == 0:
-            return [-1,0,0]
+            return [-1, 0, 0]
         else:
-            return [self.watchedepisodelist_wl[j[0]][x] for x in [4,3,6]] # return 4playCount, 3lastPlayed, 6lastChange
+            return [self.watchedepisodelist_wl[j[0]][x] for x in [4, 3, 6]] # return 4playCount, 3lastPlayed, 6lastChange
