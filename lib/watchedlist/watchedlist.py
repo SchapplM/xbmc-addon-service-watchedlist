@@ -223,13 +223,13 @@ class WatchedList:
                 if self.load_db():
                     utils.showNotification(utils.getString(32102), utils.getString(32601), xbmc.LOGERROR)
                     return 3
-            if len(self.tvshownames) == 0:
+            if not self.tvshownames:
                 if self.sync_tvshows():
                     return 2
-            if len(self.watchedmovielist_wl) == 0:
+            if not self.watchedmovielist_wl:
                 if self.get_watched_wl(1):
                     return 2
-            if len(self.watchedmovielist_xbmc) == 0:
+            if not self.watchedmovielist_xbmc:
                 if self.get_watched_xbmc(1):
                     return 2
             executioncount = 0
@@ -591,7 +591,7 @@ class WatchedList:
                         try:
                             # check if series number is in imdb-format (scraper=imdb?)
                             res = re.compile('tt(\d+)').findall(item['imdbnumber'])
-                            if len(res) == 0:
+                            if not res:
                                 # number in thetvdb-format
                                 tvshowId_imdb = int(item['imdbnumber'])
                             else:
@@ -651,7 +651,7 @@ class WatchedList:
                         if modus == 'movie':
                             name = item['title'] + ' (' + str(item['year']) + ')'
                             res = re.compile('tt(\d+)').findall(item['imdbnumber'])
-                            if len(res) == 0:
+                            if not res:
                                 # no imdb-number for this movie in database. Skip
                                 utils.log(u'get_watched_xbmc: Movie %s has no imdb-number in database. movieid=%d. Try rescraping' % (name, int(item['movieid'])), xbmc.LOGINFO)
                                 continue
@@ -991,7 +991,7 @@ class WatchedList:
                     lastplayed_wl = row_wl[3]
                     playcount_wl = row_wl[4]
                     lastchange_wl = row_wl[6]
-                    if len(indices) > 0:
+                    if indices:
                         # the movie/episode is already in the xbmc-list
                         for i in indices:
                             if modus == 'movie':
@@ -1208,7 +1208,7 @@ class WatchedList:
             else:
                 list_new = self.watchedepisodelist_xbmc
                 list_old = old_watchedepisodelist_xbmc
-            if len(list_old) == 0 or len(list_new) == 0:
+            if not list_old or not list_new:
                 # one of the lists is empty: nothing to compare. No user changes noticable
                 continue
             for i_n, row_xbmc in enumerate(list_new):
@@ -1222,7 +1222,7 @@ class WatchedList:
                     i_o = i_n  # db did not change
                 else:  # search the movieid
                     i_o = [i for i, x in enumerate(list_old) if x[7] == mediaid]
-                    if len(i_o) == 0:
+                    if not i_o:
                         continue  # movie is not in old array
                     i_o = i_o[0]  # convert list to int
                 lastplayed_old = list_old[i_o][3]
@@ -1269,7 +1269,7 @@ class WatchedList:
                     return 2
 
             # update Kodi watched status, e.g. to set duplicate movies also as watched
-            if len(indices_changed) > 0:
+            if indices_changed:
                 self.write_xbmc_wdata(0, 1)  # this changes self.watchedmovielist_xbmc
         self.close_db(1)  # keep the db closed most of the time (no access problems)
         return 1
@@ -1335,9 +1335,9 @@ class WatchedList:
             lastplayed_xbmc = int(time.time())
         if mediatype == 'movie':
             j = [ii for ii, x in enumerate(self.watchedmovielist_wl) if x[0] == imdbId]
-        if mediatype == 'episode':
+        else:  # if mediatype == 'episode':
             j = [ii for ii, x in enumerate(self.watchedepisodelist_wl) if x[0] == imdbId and x[1] == season and x[2] == episode]
-        if len(j) > 0:  # j is the list of indexes of the occurences of the given row
+        if j:  # j is the list of indexes of the occurences of the given row
             j = j[0]  # there can only be one valid index j, since only one entry in wl per imdbId
             # the movie is already in the watched-list
             if mediatype == 'movie':
@@ -1780,7 +1780,7 @@ class WatchedList:
             if no entry is available, playcount is -1
         """
         j = [ii for ii, x in enumerate(self.watchedmovielist_wl) if x[0] == imdbId]
-        if len(j) == 0:
+        if not j:
             return [-1, 0, 0]
         else:
             return [self.watchedmovielist_wl[j[0]][x] for x in [4, 3, 6]]  # return 4playCount, 3lastPlayed, 6lastChange
@@ -1798,7 +1798,7 @@ class WatchedList:
             if no entry is available, playcount is -1
         """
         j = [ii for ii, x in enumerate(self.watchedepisodelist_wl) if x[0] == tvdbId and x[1] == season and x[2] == episode]
-        if len(j) == 0:
+        if not j:
             return [-1, 0, 0]
         else:
             return [self.watchedepisodelist_wl[j[0]][x] for x in [4, 3, 6]]  # return 4playCount, 3lastPlayed, 6lastChange
