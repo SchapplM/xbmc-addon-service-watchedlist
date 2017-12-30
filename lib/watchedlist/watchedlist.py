@@ -474,7 +474,7 @@ class WatchedList:
                 # Download Dropbox database only once a day to reduce traffic.
                 if time.time() > self.downloaded_dropbox_timestamp + 3600 * 24:
                     if self.pullFromDropbox():
-                        return
+                        return 1
                     self.downloaded_dropbox_timestamp = time.time()
                 # connect to the dropbox wl database.
                 if self.dropbox_path is not None:
@@ -1122,6 +1122,14 @@ class WatchedList:
         return 0
 
     def database_backup_delete(self):
+        """delete old backup files
+
+        Returns:
+            return code:
+            0    no operation done or operation successful
+            1    error deleting the backups
+        """
+        
         if not self.dbbackupdone:
             return 0
         # Limit number of backup files to the specified value
@@ -1156,6 +1164,7 @@ class WatchedList:
                 except BaseException:
                     utils.log(u'database_backup_delete: Error deleting old backup file %d (%s)' % (i, os.path.join(backupdir, f)), xbmc.LOGERROR)
                     return 1
+        return 0
 
     def watch_user_changes(self, idletime_old, idletime):
         """check if the user made changes in the watched states. Especially setting movies as "not watched".
