@@ -45,6 +45,7 @@ import re
 import time
 import sqlite3
 import mysql.connector
+import base64
 
 import xbmc
 import xbmcgui
@@ -56,8 +57,8 @@ import utils
 try:
     import dropbox
     from dropbox.exceptions import ApiError as DropboxApiError
-    DROPBOX_APP_KEY = 'bhd2v8hgsmqwcgt'
-    DROPBOX_APP_SECRET = 't2cepoevjqyubnd'
+    DROPBOX_APP_KEY = base64.b64decode("YmhkMnY4aGdzbXF3Y2d0")
+    DROPBOX_APP_SECRET = base64.b64decode("dDJjZXBvZXZqcXl1Ym5k")
     DROPBOX_ENABLED = True
 except:
     DROPBOX_ENABLED = False
@@ -68,12 +69,12 @@ if utils.getSetting('dbbackupcount') != '0':
     import zipfile
     import datetime
 
-buggalo.EMAIL_CONFIG = {"recipient": "msahadl60@gmail.com",
-                        "sender": "Buggalo <kodiwatchedlist@gmail.com>",
-                        "server": "smtp.googlemail.com",
+buggalo.EMAIL_CONFIG = {"recipient": base64.b64decode("bXNhaGFkbDYwQGdtYWlsLmNvbQ=="),
+                        "sender": base64.b64decode("QnVnZ2FsbyA8a29kaXdhdGNoZWRsaXN0QGdtYWlsLmNvbT4="),
+                        "server": base64.b64decode("c210cC5nb29nbGVtYWlsLmNvbQ=="),
                         "method": "ssl",
-                        "user": "kodiwatchedlist@gmail.com",
-                        "pass": "mcgxwujwzswnqmbh"}
+                        "user": base64.b64decode("a29kaXdhdGNoZWRsaXN0QGdtYWlsLmNvbQ=="),
+                        "pass": base64.b64decode("bWNneHd1and6c3ducW1iaA==")}
 
 QUERY_MV_INSERT_SQLITE = 'INSERT OR IGNORE INTO movie_watched (idMovieImdb,playCount,lastChange,lastPlayed,title) VALUES (?, ?, ?, ?, ?)'
 QUERY_MV_INSERT_MYSQL = 'INSERT IGNORE INTO movie_watched (idMovieImdb,playCount,lastChange,lastPlayed,title) VALUES (%s, %s, FROM_UNIXTIME(%s), FROM_UNIXTIME(%s), %s)'
