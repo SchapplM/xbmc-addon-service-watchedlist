@@ -1199,9 +1199,9 @@ class WatchedList:
         buggalo.addExtraData('len_old_watchedepisodelist_xbmc', len(old_watchedepisodelist_xbmc))
         buggalo.addExtraData('len_self_watchedmovielist_xbmc', len(self.watchedmovielist_xbmc))
         buggalo.addExtraData('len_self_watchedepisodelist_xbmc', len(self.watchedepisodelist_xbmc))
-        # separate the change detection and the change in the database to prevent circle reference
-        indices_changed = list([])
-        # compare states of movies/episodes
+        # Separate the change detection and the change in the database to 
+        # prevent circle reference: Two steps for watching user changes
+        # First step: Compare states of movies/episodes
         for modus in ['movie', 'episode']:
             if self.monitor.abortRequested():
                 return 4
@@ -1219,6 +1219,7 @@ class WatchedList:
             if not list_old or not list_new:
                 # one of the lists is empty: nothing to compare. No user changes noticable
                 continue
+            indices_changed = list([])  # list for corresponding new/old indices
             for i_n, row_xbmc in enumerate(list_new):
                 if self.monitor.abortRequested():
                     return 4
@@ -1243,7 +1244,7 @@ class WatchedList:
                     # update wl with new watched state
                     indices_changed.append([i_n, i_o])
 
-            # go through all movies changed by the user
+            # Second step: Go through all movies changed by the user
             for icx in indices_changed:
                 if self.monitor.abortRequested():
                     return 4
