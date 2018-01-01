@@ -282,6 +282,8 @@ class WatchedList:
                     return 0  # the program may exit. No purpose for background process
 
             return 0
+        except SystemExit:
+            return 4
         except BaseException:
             buggalo.onExceptionRaised()
 
@@ -296,6 +298,7 @@ class WatchedList:
         Returns:
             return code:
             0    success
+            2    SystemExit
             3    Error opening database
             4    Error getting watched state from addon database
             5    Error getting watched state from Kodi database
@@ -380,6 +383,8 @@ class WatchedList:
             if self.database_backup_delete():
                 return 10
             return 0
+        except SystemExit:
+            return 2
         except BaseException:
             buggalo.onExceptionRaised()
 
@@ -511,6 +516,8 @@ class WatchedList:
                 utils.showNotification(utils.getString(32108), err.msg.decode('utf-8'), xbmc.LOGERROR)
             buggalo.addExtraData('db_connstatus', 'mysql error, closed')
             self.close_db(3)
+            return 1
+        except SystemExit:
             return 1
         except BaseException:
             utils.log(u"Error while opening %s: %s" % (self.dbpath, sys.exc_info()[2]), xbmc.LOGERROR)
@@ -691,6 +698,8 @@ class WatchedList:
                 self.close_db(3)
                 return 4
             return 0
+        except SystemExit:
+            return 4
         except BaseException:
             utils.log(u'get_watched_xbmc: error getting the Kodi database : %s' % sys.exc_info()[2], xbmc.LOGERROR)
             self.close_db(3)
@@ -770,6 +779,8 @@ class WatchedList:
         except mysql.connector.Error as err:
             utils.log(u'get_watched_wl: MySQL Database error getting the wl database. %s' % err, xbmc.LOGERROR)
             return 3
+        except SystemExit:
+            return 4
         except BaseException:
             utils.log(u'get_watched_wl: Error getting the wl database : %s' % sys.exc_info()[2], xbmc.LOGERROR)
             self.close_db(1)
@@ -830,6 +841,8 @@ class WatchedList:
             utils.log(u"sync_tvshows: MySQL Database error accessing the wl database: ''%s''" % (err), xbmc.LOGERROR)
             self.close_db(1)
             return 1
+        except SystemExit:
+            return 4
         except BaseException:
             utils.log(u'sync_tvshows: Error getting the wl database: ''%s''' % sys.exc_info()[2], xbmc.LOGERROR)
             self.close_db(1)
@@ -847,6 +860,7 @@ class WatchedList:
             0    successfully written WL
             1    program exception
             2    database loading error
+            4    SystemExit
         """
 
         buggalo.addExtraData('self_sqlcursor', self.sqlcursor_wl)
@@ -906,6 +920,8 @@ class WatchedList:
                     utils.log(u'write_wl_wdata: MySQL Database error ''%s'' while updating %s %s' % (err, modus, row_xbmc[5]), xbmc.LOGERROR)
                     self.close_db(1)
                     return 1  # error while writing. Do not continue with episodes, if movies raised an exception
+                except SystemExit:
+                    return 4
                 except BaseException:
                     utils.log(u'write_wl_wdata: Error while updating %s %s: %s' % (modus, row_xbmc[5], sys.exc_info()[2]), xbmc.LOGERROR)
                     self.close_db(1)
@@ -944,6 +960,7 @@ class WatchedList:
             0    successfully written Kodi database
             1    program exception
             2    cancel by user interaction
+            4    SystemExit
         """
 
         for modus in ['movie', 'episode']:
@@ -1060,6 +1077,8 @@ class WatchedList:
                         # the movie is in the watched-list but not in the xbmc-list -> no action
                         # utils.log(u'write_xbmc_wdata: movie not in Kodi database: tt%d, %s' % (imdbId, row_xbmc[2]), xbmc.LOGDEBUG)
                         continue
+                except SystemExit:
+                    return 4
                 except BaseException:
                     utils.log(u"write_xbmc_wdata: Error while updating %s %s: %s" % (modus, name, sys.exc_info()[2]), xbmc.LOGERROR)
                     if progressdialogue:
@@ -1088,7 +1107,7 @@ class WatchedList:
             0    successfully copied database
             1    file writing error
             2    program exception
-
+            4    SystemExit
         """
 
         if utils.getSetting("db_format") != '0':
@@ -1114,6 +1133,8 @@ class WatchedList:
                 if self.dbfileaccess == 'copy':
                     xbmcvfs.copy(zipfilename, os.path.join(self.dbdirectory_copy, utils.decode(timestr + u'-watchedlist.db.zip')))
                     xbmcvfs.delete(zipfilename)
+            except SystemExit:
+                return 4
             except BaseException:
                 buggalo.addExtraData('zipfilename', zipfilename)
                 buggalo.onExceptionRaised()
@@ -1569,6 +1590,8 @@ class WatchedList:
             if utils.getSetting("progressdialog") == 'true':
                 DIALOG_PROGRESS.close()
             return 1
+        except SystemExit:
+            return 4
         except BaseException:
             utils.log(u'merge_dropbox_local: Error getting the wl database: ''%s''' % sys.exc_info()[2], xbmc.LOGERROR)
             self.close_db(3)
@@ -1662,6 +1685,8 @@ class WatchedList:
             if utils.getSetting("progressdialog") == 'true':
                 DIALOG_PROGRESS.close()
             return 1
+        except SystemExit:
+            return 4
         except BaseException:
             utils.log(u'merge_local_dropbox: Error getting the wl database: ''%s''' % sys.exc_info()[2], xbmc.LOGERROR)
             self.close_db(3)
