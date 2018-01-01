@@ -1126,13 +1126,22 @@ class WatchedList:
             try:
                 with zipfile.ZipFile(zipfilename, 'w') as zf:
                     zf.write(self.dbpath, arcname='watchedlist.db', compress_type=zipfile.ZIP_DEFLATED)
-                    zf.close()
                 self.dbbackupdone = True
                 utils.log(u'database_backup: database backup copy created to %s' % zipfilename, xbmc.LOGINFO)
                 # copy the zip file with Kodi file system, if needed
                 if self.dbfileaccess == 'copy':
                     xbmcvfs.copy(zipfilename, os.path.join(self.dbdirectory_copy, utils.decode(timestr + u'-watchedlist.db.zip')))
                     xbmcvfs.delete(zipfilename)
+            except ValueError as err: # e.g. "timestamps before 1980"
+                utils.showNotification(utils.getString(32102), utils.getString(32608) % str(err), xbmc.LOGERROR)
+                utils.log(u'database_backup: Error creating database backup %s: %s' % (zipfilename, str(err)), xbmc.LOGERROR)
+                self.dbbackupdone = True # pretend this was done to avoid log spamming
+                return 2
+            except IOError as err: # e.g. "permission denied"
+                utils.showNotification(utils.getString(32102), utils.getString(32608) % err.strerror, xbmc.LOGERROR)
+                utils.log(u'database_backup: Error creating database backup %s: (%s) %s' % (zipfilename, err.errno, err.strerror), xbmc.LOGERROR)
+                self.dbbackupdone = True # pretend this was done to avoid log spamming
+                return 2
             except SystemExit:
                 return 4
             except BaseException:
