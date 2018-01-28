@@ -214,10 +214,10 @@ class WatchedList:
             utils.footprint()
 
             # wait the delay time after startup
-            delaytime = float(utils.getSetting("delay")) * 60.0  # in seconds
+            delaytime = int(utils.getSetting("delay")) * 60  # in seconds
             utils.log(u'Delay time before execution: %d seconds' % delaytime, xbmc.LOGDEBUG)
-            utils.showNotification(utils.getString(32101), utils.getString(32004) % float(utils.getSetting("delay")), xbmc.LOGINFO)
-            if self.monitor.waitForAbort(1.0 + delaytime):  # wait at least one second (zero waiting time waits infinitely)
+            utils.showNotification(utils.getString(32101), utils.getString(32004) % int(utils.getSetting("delay")), xbmc.LOGINFO)
+            if self.monitor.waitForAbort(1 + delaytime):  # wait at least one second (zero waiting time waits infinitely)
                 return 0
 
             # load all databases
@@ -241,7 +241,7 @@ class WatchedList:
                 utils.showNotification(utils.getString(32101), utils.getString(32005), xbmc.LOGINFO)
 
             # handle the periodic execution
-            while float(utils.getSetting("starttype")) > 0 or utils.getSetting("watch_user") == 'true':
+            while int(utils.getSetting("starttype")) > 0 or utils.getSetting("watch_user") == 'true':
                 starttime = time.time()
                 # determine sleeptime before next full watched-database update
                 if utils.getSetting("starttype") == '1' and executioncount == 0:  # one execution after startup
@@ -250,7 +250,7 @@ class WatchedList:
                     if executioncount == 0:  # with periodic execution, one update after startup and then periodic
                         sleeptime = 0
                     else:
-                        sleeptime = float(utils.getSetting("interval")) * 3600  # wait interval until next startup in [seconds]
+                        sleeptime = int(utils.getSetting("interval")) * 3600  # wait interval until next startup in [seconds]
                         # wait and then update again
                         utils.log(u'wait %d seconds until next update' % sleeptime)
                         utils.showNotification(utils.getString(32101), utils.getString(32003) % (sleeptime / 3600), xbmc.LOGINFO)
@@ -278,7 +278,7 @@ class WatchedList:
                     executioncount += 1
 
                 # check for exiting program
-                if float(utils.getSetting("starttype")) < 2 and utils.getSetting("watch_user") == 'false':
+                if int(utils.getSetting("starttype")) < 2 and utils.getSetting("watch_user") == 'false':
                     return 0  # the program may exit. No purpose for background process
 
             return 0
@@ -479,7 +479,7 @@ class WatchedList:
             # check for dropbox
             if DROPBOX_ENABLED and utils.getSetting("dropbox_enabled") == 'true':
                 # Download Dropbox database only once a day to reduce traffic.
-                if time.time() > self.downloaded_dropbox_timestamp + 3600 * 24:
+                if time.time() > self.downloaded_dropbox_timestamp + 3600.0 * 24.0:
                     if self.pullFromDropbox():
                         return 1
                     self.downloaded_dropbox_timestamp = time.time()
