@@ -290,6 +290,7 @@ class WatchedList:
     def runUpdate(self, manualstart):
         """
         entry point for manual start.
+        this function is called for periodic update for automatic start
         perform the update step by step
 
         Args:
@@ -356,9 +357,6 @@ class WatchedList:
                 utils.showNotification(utils.getString(32102), utils.getString(32604), xbmc.LOGERROR)
                 return 6
 
-            # close the sqlite database (addon)
-            self.close_db(1)  # should be closed by the functions directly accessing the database
-
             # export from addon database into Kodi database
             res = self.write_xbmc_wdata((utils.getSetting("progressdialog") == 'true'), 2)
             if res == 2:  # user exit
@@ -377,6 +375,9 @@ class WatchedList:
                     self.pushToDropbox()
                 else:
                     return 9
+
+            # close the watchedlist database. Is only closed locally in case of error
+            self.close_db(1)
 
             # delete old backup files of the database
             # do this at the end for not destroying valuable backup in case something went wrong before
@@ -451,7 +452,7 @@ class WatchedList:
                     self.dbpath = os.path.join(self.dbdirectory, "watchedlist.db")
                     if xbmcvfs.exists(self.dbpath_copy):
                         success = xbmcvfs.copy(self.dbpath_copy, self.dbpath)  # copy the external db file to local mirror directory
-                        utils.log(u'copied db file %s -> %s. Success: %d' % (self.dbpath_copy, self.dbpath, success), xbmc.LOGDEBUG)
+                        utils.log(u'copied db file from share: %s -> %s. Success: %d' % (self.dbpath_copy, self.dbpath, success), xbmc.LOGDEBUG)
 
                 buggalo.addExtraData('dbdirectory', self.dbdirectory)
                 buggalo.addExtraData('dbpath', self.dbpath)
@@ -541,7 +542,8 @@ class WatchedList:
             0    successfully closed database
             1    error
         """
-        if flag == 1 or flag == 3:
+        # close watchedlist db (if it is open)
+        if self.sqlcon_wl and (flag == 1 or flag == 3):
             if self.sqlcon_wl:
                 self.sqlcon_wl.close()
                 self.sqlcon_wl = 0
@@ -549,17 +551,17 @@ class WatchedList:
             if utils.getSetting("db_format") == '0' and self.dbfileaccess == 'copy':
                 if xbmcvfs.exists(self.dbpath):
                     success = xbmcvfs.copy(self.dbpath, self.dbpath_copy)
-                    utils.log(u'copied db file %s -> %s. Success: %d' % (self.dbpath, self.dbpath_copy, success), xbmc.LOGDEBUG)
+                    utils.log(u'copied db file to share: %s -> %s. Success: %d' % (self.dbpath, self.dbpath_copy, success), xbmc.LOGDEBUG)
                     if not success:
                         utils.showNotification(utils.getString(32102), utils.getString(32606) % self.dbpath, xbmc.LOGERROR)
                         return 1
             buggalo.addExtraData('db_connstatus', 'closed')
+        # close dropbox db
         if flag == 2 or flag == 3:
             if self.sqlcon_db:
                 self.sqlcon_db.close()
             self.sqlcon_db = 0
         return 0
-        # cursor is not changed -> error
 
     def get_watched_xbmc(self, silent):
         """Get Watched States of Kodi Database
@@ -763,7 +765,6 @@ class WatchedList:
 
             if not silent:
                 utils.showNotification(utils.getString(32101), utils.getString(32298) % (len(self.watchedmovielist_wl), len(self.watchedepisodelist_wl)), xbmc.LOGINFO)
-            self.close_db(1)
             return 0
         except sqlite3.Error as err:
             try:
@@ -825,7 +826,6 @@ class WatchedList:
                 if self.monitor.abortRequested():
                     break
                 self.tvshownames[int(row_i[0])] = row_i[1]
-            self.close_db(1)
         except sqlite3.Error as err:
             try:
                 errstring = err.args[0]  # TODO: Find out, why this does not work some times
@@ -942,7 +942,6 @@ class WatchedList:
             else:
                 strno = [32203, 32301]
             utils.showNotification(utils.getString(strno[0]), utils.getString(strno[1]) % (count_insert, count_update), xbmc.LOGINFO)
-        self.close_db(1)
         return 0
 
     def write_xbmc_wdata(self, progressdialogue, notifications):
@@ -1293,14 +1292,14 @@ class WatchedList:
                         errstring = err.args[0]  # TODO: Find out, why this does not work some times
                     except BaseException:
                         errstring = ''
-                    utils.log(u'write_wl_wdata: SQLite Database error (%s) while updating %s %s' % (errstring, modus, row_xbmc[5]))
+                    utils.log(u'watch_user_changes: SQLite Database error (%s) while updating %s %s' % (errstring, modus, row_xbmc[5]))
                     utils.showNotification(utils.getString(32102), utils.getString(32606) % ('(%s)' % errstring), xbmc.LOGERROR)
                     # error because of db locked or similar error
                     self.close_db(1)
                     return 2
                 except mysql.connector.Error as err:
                     # Catch common mysql errors and show them to guide the user
-                    utils.log(u'write_wl_wdata: MySQL Database error (%s) while updating %s %s' % (err, modus, row_xbmc[5]))
+                    utils.log(u'watch_user_changes: MySQL Database error (%s) while updating %s %s' % (err, modus, row_xbmc[5]))
                     utils.showNotification(utils.getString(32102), utils.getString(32606) % ('(%s)' % err), xbmc.LOGERROR)
                     self.close_db(1)
                     return 2
@@ -1308,7 +1307,6 @@ class WatchedList:
             # update Kodi watched status, e.g. to set duplicate movies also as watched
             if indices_changed:
                 self.write_xbmc_wdata(0, 1)  # this changes self.watchedmovielist_xbmc
-        self.close_db(1)  # keep the db closed most of the time (no access problems)
         return 1
 
     def _wl_update_media(self, mediatype, row_xbmc, saveanyway, commit, lastChange):
