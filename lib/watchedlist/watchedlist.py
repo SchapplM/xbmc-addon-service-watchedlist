@@ -417,10 +417,8 @@ class WatchedList:
                         # use a user specified file, for example to synchronize multiple clients
                         self.dbdirectory = xbmc.translatePath(utils.getSetting("dbpath")).decode('utf-8')
                         self.dbfileaccess = utils.fileaccessmode(self.dbdirectory)
-                        self.dbdirectory = utils.translateSMB(self.dbdirectory)
-
                         self.dbpath = os.path.join(self.dbdirectory, utils.getSetting("dbfilename"))
-                        # xbmc.validatePath(self.dbdirectory) # does not work for smb
+
                         if not xbmcvfs.exists(self.dbdirectory):  # do not use os.path.exists to access smb:// paths
                             if manualstart:
                                 utils.log(u'db path does not exist: %s' % self.dbdirectory, xbmc.LOGWARNING)
