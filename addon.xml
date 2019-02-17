@@ -30,8 +30,8 @@
 		<disclaimer lang="de_DE">Dieses Script ignoriert das Dateiformat. Ein gesehener Film in DVD-Qualität wird auch in der BlueRay-Version als gesehen gekennzeichnet.</disclaimer>
 		<platform>all</platform>
 		<license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
-    	<forum>http://forum.kodi.tv/showthread.php?tid=164652</forum>
-    	<website>http://kodi.wiki/view/Add-on:WatchedList</website>
+    	<forum>https://forum.kodi.tv/showthread.php?tid=164652</forum>
+    	<website>https://kodi.wiki/view/Add-on:WatchedList</website>
     	<email></email>
     	<source>https://github.com/SchapplM/xbmc-addon-service-watchedlist</source>
 	</extension>
