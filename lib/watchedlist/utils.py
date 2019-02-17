@@ -210,7 +210,6 @@ def fileaccessmode(path):
     """
 
     res_nw = re.compile(r'(.*?)://(.*?)').findall(path)
-    print res_nw
     if res_nw:
         # Path with smb://, nfs:// or ftp:// is correct, but can not be accessed with normal python file access.
         # Copy the file with the virtual file system
