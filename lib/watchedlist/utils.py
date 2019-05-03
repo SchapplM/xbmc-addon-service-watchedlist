@@ -114,8 +114,8 @@ def footprint():
     log(u'dropbox_apikey = %s' % getSetting('dropbox_apikey'), xbmc.LOGDEBUG)
     log(u'mysql_server = %s' % getSetting('mysql_server'), xbmc.LOGDEBUG)
     log(u'mysql_port = %s' % getSetting('mysql_port'), xbmc.LOGDEBUG)
-    log(u'mysql_user = %s' % getSetting('mysql_user'), xbmc.LOGDEBUG)
-    log(u'mysql_pass = %s' % getSetting('mysql_pass'), xbmc.LOGDEBUG)
+    log(u'mysql_user = *******', xbmc.LOGDEBUG)
+    log(u'mysql_pass = *******', xbmc.LOGDEBUG)
 
 
 def sqlDateTimeToTimeStamp(sqlDateTime):
