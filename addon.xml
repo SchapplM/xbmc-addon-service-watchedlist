@@ -37,7 +37,6 @@
         <assets>
             <icon>icon.png</icon>
             <fanart>fanart.jpg</fanart>
-            <screenshot></screenshot>
         </assets>
     </extension>
 </addon>
