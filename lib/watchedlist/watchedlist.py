@@ -409,7 +409,7 @@ class WatchedList:
                 # load the db path
                 if utils.getSetting("extdb") == 'false':
                     # use the default file
-                    self.dbdirectory = xbmc.translatePath(utils.data_dir()).decode('utf-8')
+                    self.dbdirectory = xbmc.translatePath(utils.data_dir())
                     buggalo.addExtraData('dbdirectory', self.dbdirectory)
                     self.dbpath = os.path.join(self.dbdirectory, "watchedlist.db")
                 else:
@@ -417,7 +417,7 @@ class WatchedList:
 
                     while not self.monitor.abortRequested():
                         # use a user specified file, for example to synchronize multiple clients
-                        self.dbdirectory = xbmc.translatePath(utils.getSetting("dbpath")).decode('utf-8')
+                        self.dbdirectory = xbmc.translatePath(utils.getSetting("dbpath"))
                         self.dbfileaccess = utils.fileaccessmode(self.dbdirectory)
                         self.dbpath = os.path.join(self.dbdirectory, utils.getSetting("dbfilename"))
 
@@ -446,7 +446,7 @@ class WatchedList:
                     buggalo.addExtraData('dbdirectory_copy', self.dbdirectory_copy)
                     buggalo.addExtraData('dbpath_copy', self.dbpath_copy)
                     # work in copy directory in the Kodi profile folder
-                    self.dbdirectory = os.path.join(xbmc.translatePath(utils.data_dir()).decode('utf-8'), 'dbcopy' + os.sep)
+                    self.dbdirectory = os.path.join(xbmc.translatePath(utils.data_dir()), 'dbcopy' + os.sep)
                     if not xbmcvfs.exists(self.dbdirectory):  # directory has to end with '/' (os.sep)
                         xbmcvfs.mkdir(self.dbdirectory)
                         utils.log(u'created directory %s' % str(self.dbdirectory))
@@ -505,7 +505,7 @@ class WatchedList:
             return 1
         except mysql.connector.Error as err:
             # Catch common mysql errors and show them to guide the user
-            utils.log(u"Database error while opening mySQL DB %s [%s:%s@%s]. %s" % (utils.getSetting("mysql_db"), utils.getSetting("mysql_user"), utils.getSetting("mysql_pass"), utils.getSetting("mysql_db"), err.msg.decode('utf-8')), xbmc.LOGERROR)
+            utils.log(u"Database error while opening mySQL DB %s [%s:%s@%s]. %s" % (utils.getSetting("mysql_db"), utils.getSetting("mysql_user"), utils.getSetting("mysql_pass"), utils.getSetting("mysql_db"), err.msg), xbmc.LOGERROR)
             if err.errno == mysql.connector.errorcode.ER_DBACCESS_DENIED_ERROR:
                 utils.showNotification(utils.getString(32108), utils.getString(32210) % (utils.getSetting("mysql_user"), utils.getSetting("mysql_db")), xbmc.LOGERROR)
             elif err.errno == mysql.connector.errorcode.ER_ACCESS_DENIED_ERROR:
@@ -513,7 +513,7 @@ class WatchedList:
             elif err.errno == mysql.connector.errorcode.ER_BAD_DB_ERROR:
                 utils.showNotification(utils.getString(32108), utils.getString(32209) % utils.getSetting("mysql_db"), xbmc.LOGERROR)
             else:
-                utils.showNotification(utils.getString(32108), err.msg.decode('utf-8'), xbmc.LOGERROR)
+                utils.showNotification(utils.getString(32108), err.msg, xbmc.LOGERROR)
             buggalo.addExtraData('db_connstatus', 'mysql error, closed')
             self.close_db(3)
             return 1
@@ -900,7 +900,7 @@ class WatchedList:
                     row_xbmc = self.watchedepisodelist_xbmc[i]
 
                 if utils.getSetting("progressdialog") == 'true':
-                    DIALOG_PROGRESS.update(100 * (i + 1) / list_length, utils.getString(32105), utils.getString(32610) % (i + 1, list_length, row_xbmc[5]))
+                    DIALOG_PROGRESS.update(int(100 * (i + 1) / list_length), utils.getString(32105), utils.getString(32610) % (i + 1, list_length, row_xbmc[5]))                    
 
                 try:
                     res = self._wl_update_media(modus, row_xbmc, 0, 0, 0)
@@ -998,7 +998,7 @@ class WatchedList:
                 name = row_wl[5]
 
                 if progressdialogue:
-                    DIALOG_PROGRESS.update(100 * (j + 1) / list_length, utils.getString(32106), utils.getString(32610) % (j + 1, list_length, name))
+                    DIALOG_PROGRESS.update(int(100 * (j + 1) / list_length), utils.getString(32106), utils.getString(32610) % (j + 1, list_length, name))
                 try:
                     # search the unique movie/episode id in the xbmc-list
                     if modus == 'movie':
@@ -1494,8 +1494,8 @@ class WatchedList:
             self.close_db(1)
             retval['errcode'] = 1
         except mysql.connector.Error as err:
-            utils.log(u"wl_update_media: MySQL Database error accessing the wl database: ''%s''" % (err.msg.decode('utf-8')), xbmc.LOGERROR)
-            utils.showNotification(utils.getString(32108), err.msg.decode('utf-8'), xbmc.LOGERROR)
+            utils.log(u"wl_update_media: MySQL Database error accessing the wl database: ''%s''" % (err.msg), xbmc.LOGERROR)
+            utils.showNotification(utils.getString(32108), err.msg, xbmc.LOGERROR)
             self.close_db(1)
             retval['errcode'] = 1
         return retval
@@ -1578,7 +1578,7 @@ class WatchedList:
                     if utils.getSetting("progressdialog") == 'true' and DIALOG_PROGRESS.iscanceled():
                         return 2
                     if utils.getSetting("progressdialog") == 'true':
-                        DIALOG_PROGRESS.update(100 * (i + 1) / list_length, utils.getString(32105), utils.getString(32610) % (i + 1, list_length, row_xbmc_sim[5]))
+                        DIALOG_PROGRESS.update(int(100 * (i + 1) / list_length), utils.getString(32105), utils.getString(32610) % (i + 1, list_length, row_xbmc_sim[5]))
 
                 utils.showNotification(utils.getString(strno), utils.getString(32301) % (count_insert, count_update), xbmc.LOGINFO)
                 if utils.getSetting("progressdialog") == 'true':
@@ -1674,7 +1674,7 @@ class WatchedList:
                     if utils.getSetting("progressdialog") == 'true' and DIALOG_PROGRESS.iscanceled():
                         return 2
                     if utils.getSetting("progressdialog") == 'true':
-                        DIALOG_PROGRESS.update(100 * (i + 1) / list_length, utils.getString(strno), utils.getString(32610) % (i + 1, list_length, name))
+                        DIALOG_PROGRESS.update(int(100 * (i + 1) / list_length), utils.getString(strno), utils.getString(32610) % (i + 1, list_length, name))
                 utils.showNotification(utils.getString(strno), (utils.getString(32717)) % list_length, xbmc.LOGINFO)
                 if utils.getSetting("progressdialog") == 'true':
                     DIALOG_PROGRESS.close()

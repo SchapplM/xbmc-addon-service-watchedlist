@@ -21,7 +21,7 @@ def data_dir():
     """"get user data directory of this addon.
     according to http://wiki.xbmc.org/index.php?title=Add-on_Rules#Requirements_for_scripts_and_plugins
     """
-    _datapath = xbmc.translatePath(_Addon.getAddonInfo('profile')).decode('utf-8')
+    _datapath = xbmc.translatePath(_Addon.getAddonInfo('profile'))#.decode('utf-8')
     if not xbmcvfs.exists(_datapath):
         xbmcvfs.mkdir(_datapath)
     return _datapath
@@ -31,7 +31,7 @@ def addon_dir():
     """"get source directory of this addon.
     according to http://wiki.xbmc.org/index.php?title=Add-on_Rules#Requirements_for_scripts_and_plugins
     """
-    return _Addon.getAddonInfo('path').decode('utf-8')
+    return _Addon.getAddonInfo('path')#.decode('utf-8')
 
 
 def log(message, loglevel=xbmc.LOGNOTICE):
@@ -41,7 +41,7 @@ def log(message, loglevel=xbmc.LOGNOTICE):
         message: has to be unicode, http://wiki.xbmc.org/index.php?title=Add-on_unicode_paths#Logging
         loglevel: xbmc.LOGDEBUG, xbmc.LOGINFO, xbmc.LOGNOTICE, xbmc.LOGWARNING, xbmc.LOGERROR, xbmc.LOGFATAL
     """
-    xbmc.log(encode(_addon_id + u": " + message), level=loglevel)
+    xbmc.log(_addon_id + u": " + message, level=loglevel)
 
 
 def showNotification(title, message, loglevel, showtime=4000):
@@ -75,7 +75,7 @@ def setSetting(name, value):
 def getSetting(name):
     # The returned value from getSetting is not unicode, only string
     # This function returns unicode
-    return _Addon.getSetting(name).decode('utf-8')
+    return _Addon.getSetting(name)#.decode('utf-8')
 
 
 def getString(string_id):
@@ -85,11 +85,11 @@ def getString(string_id):
 
 
 def encode(string):
-    return string.encode('UTF-8', 'replace')
+    return string#.encode('UTF-8', 'replace')
 
 
 def decode(string):
-    return string.decode('UTF-8')
+    return string#.decode('UTF-8')
 
 
 def footprint():
@@ -164,7 +164,7 @@ def executeJSON(request):
     """
     rpccmd = json.dumps(request)  # create string from dict
     json_query = xbmc.executeJSONRPC(rpccmd)
-    json_query = unicode(json_query, 'utf-8', errors='ignore')
+    #json_query = unicode(json_query, 'utf-8', errors='ignore')
     json_response = json.loads(json_query)
     # in case of exception this will be sent
     buggalo.addExtraData('len(json_query)', len(json_query))
