@@ -57,8 +57,8 @@ import lib.watchedlist.utils as utils
 try:
     import dropbox
     from dropbox.exceptions import ApiError as DropboxApiError
-    DROPBOX_APP_KEY = base64.b64decode("YmhkMnY4aGdzbXF3Y2d0")
-    DROPBOX_APP_SECRET = base64.b64decode("dDJjZXBvZXZqcXl1Ym5k")
+    DROPBOX_APP_KEY = base64.b64decode("YmhkMnY4aGdzbXF3Y2d0").decode('ascii')
+    DROPBOX_APP_SECRET = base64.b64decode("dDJjZXBvZXZqcXl1Ym5k").decode('ascii')
     DROPBOX_ENABLED = True
 except BaseException:
     DROPBOX_ENABLED = False
@@ -69,12 +69,12 @@ if utils.getSetting('dbbackupcount') != '0':
     import zipfile
     import datetime
 
-buggalo.EMAIL_CONFIG = {"recipient": base64.b64decode("bXNhaGFkbDYwQGdtYWlsLmNvbQ=="),
-                        "sender": base64.b64decode("QnVnZ2FsbyA8a29kaXdhdGNoZWRsaXN0QGdtYWlsLmNvbT4="),
-                        "server": base64.b64decode("c210cC5nb29nbGVtYWlsLmNvbQ=="),
+buggalo.EMAIL_CONFIG = {"recipient": base64.b64decode("bXNhaGFkbDYwQGdtYWlsLmNvbQ==").decode('ascii'),
+                        "sender": base64.b64decode("QnVnZ2FsbyA8a29kaXdhdGNoZWRsaXN0QGdtYWlsLmNvbT4=").decode('ascii'),
+                        "server": base64.b64decode("c210cC5nb29nbGVtYWlsLmNvbQ==").decode('ascii'),
                         "method": "ssl",
-                        "user": base64.b64decode("a29kaXdhdGNoZWRsaXN0QGdtYWlsLmNvbQ=="),
-                        "pass": base64.b64decode("bWNneHd1and6c3ducW1iaA==")}
+                        "user": base64.b64decode("a29kaXdhdGNoZWRsaXN0QGdtYWlsLmNvbQ==").decode('ascii'),
+                        "pass": base64.b64decode("bWNneHd1and6c3ducW1iaA==").decode('ascii')}
 
 QUERY_MV_INSERT_SQLITE = 'INSERT OR IGNORE INTO movie_watched (idMovieImdb,playCount,lastChange,lastPlayed,title) VALUES (?, ?, ?, ?, ?)'
 QUERY_MV_INSERT_MYSQL = 'INSERT IGNORE INTO movie_watched (idMovieImdb,playCount,lastChange,lastPlayed,title) VALUES (%s, %s, FROM_UNIXTIME(%s), FROM_UNIXTIME(%s), %s)'
