@@ -1120,7 +1120,7 @@ class WatchedList:
                 return 1
             now = datetime.datetime.now()
             timestr = u'%04d%02d%02d_%02d%02d%02d' % (now.year, now.month, now.day, now.hour, now.minute, now.second)
-            zipfilename = os.path.join(self.dbdirectory, utils.decode(timestr + u'-watchedlist.db.zip'))
+            zipfilename = os.path.join(self.dbdirectory, timestr + u'-watchedlist.db.zip')
             try:
                 with zipfile.ZipFile(zipfilename, 'w') as zf:
                     zf.write(self.dbpath, arcname='watchedlist.db', compress_type=zipfile.ZIP_DEFLATED)
@@ -1128,7 +1128,7 @@ class WatchedList:
                 utils.log(u'database_backup: database backup copy created to %s' % zipfilename, xbmc.LOGINFO)
                 # copy the zip file with Kodi file system, if needed
                 if self.dbfileaccess == 'copy':
-                    xbmcvfs.copy(zipfilename, os.path.join(self.dbdirectory_copy, utils.decode(timestr + u'-watchedlist.db.zip')))
+                    xbmcvfs.copy(zipfilename, os.path.join(self.dbdirectory_copy, timestr + u'-watchedlist.db.zip'))
                     xbmcvfs.delete(zipfilename)
             except ValueError as err: # e.g. "timestamps before 1980"
                 utils.showNotification(utils.getString(32102), utils.getString(32608) % str(err), xbmc.LOGERROR)
