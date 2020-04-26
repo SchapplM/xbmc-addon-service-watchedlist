@@ -9,6 +9,7 @@
         <import addon="script.module.myconnpy" version="8.0.18" />
         <!--<import addon="script.module.pydevd" version="3.4.1"/> --> <!-- Required for remote debugging in Linux -->
         <import addon="script.module.dropbox" version="9.4.0"/> <!-- For Dropbox synchronisation -->
+        <import addon="script.module.dropbox_auth" version="1.0.0" optional="true"/> <!-- For Dropbox authentification -->
     </requires>
     <extension point="xbmc.python.script" library="manual.py"> <!--Python code for manual start in the addons menu-->
         <provides>executable</provides> <!-- Addon is shown under Programs -->
