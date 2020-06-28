@@ -24,7 +24,7 @@
 		<setting id="dbbackupcount" type="slider" label="30020" default="-1" range="-1,1,5" option="int"  enable="eq(-4,0)" />
 		<!-- Call the Dropbox Authorization script: Give the Dropbox app kex and the "secret" key. The script will write the authorization code to this field with the provided addon information -->
 		<setting id="dropbox_enabled" type="bool" label="30045" default="false" />
-    <setting id="dropbox_apikey" type="action" label="30023" action="RunScript(script.module.dropbox, service.watchedlist, dropbox_apikey, bhd2v8hgsmqwcgt, t2cepoevjqyubnd)" enable="eq(-1,true)" />
+    <setting id="dropbox_apikey" type="action" label="30023" action="RunScript(script.module.dropbox_auth, service.watchedlist, dropbox_apikey, bhd2v8hgsmqwcgt, t2cepoevjqyubnd)" enable="eq(-1,true)" />
 
 		<!-- MySQL Database Options (second option in db_format)-->
 		<!--<setting label="30044" type="lsep"/>-->
