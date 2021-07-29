@@ -132,20 +132,33 @@ def sqlDateTimeToTimeStamp(sqlDateTime):
         except BaseException:
             return 0  # error, but timestamp=0 works in the addon
 
-
-def TimeStamptosqlDateTime(TimeStamp):
-    """Convert Unix Timestamp to SQLite DateTime
+def TimeStamptostringDateTime(TimeStamp):
+    """Convert Unix Timestamp to DateTime or an empty string
 
         Args:
             timestamp: E.g. 1368213804
 
         Returns:
             sqlDateTime: E.g. "2013-05-10 21:23:24"
+            Empty string: E.g. ""
     """
     if TimeStamp == 0:
         return ""
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(TimeStamp))
 
+def TimeStamptosqlDateTime(TimeStamp):
+    """Convert Unix Timestamp to SQL DateTime or None
+
+        Args:
+            timestamp: E.g. 1368213804
+
+        Returns:
+            sqlDateTime: E.g. "2013-05-10 21:23:24"
+            None
+    """
+    if TimeStamp == 0:
+        return None
+    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(TimeStamp))
 
 def executeJSON(request):
     """Execute JSON-RPC Command
