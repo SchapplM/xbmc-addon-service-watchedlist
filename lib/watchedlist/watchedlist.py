@@ -120,9 +120,9 @@ QUERY_CLEAR_EP_SQLITE = "DELETE FROM episode_watched;"
 
 # Queries for selecting all table entries
 QUERY_SELECT_MV_SQLITE = "SELECT idMovieImdb, lastPlayed, playCount, title, lastChange FROM movie_watched ORDER BY title"
-QUERY_SELECT_MV_MYSQL = "SELECT `idMovieImdb`, UNIX_TIMESTAMP(`lastPlayed`), `playCount`, `title`, UNIX_TIMESTAMP(`lastChange`) FROM `movie_watched` ORDER BY `title`"
+QUERY_SELECT_MV_MYSQL = "SELECT `idMovieImdb`, `lastPlayed`, `playCount`, `title`, `lastChange` FROM `movie_watched` ORDER BY `title`"
 QUERY_SELECT_EP_SQLITE = "SELECT idShow, season, episode, lastPlayed, playCount, lastChange FROM episode_watched ORDER BY idShow, season, episode"
-QUERY_SELECT_EP_MYSQL = "SELECT `idShow`, `season`, `episode`, UNIX_TIMESTAMP(`lastPlayed`), `playCount`, UNIX_TIMESTAMP(`lastChange`) FROM `episode_watched` ORDER BY `idShow`, `season`, `episode`"
+QUERY_SELECT_EP_MYSQL = "SELECT `idShow`, `season`, `episode`, `lastPlayed`, `playCount`, `lastChange` FROM `episode_watched` ORDER BY `idShow`, `season`, `episode`"
 
 # Queries for inserting tv series
 QUERY_INSERT_SS_SQLITE = "INSERT OR IGNORE INTO tvshows (idShow,title) VALUES (?, ?)"
@@ -742,7 +742,12 @@ class WatchedList:
                     if self.monitor.abortRequested():
                         self.close_db(1)
                         return 4
-                    self.watchedmovielist_wl.append(list([int(row[0]), 0, 0, int(row[1]), int(row[2]), row[3], int(row[4])]))  # 0tvdbnumber, 1empty, 2empty, 3lastPlayed, 4playCount, 5title, 6lastChange
+                    
+                    # Correcting datetime from mysql if necessary
+                    lastPlayed = utils.mixToLocalTimeStamp(row[1])
+                    lastChange = utils.mixToLocalTimeStamp(row[4])
+                    self.watchedmovielist_wl.append(list([int(row[0]), 0, 0, lastPlayed, int(row[2]), row[3], lastChange]))
+                    # 0tvdbnumber, 1empty, 2empty, 3lastPlayed, 4playCount, 5title, 6lastChange
 
             # get watched episodes from addon database
             self.watchedepisodelist_wl = list([])
@@ -762,7 +767,12 @@ class WatchedList:
                         name = '%s S%02dE%02d' % (self.tvshownames[int(row[0])], int(row[1]), int(row[2]))
                     except BaseException:
                         name = 'tvdb-id %d S%02dE%02d' % (int(row[0]), int(row[1]), int(row[2]))
-                    self.watchedepisodelist_wl.append(list([int(row[0]), int(row[1]), int(row[2]), int(row[3]), int(row[4]), name, int(row[5])]))  # 0tvdbnumber, 1season, 2episode, 3lastplayed, 4playcount, 5name, 6lastChange
+                    
+                    # Correcting datetime from mysql if necessary
+                    lastPlayed = utils.mixToLocalTimeStamp(row[3])
+                    lastChange = utils.mixToLocalTimeStamp(row[5])
+                    self.watchedepisodelist_wl.append(list([int(row[0]), int(row[1]), int(row[2]), lastPlayed, int(row[4]), name, lastChange]))
+                    # 0tvdbnumber, 1season, 2episode, 3lastplayed, 4playcount, 5name, 6lastChange
 
             if not silent:
                 utils.showNotification(utils.getString(32101), utils.getString(32298) % (len(self.watchedmovielist_wl), len(self.watchedepisodelist_wl)), xbmc.LOGINFO)
@@ -1048,12 +1058,12 @@ class WatchedList:
                             jsondict = {
                                 "jsonrpc": "2.0",
                                 "method": jsonmethod,
-                                "params": {idfieldname: mediaid, "playcount": playcount_wl, "lastplayed": utils.TimeStamptostringDateTime(lastplayed_new)},
+                                "params": {idfieldname: mediaid, "playcount": playcount_wl, "lastplayed": utils.TimeStamptoLocalDateTimeString(lastplayed_new)},
                                 "id": 1
                             }
                             json_response = utils.executeJSON(jsondict)
                             if 'result' in json_response and json_response['result'] == 'OK':
-                                utils.log(u'write_xbmc_wdata: Kodi database updated for %s. playcount: {%d -> %d}, lastplayed: {"%s" -> "%s"} (%sid=%d)' % (name, playcount_xbmc, playcount_wl, utils.TimeStamptostringDateTime(lastplayed_xbmc), utils.TimeStamptostringDateTime(lastplayed_new), modus, mediaid), xbmc.LOGINFO)
+                                utils.log(u'write_xbmc_wdata: Kodi database updated for %s. playcount: {%d -> %d}, lastplayed: {"%s" -> "%s"} (%sid=%d)' % (name, playcount_xbmc, playcount_wl, utils.TimeStamptoLocalDateTimeString(lastplayed_xbmc), utils.TimeStamptoLocalDateTimeString(lastplayed_new), modus, mediaid), xbmc.LOGINFO)
                                 if playcount_wl == 0:
                                     if notifications > 0:
                                         utils.showNotification(utils.getString(32404), name, xbmc.LOGDEBUG)
@@ -1285,7 +1295,7 @@ class WatchedList:
                 lastplayed_new = row_xbmc[3]
                 playcount_new = row_xbmc[4]
                 mediaid = row_xbmc[7]
-                utils.log(u'watch_user_changes: %s "%s" changed playcount {%d -> %d} lastplayed {"%s" -> "%s"}. %sid=%d' % (modus, row_xbmc[5], playcount_old, playcount_new, utils.TimeStamptostringDateTime(lastplayed_old), utils.TimeStamptostringDateTime(lastplayed_new), modus, mediaid))
+                utils.log(u'watch_user_changes: %s "%s" changed playcount {%d -> %d} lastplayed {"%s" -> "%s"}. %sid=%d' % (modus, row_xbmc[5], playcount_old, playcount_new, utils.TimeStamptoLocalDateTimeString(lastplayed_old), utils.TimeStamptoLocalDateTimeString(lastplayed_new), modus, mediaid))
                 try:
                     self._wl_update_media(modus, row_xbmc, 1, 1, 0)
                 except sqlite3.Error as err:
@@ -1361,7 +1371,6 @@ class WatchedList:
                 return retval
         if not saveanyway and playcount_xbmc == 0 and lastChange == 0:
             # playcount in xbmc-list is empty. Nothing to save
-            # utils.log(u'wl_update_%s: not watched in xbmc: tt%d, %s' % (modus, imdbId, name), xbmc.LOGDEBUG)
             return retval
         if lastChange == 0:
             lastchange_new = int(time.time())
@@ -1383,7 +1392,6 @@ class WatchedList:
             lastplayed_wl = row_wl[3]
             playcount_wl = row_wl[4]
             lastchange_wl = row_wl[6]
-
             if not saveanyway:
                 # check if an update of the wl database is necessary (xbmc watched status newer)
                 if lastChange == 0:  # information from xbmc: Criterion Playcount and lastplayed-timestamp
@@ -1408,14 +1416,14 @@ class WatchedList:
                     values = list([playcount_xbmc, lastplayed_new, lastchange_new, imdbId])
                 else:  # mysql
                     sql = QUERY_MV_UPDATE_MYSQL
-                    values = list([playcount_xbmc, utils.TimeStamptosqlDateTime(lastplayed_new), utils.TimeStamptosqlDateTime(lastchange_new), imdbId])
+                    values = list([playcount_xbmc, utils.TimeStamptoUTCsqlDateTime(lastplayed_new), utils.TimeStamptoUTCsqlDateTime(lastchange_new), imdbId])
             else:
                 if int(utils.getSetting("db_format")) != 1:  # sqlite3
                     sql = QUERY_EP_UPDATE_SQLITE
                     values = list([playcount_xbmc, lastplayed_new, lastchange_new, imdbId, season, episode])
                 else:  # mysql
                     sql = QUERY_EP_UPDATE_MYSQL
-                    values = list([playcount_xbmc, utils.TimeStamptosqlDateTime(lastplayed_new), utils.TimeStamptosqlDateTime(lastchange_new), imdbId, season, episode])
+                    values = list([playcount_xbmc, utils.TimeStamptoUTCsqlDateTime(lastplayed_new), utils.TimeStamptoUTCsqlDateTime(lastchange_new), imdbId, season, episode])
             self.sqlcursor_wl.execute(sql, values)
             retval['num_update'] = self.sqlcursor_wl.rowcount
             # update the local mirror variable of the wl database: # 0imdbnumber, season, episode, 3lastPlayed, 4playCount, 5title, 6lastChange
@@ -1423,7 +1431,7 @@ class WatchedList:
                 self.watchedmovielist_wl[j] = list([imdbId, 0, 0, lastplayed_new, playcount_xbmc, name, lastchange_new])
             else:
                 self.watchedepisodelist_wl[j] = list([imdbId, season, episode, lastplayed_new, playcount_xbmc, name, lastchange_new])
-            utils.log(u'wl_update_%s: updated wl db for "%s" (id %d). playcount: {%d -> %d}. lastplayed: {"%s" -> "%s"}. lastchange: "%s. Affected %d row."' % (mediatype, name, imdbId, playcount_wl, playcount_xbmc, utils.TimeStamptostringDateTime(lastplayed_wl), utils.TimeStamptostringDateTime(lastplayed_new), utils.TimeStamptostringDateTime(lastchange_new), self.sqlcursor_wl.rowcount), xbmc.LOGDEBUG)
+            utils.log(u'wl_update_%s: updated wl db for "%s" (id %d). playcount: {%d -> %d}. lastplayed: {"%s" -> "%s"}. lastchange: "%s. Affected %d row."' % (mediatype, name, imdbId, playcount_wl, playcount_xbmc, utils.TimeStamptoLocalDateTimeString(lastplayed_wl), utils.TimeStamptoLocalDateTimeString(lastplayed_new), utils.TimeStamptoLocalDateTimeString(lastchange_new), self.sqlcursor_wl.rowcount), xbmc.LOGDEBUG)
             if playcount_xbmc > 0:
                 utils.showNotification(utils.getString(32403), name, xbmc.LOGDEBUG)
             else:
@@ -1437,16 +1445,16 @@ class WatchedList:
                     values = list([imdbId, playcount_xbmc, lastchange_new, lastplayed_xbmc, name])
                 else:  # mysql
                     sql = QUERY_MV_INSERT_MYSQL
-                    values = list([imdbId, playcount_xbmc, utils.TimeStamptosqlDateTime(lastchange_new), utils.TimeStamptosqlDateTime(lastplayed_xbmc), name])
+                    values = list([imdbId, playcount_xbmc, utils.TimeStamptoUTCsqlDateTime(lastchange_new), utils.TimeStamptoUTCsqlDateTime(lastplayed_xbmc), name])
             else:  # episode
                 if int(utils.getSetting("db_format")) != 1:  # sqlite3
                     sql = QUERY_EP_INSERT_SQLITE
                     values = list([imdbId, season, episode, playcount_xbmc, lastchange_new, lastplayed_xbmc])
                 else:  # mysql
                     sql = QUERY_EP_INSERT_MYSQL
-                    values = list([imdbId, season, episode, playcount_xbmc, utils.TimeStamptosqlDateTime(lastchange_new), utils.TimeStamptosqlDateTime(lastplayed_xbmc)])
+                    values = list([imdbId, season, episode, playcount_xbmc, utils.TimeStamptoUTCsqlDateTime(lastchange_new), utils.TimeStamptoUTCsqlDateTime(lastplayed_xbmc)])
             self.sqlcursor_wl.execute(sql, values)
-            utils.log(u'wl_update_%s: new entry for wl database: "%s", lastChange="%s", lastPlayed="%s", playCount=%d. Affected %d row.' % (mediatype, name, utils.TimeStamptostringDateTime(lastchange_new), utils.TimeStamptostringDateTime(lastplayed_xbmc), playcount_xbmc, self.sqlcursor_wl.rowcount))
+            utils.log(u'wl_update_%s: new entry for wl database: "%s", lastChange="%s", lastPlayed="%s", playCount=%d. Affected %d row.' % (mediatype, name, utils.TimeStamptoLocalDateTimeString(lastchange_new), utils.TimeStamptoLocalDateTimeString(lastplayed_xbmc), playcount_xbmc, self.sqlcursor_wl.rowcount))
             retval['num_new'] = self.sqlcursor_wl.rowcount
             # update the local mirror variable of the wl database
             if mediatype == 'movie':
