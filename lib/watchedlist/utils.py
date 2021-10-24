@@ -12,6 +12,7 @@ import xbmcgui
 import xbmcvfs
 import xbmcaddon
 import buggalo
+import datetime
 
 _addon_id = u'service.watchedlist'
 _Addon = xbmcaddon.Addon(_addon_id)
@@ -132,20 +133,53 @@ def sqlDateTimeToTimeStamp(sqlDateTime):
         except BaseException:
             return 0  # error, but timestamp=0 works in the addon
 
+def mixToLocalTimeStamp(sqlDateTime):
+    """Convert an unknow DateTime(UTC) or timestamp (local) format to a local Timestamp
 
-def TimeStamptosqlDateTime(TimeStamp):
-    """Convert Unix Timestamp to SQLite DateTime
+        Args:
+            sqlDateTime: E.g. "2013-05-10 21:23:24" UTC
+        Returns:
+            timestamp: E.g. 1368213804 Local time
+    """
+    # timestamps comming from the SQL are in utc and need conversion
+    if isinstance(sqlDateTime, datetime.datetime):
+        return int(sqlDateTime.replace(tzinfo=datetime.timezone.utc).astimezone(tz=None).timestamp())
+    # NULL Columns in SQL will be returned as None by the cursor but WatchedList needs a 0 if there is no date
+    elif sqlDateTime is None:
+        return 0
+    # timestamps comming from the SQLlite are already in local time
+    try:
+        return int(sqlDateTime) 
+    except:
+        return 0
+
+def TimeStamptoLocalDateTimeString(TimeStamp):
+    """Convert Unix Timestamp to DateTime or an empty string
 
         Args:
             timestamp: E.g. 1368213804
 
         Returns:
             sqlDateTime: E.g. "2013-05-10 21:23:24"
+            Empty string: E.g. ""
     """
     if TimeStamp == 0:
         return ""
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(TimeStamp))
 
+def TimeStamptoUTCsqlDateTime(TimeStamp):
+    """Convert Unix Timestamp to SQL DateTime or None
+
+        Args:
+            timestamp: E.g. 1368213804
+
+        Returns:
+            sqlDateTime: E.g. "2013-05-10 21:23:24"
+            None
+    """
+    if TimeStamp == 0:
+        return None
+    return datetime.datetime.utcfromtimestamp(TimeStamp).strftime('%Y-%m-%d %H:%M:%S')
 
 def executeJSON(request):
     """Execute JSON-RPC Command
