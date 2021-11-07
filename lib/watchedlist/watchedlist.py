@@ -670,8 +670,7 @@ class WatchedList:
                                     imdbId = int(res[0])
                             except BaseException: 
                                 # no imdb-number or themoviedb-number for this movie in database. Skip
-                                utils.log(u'get_watched_xbmc: Movie %s has no imdb-number or themoviedb-number in database. movieid=%d. Try rescraping' % (n
-ame, int(item['movieid'])), xbmc.LOGINFO)
+                                utils.log(u'get_watched_xbmc: Movie %s has no imdb-number or themoviedb-number in database. movieid=%d. Try rescraping' % (name, int(item['movieid'])), xbmc.LOGINFO)
                                 imdbId = 0
                                 continue
                         else:  # episodes
