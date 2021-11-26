@@ -635,7 +635,7 @@ class WatchedList:
                         "jsonrpc": "2.0",
                         "method": "VideoLibrary.GetMovies",
                         "params": {
-                            "properties": ["title", "year", "imdbnumber", "lastplayed", "playcount"],
+                            "properties": ["title", "year", "imdbnumber", "lastplayed", "playcount", "uniqueid"],
                             "sort": {"order": "ascending", "method": "title"}
                         },
                         "id": 1
@@ -662,7 +662,7 @@ class WatchedList:
                             name = item['title'] + ' (' + str(item['year']) + ')'
                             try:
                                 # check if movie number is in imdb-format (scraper=imdb)
-                                res = re.compile(r'tt(\d+)').findall(item['imdbnumber'])
+                                res = re.compile(r'tt(\d+)').findall(item['uniqueid']['imdb'])
                                 if not res:
                                     # movie number is in themoviedb format
                                     imdbId = int(item['imdbnumber'])
