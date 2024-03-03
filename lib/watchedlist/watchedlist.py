@@ -1415,6 +1415,11 @@ class WatchedList:
                     sql = QUERY_EP_UPDATE_SQLITE
                 else:  # mysql
                     sql = QUERY_EP_UPDATE_MYSQL
+                    # fix timestamp/timezone; from https://github.com/SchapplM/xbmc-addon-service-watchedlist/issues/28#issuecomment-1890145879
+                    if lastplayed_new == 0:
+                        lastplayed_new = 1
+                    if lastchange_new == 0:
+                        lastchange_new = 1
                 values = list([playcount_xbmc, lastplayed_new, lastchange_new, imdbId, season, episode])
             self.sqlcursor_wl.execute(sql, values)
             retval['num_update'] = self.sqlcursor_wl.rowcount
